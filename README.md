@@ -34,26 +34,36 @@ distinct the above array.
 20) javascript is sexy first 7 chapters especiially object, this and functions. 
 Recursion,fibonacci, palindrome, factorial, permutation, combination using javascript. 
 
-21) from an array of object consisting of emp data getting the max salary i. e. getting the highest salary, getting all the employes with salary > 10000, creating a result consisting of no. of employees for each of the department.
-Sample to practice with:
-    [{name:'a', 
-    age:35,
-    salary:100000
-    dept:['sales','finance']
-    }, 
-    ……….] 
+21) from an array of object consisting of emp data getting the max salary
+   const arr = [
+          { name:'a', age:35, salary:100000, dept:['Sales','Finance'] },
+          { name:'b', age:27, salary:120000, dept:['Software'] },
+          { name:'c', age:32, salary:200000, dept:['Operations','Finance'] },
+          { name:'d', age:23, salary:115000, dept:['HR','finance'] },
+    ]
+i. find the highest salary
+ii. find all the departments with salary >= 12000
 
-22) splice vs slice 
-23) how to break a map / filter / reduce iteration
-24) sort, push, delete 
-25) Infinite currying
-26) foreach, for… of, for…. in
-27) call vs bind vs apply
-28) lexical scope in javascript
+const depts = arr.filter(emp => emp.salary >= 120000)
+					.map(emp => emp.dept)
+                    .reduce((initial, acc) => [...initial, ...acc])
+
+iv. creating a result consisting of no. of employees for each of the department.
+Sample to practice with:
+
+    
+
+23) splice vs slice 
+24) how to break a map / filter / reduce iteration
+25) sort, push, delete 
+26) Infinite currying
+27) foreach, for… of, for…. in
+28) call vs bind vs apply
+29) lexical scope in javascript
 what values falsify in javascript? 
-29) null vs undefined vs '' 
-30) ways to iterate an iterator 
-31) parallell asynchronous call vs serial asynchronous calls (promise chaining) . promise. all() 
+30) null vs undefined vs '' 
+31) ways to iterate an iterator 
+32) parallell asynchronous call vs serial asynchronous calls (promise chaining) . promise. all() 
 31) rest api methods and when to use which
 32) authentication, jwt, oauth
 33) [] ==[]    [] ===[] 
