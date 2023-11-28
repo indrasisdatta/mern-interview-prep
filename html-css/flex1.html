@@ -1,0 +1,40 @@
+<!-- Display 5 flex item divs of width 120px within a parent div of width 300px (with proper alignment) -->
+
+<style>
+  #container {
+    border: 2px solid #000ddd;
+    display: flex;
+    width: 300px;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  .item {
+    height: 200px; 
+    width: 120px;
+    background: yellow;
+    flex-basis: 120px;
+    display: inline-flex;
+    margin: 5px;
+    align-items: center;
+    justify-content: center;  
+  }
+</style>
+
+<div id="container">
+  <div class="item">
+    Item A
+  </div>
+  <div class="item">
+    Item B
+  </div>
+  <div class="item">
+    Item C
+  </div>
+  <div class="item">
+    Item D
+  </div>
+  <div class="item">
+    Item E
+  </div>
+</div>
+
