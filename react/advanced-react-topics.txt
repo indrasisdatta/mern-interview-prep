@@ -1,1 +1,15 @@
-1. React advanced hooks - useDeferredValue
+1. React advanced hooks 
+   a) useDeferredValue  https://react.dev/reference/react/useDeferredValue
+   b) useTransition https://blog.webdevsimplified.com/2022-04/use-transition
+      -> useDeferredValue is suited for optimizing rendering (show old content while fresh content is loading)
+      -> useTransition gives lower priority to state updates written within startTransition to prevent blocking
+   c) useId (Assign unique id to div etc when component is called multiple times)
+   d) useImperativeHandle (Expose only few methods/custom methods from child component's forwardRef)
+
+   e) useInsertionEffect
+   f) useLayoutEffect
+
+
+   
+   
+   
