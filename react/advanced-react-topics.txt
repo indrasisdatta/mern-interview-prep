@@ -14,7 +14,14 @@
 
 3. React memo - Re-render child component only if props have changed.
    memo(Component, arePropsEqual)  --> arePropsEqual internally uses Object.is to compare old and new props
+   It compares the current props with the next props using Object.is for primitive values and a shallow equality check for objects. 
+   // For comparing object props, create a custom equality function
+   const arePropsEqual = (prevProps, nextProps) => {
+      return JSON.stringify(prevProps) === JSON.stringify(nextProps);
+   };
+   memo(Component, arePropsEqual);
    https://codesandbox.io/p/sandbox/memo-eg-qmchpg
+   https://codesandbox.io/p/sandbox/react-memo-object-props-iimgcg
 
 4. useMemo & useCallback 
    - useMemo - cache function result for dependencies. Function will be called only when there's a change in dependency value
