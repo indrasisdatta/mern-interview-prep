@@ -5,9 +5,32 @@
       -> useTransition gives lower priority to state updates written within startTransition to prevent blocking
    c) useId (Assign unique id to div etc when component is called multiple times)
    d) useImperativeHandle (Expose only few methods/custom methods from child component's forwardRef)
+   e) useInsertionEffect (fired synchronously before DOM mutations eg. runtime injection of style tag)
+   f) useLayoutEffect (fired synchronously after DOM mutation)
+   g) useEffect (runs asynchronously once browser paints DOM changes to screen)
 
-   e) useInsertionEffect
-   f) useLayoutEffect
+2. forwardRef with useImperativeHandle (Create ref in parent and send to child component i.e access child's ref from parent)
+   https://codesandbox.io/p/sandbox/forwardref-rmzmz6
+
+3. React memo - Re-render child component only if props have changed.
+   memo(Component, arePropsEqual)  --> arePropsEqual internally uses Object.is to compare old and new props
+   https://codesandbox.io/p/sandbox/memo-eg-qmchpg
+
+4. useMemo & useCallback 
+   - useMemo - cache function result for dependencies. Function will be called only when there's a change in dependency value
+   - useCallback - caches function itself when passed as prop to child 
+   Note: In below example, useMemo and useCallback solves the same purpose. 
+   const clickHandlerChildMemo = useMemo(() => {
+      return clickHandlerChild();
+   }, [childName]);
+   const clickHandlerChildCallback = useCallback(
+     () => clickHandlerChild,
+     [childName],
+   );
+   https://codesandbox.io/p/sandbox/react-memo-hooks-m8p9hr
+   
+
+
 
 
    
