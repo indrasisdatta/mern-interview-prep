@@ -70,3 +70,29 @@ validName("Herb. George Wells") // false
 // Words cannot end with a dot (only initials can) */
  
  
+/* ALT SOlution */ 
+const isWrongLength = terms => ![2, 3].includes(terms.length);
+const isNotCapitalized = term => !term[0].match(/[A-Z]/);
+const isDotlessInitial = term => term.length === 1;
+const isWordWithDot = term => term.length > 2 && term.includes('.');
+const endsWithInitial = terms => terms.slice(-1)[0].includes('.');
+const onlyFirstOfThreeIsInitial = terms => (terms.length === 3) && terms[0].includes('.') && !terms[1].includes('.');
+
+const validNameAlt = name => {
+	const terms = name.split(' ');
+	
+	if (
+		isWrongLength(terms)
+		|| terms.some(term =>
+			isNotCapitalized(term)
+			|| isDotlessInitial(term)
+			|| isWordWithDot(term)
+		)
+		|| endsWithInitial(terms)
+		|| onlyFirstOfThreeIsInitial(terms)
+	) {
+		return false;
+	}
+
+	return true;
+};
