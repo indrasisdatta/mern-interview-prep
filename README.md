@@ -81,3 +81,4 @@ what values falsify in javascript?
 39) Promise.all v/s async
 40) Error handling 
 41) Data structure examples
+42) What are mixins? Explain with real life example.
