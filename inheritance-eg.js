@@ -18,3 +18,23 @@ Student.prototype.constructor = Student;
 
 const student1 = new Student('Std', 5);
 console.log(student1)
+
+/* ES6 inheritance */
+class Person {
+	constructor(name) {
+  	this.name = name;
+  }
+  displayInfo() {
+  	return `Hi ${this.name}`
+  }
+}
+class Student extends Person {
+	constructor(name, studentId) {
+  	super(name);
+    this.studentId = studentId;
+  }
+}
+
+const student1 = new Student('Std', 5);
+console.log(student1);
+console.log(student1.displayInfo())
