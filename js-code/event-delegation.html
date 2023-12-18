@@ -1,0 +1,17 @@
+<ul>
+  <li>Emp1</li>
+  <li>Emp2</li>
+  <li>Emp3</li>
+  <li>Emp4</li>
+</ul>
+
+<script>
+  const ul = document.querySelector('ul');
+  
+  ul.addEventListener('click', function() {
+  	if (event.target.tagName === 'LI') {
+    	console.log(event.target)
+    	alert(event.target.innerText);
+    }
+  }, { capture: true });
+</script>
