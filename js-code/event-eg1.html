@@ -1,0 +1,52 @@
+<style>
+  .container {
+    background: #000fff;
+    color: #fff;
+    height: 120px;
+    width: 400px;
+    text-align: center;
+  }
+  form {
+    background: #000;
+    width: 300px;
+    margin: auto;
+  }
+  p {
+    background: #fff000;
+    width: 300px;
+  }
+</style>
+
+<div class="container">
+  This is div
+  <form>
+    This is form
+    <p>
+      This is para
+    </p>
+  </form>
+</div>
+
+<script>
+  /**
+  * 1. What is event propagation? - Event bubbling, event capturing
+  * 2. What is event bubbling?
+  * 3. event.target v/s event.currentTarget?
+  * 4. What is event capturing?
+  * 5. How to stop bubbling/capturing?
+  * 6. What is event delegation?
+  */
+  const div = document.querySelector('div');
+  const form = document.querySelector('form');
+  const p = document.querySelector('p');
+  
+  div.addEventListener('click', clickHandler);
+  form.addEventListener('click', clickHandler);
+  p.addEventListener('click', clickHandler);
+  
+  function clickHandler(event) {
+   // target - element which triggered the event 
+   // currentTarget - element that the event listener is attached to
+  	console.log(event.target.tagName, event.currentTarget.tagName);
+  }
+</script>
