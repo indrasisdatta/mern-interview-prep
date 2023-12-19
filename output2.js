@@ -14,3 +14,29 @@ for (var i = 0; i < 3; i++) {
   })(i)
   
 }
+
+let person = { name: 'ABC' };
+const people = [person];
+person = null;
+console.log(people);
+
+function checkUser(userObj) {
+	if (userObj === {userId: 1}) {
+  	console.log('Case 1 User found')
+  } else if (Object.is(userObj, {userId: 1})) {
+  	console.log('Case 2 User found')
+  } else {
+  	console.log('User not found')
+  }
+}
+
+checkUser({userId: 1});
+
+
+function getInfo(one, two, three, four) {
+	console.log('getInfo', one, two, three, four);
+}
+const name = 'Mike';
+const role = 'Developer'
+const empId = 123;
+getInfo`${name} is ${role} ${empId}`
