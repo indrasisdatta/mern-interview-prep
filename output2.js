@@ -1,18 +1,20 @@
+// Approach 1 using function call: Without changing var to let, how to print correct numbers
 for (var i = 0; i < 3; i++) {
-	/* Workaround 1 */
-	/* function print(i) {
+	function print(i) {
 	    setTimeout(() => {
 	      console.log(i)
 	    }, 100)
 	  }
-	  print(i); */
+	  print(i); 
+}
+// Approach 2 using IIFE: Without changing var to let, how to print correct numbers
+for (var i = 0; i < 3; i++) {
   /* Workaround 2 */
-	(function(i) {
+  (function(i) {
   	setTimeout(() => {
       console.log(i)
     }, 100)
-  })(i)
-  
+  })(i)  
 }
 
 let person = { name: 'ABC' };
