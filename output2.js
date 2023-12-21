@@ -42,3 +42,11 @@ const name = 'Mike';
 const role = 'Developer'
 const empId = 123;
 getInfo`${name} is ${role} ${empId}`
+
+/* Custom method for string */
+String.prototype.fullName = function() {
+	return `My name is ${this}`;
+}
+const name = "Indrasis";
+console.log(name.fullName())
+
