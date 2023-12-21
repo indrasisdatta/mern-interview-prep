@@ -50,3 +50,10 @@ String.prototype.fullName = function() {
 const name = "Indrasis";
 console.log(name.fullName())
 
+/* Arrow function doesn't have this, so doesn't have prototype chain */
+const printArrow = () => 'Arrow func';
+const print = function() { return 'Func'; }
+console.log(printArrow.prototype, print.prototype);
+
+
+
