@@ -43,3 +43,27 @@ console.log(obj2.fullName);
 delete obj2.fullName;
 console.log(obj2.fullName);
 
+/* Question 4: Evaluating truthy/falsy values */
+console.log(3+4+'5');
+console.log(false || {} || 2); // returns first truthy value 
+console.log(0 || null || false); // returns last if none is truthy
+
+/* Question 5: Evaluating Symbol */
+console.log(String("ABC") === String("ABC"));
+console.log(Symbol("ABC") === Symbol("ABC"));
+
+/* Question 6: Evaluating IIFE */
+(() => {
+	console.log('Test IIFE');
+	let x, y;
+  try {
+  	throw new Error();
+  } catch (e) {
+  	(x=1), (y=2);
+  	console.log(x)
+  }
+  console.log(x)
+  console.log(y)
+})();
+
+
