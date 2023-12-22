@@ -66,4 +66,19 @@ console.log(Symbol("ABC") === Symbol("ABC"));
   console.log(y)
 })();
 
+/* Question 7: Function param (object reference) */
+const person = {
+  name: 'User',
+  hobbies: ['Coding']
+};
+
+function addHobby(hobby, hobbies = person.hobbies) {
+  hobbies.push(hobby);
+  return hobbies;
+}
+addHobby('running', []);
+addHobby('dancing'); // person.hobbies = ['Coding', 'dancing']
+addHobby('baking', person.hobbies); // person.hobbies = ['Coding', 'dancing', 'baking']
+console.log(person.hobbies);
+
 
