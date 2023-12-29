@@ -55,5 +55,32 @@ const printArrow = () => 'Arrow func';
 const print = function() { return 'Func'; }
 console.log(printArrow.prototype, print.prototype);
 
+/* Output based - object reference and pass by value concept */
+function changeStuff(a, b, c)
+{
+  a = a * 10;
+  b.item = "changed";
+  c = {item: "changed"};
+}
 
+var num = 10;
+var obj1 = {item: "unchanged"};
+var obj2 = {item: "unchanged"};
 
+changeStuff(num, obj1, obj2);
+
+console.log(num);
+console.log(obj1.item);    
+console.log(obj2.item);
+
+/* Object.freeze works on top level object and not nested object */
+let person = {
+    name: "Leonardo",
+    profession: {
+        name: "developer"
+    }
+};
+Object.freeze(person); 
+person.name = 'Edward';
+person.profession.name = "doctor";
+console.log(person);
