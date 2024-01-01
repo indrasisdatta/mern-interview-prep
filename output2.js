@@ -84,3 +84,58 @@ Object.freeze(person);
 person.name = 'Edward';
 person.profession.name = "doctor";
 console.log(person);
+
+/* Object static question */
+class Chameleon {
+  static colorChange(newColor) {
+    this.newColor = newColor;
+    return this.newColor;
+  }
+
+  constructor({ newColor = 'green' } = {}) {
+    this.newColor = newColor;
+  }
+}
+const freddie = new Chameleon({ newColor: 'purple' });
+console.log(freddie.colorChange('orange'));
+
+/* Anything except primitive types are objects, so we can assign bark.animal */
+function bark() {
+  console.log('Woof!');
+}
+bark.animal = 'dog';
+console.dir(bark)
+
+/* Method available to all object instances - use prototype, otherwise it gets attached to constructor function */
+function Person(firstName, lastName) {
+  this.firstName = firstName;
+  this.lastName = lastName;
+}
+const member = new Person('Lydia', 'Hallie');
+// Added to constructor function object
+Person.getFullName = function() {
+  return `${this.firstName} ${this.lastName}`;
+};
+console.dir(member)
+console.log(member.getFullName());
+
+/* new v/s normal function */
+function Person(firstName, lastName) {
+  this.firstName = firstName;
+  this.lastName = lastName;
+}
+const lydia = new Person('Lydia', 'Hallie');
+const sarah = Person('Sarah', 'Smith');
+console.log(lydia, sarah);
+
+/* Object keys are always treated as string whereas it doesn't work that way for Set */
+const obj = { 1: 'a', 2: 'b', 3: 'c' };
+const set = new Set([1, 2, 3, 4, 5]);
+obj.hasOwnProperty('1');
+obj.hasOwnProperty(1);
+set.has('1');
+set.has(1);
+
+/**
+ * https://github.com/lydiahallie/javascript-questions?tab=readme-ov-file#26-the-javascript-global-execution-context-creates-two-things-for-you-the-global-object-and-the-this-keyword
+ */
