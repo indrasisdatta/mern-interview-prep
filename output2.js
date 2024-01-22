@@ -136,6 +136,20 @@ obj.hasOwnProperty(1);
 set.has('1');
 set.has(1);
 
+/* Variable scope */
+(() => {
+  let x, y;
+  try {
+    throw new Error();
+  } catch (x) {
+    (x = 1), (y = 2);
+    console.log(x);
+  }
+  console.log(x);
+  console.log(y);
+})();
+// 1, undefined, 2  (x outside try/catch is undefined)
+
 /**
  * https://github.com/lydiahallie/javascript-questions?tab=readme-ov-file#26-the-javascript-global-execution-context-creates-two-things-for-you-the-global-object-and-the-this-keyword
  */
