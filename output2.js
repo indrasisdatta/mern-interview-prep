@@ -153,3 +153,28 @@ set.has(1);
 /**
  * https://github.com/lydiahallie/javascript-questions?tab=readme-ov-file#26-the-javascript-global-execution-context-creates-two-things-for-you-the-global-object-and-the-this-keyword
  */
+
+/* Ref: https://plainenglish.io/blog/50-javascript-output-questions */
+
+const ans1 = NaN === NaN; 
+const ans2 = Object.is(NaN, NaN);
+console.log(ans1, ans2); // false, true 
+
+var a = 3;
+var b = {
+  a: 9,
+  b: ++a
+};
+console.log(a + b.a + ++b.b);
+// 4 + 9 + 5 = 18 
+
+const foo = () => console.log('First');
+const bar = () => setTimeout(() => console.log('Second'));
+const baz = () => console.log('Third');
+bar();
+foo();
+baz();
+// First, Third, Second
+
+
+
