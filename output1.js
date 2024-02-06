@@ -93,5 +93,17 @@ const myMap = new Map([
 ]);
 console.log(Object.fromEntries(myMap)); // {name: 'Jane', age: 20}
 
+/* Array.from() */
+let arrayLike = {
+  0: "Hello",
+  1: "World",
+  length: 2
+};
+let arr = Array.from(arrayLike);
+console.log(arr); //  ['Hello', 'World']
 
+let arrayOrig = [1, 2, 3, 4];
+let arrayCopy = Array.from(arrayOrig);
+arrayCopy.push(5);
+console.log(arrayOrig, arrayCopy);
 
