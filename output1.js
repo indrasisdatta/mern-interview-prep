@@ -81,4 +81,17 @@ addHobby('dancing'); // person.hobbies = ['Coding', 'dancing']
 addHobby('baking', person.hobbies); // person.hobbies = ['Coding', 'dancing', 'baking']
 console.log(person.hobbies);
 
+/*  Object.fromEntries() */
+const arr = [
+  ['name', 'John'],
+  ['age', 21]
+];
+console.log(Object.fromEntries(arr)); // {name: 'John', age: 21}
+const myMap = new Map([
+  ['name', 'Jane'],
+  ['age', 20]
+]);
+console.log(Object.fromEntries(myMap)); // {name: 'Jane', age: 20}
+
+
 
