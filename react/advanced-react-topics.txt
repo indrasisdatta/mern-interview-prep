@@ -9,6 +9,12 @@
    f) useLayoutEffect (fired synchronously after DOM mutation)
    g) useEffect (runs asynchronously once browser paints DOM changes to screen)
 
+   Other hooks
+    useState v/s useReducer - useReducer is better choice when multiple vars need to be managed 
+    eg. {loading: false, data:[], eror: null } instead of 3 useState
+    useContext - used as consumer to read value of Context
+    useRef (v/s useState) - doesn't rerender component
+
 2. forwardRef with useImperativeHandle (Create ref in parent and send to child component i.e access child's ref from parent)
    https://codesandbox.io/p/sandbox/forwardref-rmzmz6
 
