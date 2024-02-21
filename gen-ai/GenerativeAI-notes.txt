@@ -1,0 +1,14 @@
+AI
+ -> ML 
+    -> Reinforcement learning
+    -> Deep learning (specialized branch of ML which focuses on multi-layered neural network)
+        -> Generative AI
+           - Transformer architecture consisting of auto-encoders and decoders
+           - Encoders encode raw i/p data into compact latent representation vector
+           - Decoders translate vectors to meaningful data
+
+Foundation Models (FM)
+  -> Large Language Models (LLM) - subset of Foundation models
+
+
+  
