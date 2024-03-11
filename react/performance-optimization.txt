@@ -17,9 +17,15 @@ https://blog.logrocket.com/optimizing-performance-react-app/
    const Home = React.lazy(() => import("./components/Home"));  // dynamic import 
 
 3. Load limited items in page (using pagination, React virtualized, infinite scroll etc)
-
 4. Lazy loading images (react-lazy-load-image-component library)
+5. Decrease high frequency function calls. Use debounce, throttle.
+6. Fix memory leaks by removing event listeners and clearing timing events
 
-5. Webpack bundle analyzer
+7. Webpack bundle optimization:
+   https://blog.openreplay.com/optimizing-the-build-process-with-webpack/#:~:text=Optimizing%20the%20build%20size%20involves,results%20in%20more%20performant%20websites.
+   - tree shaking (remove unused modules from app)
+   - babel-minify-webpack-plugin (removes whitespaces, comments, line breaks without affecting functions)
+   - compression-webpack-plugin (reduces final build size using GZip compression algorithm)
+   - bundle analyzer (debug and analyze bundle files)
 
-6. Profiling
+8. Dev Tools - Profiling, Performance to find bottlenecks
