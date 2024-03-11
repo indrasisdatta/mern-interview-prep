@@ -1,0 +1,25 @@
+https://blog.logrocket.com/optimizing-performance-react-app/
+
+1. Memoize components to avoid unnecessary rerenders
+   (Use React.memo, useMemo, useCallback)
+   memo(Component, arePropsEqual)  --> arePropsEqual internally uses Object.is to compare old and new props
+   It compares the current props with the next props using Object.is for primitive values and a shallow equality check for objects. 
+   // For comparing object props, create a custom equality function
+   const arePropsEqual = (prevProps, nextProps) => {
+      return JSON.stringify(prevProps) === JSON.stringify(nextProps);
+   };
+   memo(Component, arePropsEqual);
+   https://codesandbox.io/p/sandbox/memo-eg-qmchpg
+   https://codesandbox.io/p/sandbox/react-memo-object-props-iimgcg
+
+2. Lazy loading routes, Code splitting, dynamic import (using lazy, Suspense)
+   import Home from "./components/Home";
+   const Home = React.lazy(() => import("./components/Home"));  // dynamic import 
+
+3. Load limited items in page (using pagination, React virtualized, infinite scroll etc)
+
+4. Lazy loading images (react-lazy-load-image-component library)
+
+5. Webpack bundle analyzer
+
+6. Profiling
