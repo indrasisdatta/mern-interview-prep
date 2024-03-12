@@ -29,3 +29,16 @@ https://blog.logrocket.com/optimizing-performance-react-app/
    - bundle analyzer (debug and analyze bundle files)
 
 8. Dev Tools - Profiling, Performance to find bottlenecks
+_____________________________________________________________________________________________________
+
+Security measures:
+
+1. Authentication and authorization
+2. Don't store any sensitive data in localStorage/cookies
+3. Form validation 
+4. Captcha to prevent brute force attack
+5. Audit npm packages
+    npm audit / npm audit fix  (Check vunerabilities)
+    npm outdated
+
+
