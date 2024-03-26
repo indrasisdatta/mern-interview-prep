@@ -1,0 +1,9 @@
+1. What is PWA?
+2. What are service workers?
+3. What are CSR, SSR, CSG?
+4. How to ensure cross-browser compatibility?
+5. Discuss the importance of accessibility in web development
+6. Compare and contrast client-side and server-side state management approaches in web development. 
+   When would you choose one over the other?
+7. How to use automated testing in frontend? End to end testing using Cypress/Selenium?
+8. Real time updates - sockets etc.
