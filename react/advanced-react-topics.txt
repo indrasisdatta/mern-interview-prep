@@ -43,14 +43,31 @@
    https://codesandbox.io/p/sandbox/react-memo-hooks-m8p9hr
    
 5. What is React Fiber?
+   https://sunnychopper.medium.com/what-is-react-fiber-and-how-it-helps-you-build-a-high-performing-react-applications-57bceb706ff3
    Fiber is the new Reconcialiation algorithm in React.
    (Work - any computations that must be performed. It's usually the result of an update eg. setState)
    - pause work and come back to it later
-   - assign pririoty to different tyeps of work
+   - assign pririoty to different types of work
    - reuse previously completed work
    - abort work if it's no longer needed
    https://github.com/acdlite/react-fiber-architecture
    https://flexiple.com/react/react-fiber
+
+6. React authentication and authorization 
+   https://dev.to/miracool/how-to-manage-user-authentication-with-react-js-3ic5
+   - ProtectedRoute - mention nested routes
+   - useAuth - custom hook which returns Provider with object values and reusable functions
+   // Route 
+   <Route element={<ProtectedRoute />}>
+     <Route path="/dashboard" element={<Dashboard />} />
+     <Route path="/profile" element={<Profile />} />
+   </Route>
+   // ProtectedRoute component - redirect to /login if token is not found
+   export const ProtectedRoute = () => {
+      const { token } = useAuth();
+      if (token) return <Navigate to="/login">;
+      return <Outlet />;
+   }
 
 
 
