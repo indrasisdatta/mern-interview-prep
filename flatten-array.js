@@ -5,14 +5,12 @@
 const arr = [1, 2, 3, ["4",5], ["6",[7,8, [9, 10, [11,12]]]]];
 
 const flattenArray = (arr, tempArr = []) => {
-	for (let i in arr) {
-  	console.log(arr[i].constructor)
-  	//if (Array.isArray(arr[i])) {
-    //if (arr[i] instanceof Array) {
-    if (arr[i].constructor === Array) {
-    	flattenArray(arr[i], tempArr);
+  for (let n of arr) {
+    if (n.constructor.name === 'Array') {
+    	flattenArray(n, tempArr);
     } else {
-    	tempArr.push(arr[i]);
+        // tempArr = [...tempArr, n] -> won't work as that changes the reference
+    	tempArr.push(Number(n));
     }
   }
   return tempArr;
