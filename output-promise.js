@@ -1,3 +1,16 @@
+/**
+ * NOTE: The callback you pass to promise is immediately executed - new Promise is immediately invoked
+ * .then() is invoked asynchronously
+ */
+setTimeout(() => console.log(1), 0);
+console.log(2);
+new Promise(res => {
+  console.log(3)
+  res();
+}).then(() => console.log(4));
+console.log(5);
+// Above code outputs: 2 3 5 4 1
+
 /* Eg. 1 */
 const customPromise = Promise.resolve('Promise data');
 
