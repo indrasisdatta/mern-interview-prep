@@ -1,4 +1,5 @@
 /**
+ * Advanced #1
  * NOTE: The callback you pass to promise is immediately executed - new Promise is immediately invoked
  * .then() is invoked asynchronously
  */
@@ -11,6 +12,21 @@ new Promise(res => {
 console.log(5);
 // Above code outputs: 2 3 5 4 1
 
+/**
+ * Advanced #2
+ */
+async function foo() {
+  console.log("A");
+  await Promise.resolve();
+  console.log("B");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  console.log("C");
+}
+console.log("D");
+foo();
+console.log("E");
+
+/* Promise practice example functions */
 /* Eg. 1 */
 const customPromise = Promise.resolve('Promise data');
 
