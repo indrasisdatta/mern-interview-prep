@@ -82,3 +82,7 @@ what values falsify in javascript?
 40) Error handling 
 41) Data structure examples
 42) What are mixins? Explain with real life example.
+43) What are symbols?
+44) Map, Set v/s WeakMap, WeakSet
+
+JS concepts: https://github.com/leonardomso/33-js-concepts
