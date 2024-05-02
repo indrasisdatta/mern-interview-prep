@@ -176,5 +176,16 @@ foo();
 baz();
 // First, Third, Second
 
+let output = (function(x) {
+    delete x;
+    return x;
+})(0);
+// Output = 0 (Delete operator is used to delete operator of object but x is local variable)
+
+const func = (function(x) {
+  delete x.id;
+  return x;
+})({id: 1, name: 'abc'});
+// Output: {name: 'abc'}
 
 
