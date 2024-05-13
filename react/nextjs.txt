@@ -1,0 +1,7 @@
+1. Next.js features:
+   - SSR
+   - SSG
+   - File system based routing
+   - Automatic code splitting
+   - API routes
+
