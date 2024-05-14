@@ -4,4 +4,22 @@
    - File system based routing
    - Automatic code splitting
    - API routes
+   - Image optimization 
+   - Middleware (eg. conditional redirect)
+
+getServerSideProps
+getStaticProps - static. Use revalidate for ISR.
+
+How to do take care of unused components?
+ - npm i next-unused
+https://www.geeksforgeeks.org/how-to-find-unused-files-in-next-js/
+
+What is AMP? (Accelerated mobile pages) How to use it in Next.js? 
+
+Styled JSX library? 
+https://github.com/vercel/styled-jsx
+
+
+
+
 
