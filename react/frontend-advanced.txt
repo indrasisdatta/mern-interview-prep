@@ -16,8 +16,9 @@
           Advantages: better performance, SEO friendly.
    - SSG: instead of rendering pages on every request, generate files in build time so that they are server immediately.
           Useful for static pages eg. blog.
-   - ISG: Incremental Static Generation is the next improvement to SSG. 
+   - ISR: Incremental Static Regeneration is the next improvement to SSG. 
           Periodically builds and revalidates new pages so that content never gets too much outdated.
+          Use static generation on a per page basis, without needing to rebuild the entire site.  
 
 4. How to ensure cross-browser compatibility?
 5. Discuss the importance of accessibility in web development
