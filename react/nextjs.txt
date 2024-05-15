@@ -7,6 +7,12 @@
    - Image optimization 
    - Middleware (eg. conditional redirect)
 
+useSWR - used in CSR for data fetching (with data, error, isLoading).
+hook based light-weight library for API call, which provides caching and data fetching.
+
+useSWR v/s React Query:
+React query is a larger library that provides more advanced features for pagination, polling, data refetching and handling errors. It also provides tools for data optimizing performance of data fetching eg. batching and deduplication.
+
 getServerSideProps
 getStaticProps - static. Use revalidate for ISR.
 
