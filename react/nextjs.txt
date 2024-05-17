@@ -25,7 +25,37 @@ What is AMP? (Accelerated mobile pages) How to use it in Next.js?
 Styled JSX library? 
 https://github.com/vercel/styled-jsx
 
+_________________________________________________________________________________________________________________________________________
 
+SERVER AND CLIENT COMPOSITION PATTERNS
 
+How to include server component within a client component? (Interleaving client and server component)
+ - By default, all components called in a client component file are treated as client components.
 
+Incorrect Approach:
+"use client"
+....
+return (
+  <>
+    <ServerComp />  // --- this is not allowed
+  </>
+)
 
+Correct Approach:  Use children prop in ClientComp to render Server comp code
+// page.tsx
+<ClientComp>
+    <ServerComp />
+</ClientComp>
+---------------------------------------------------------------------------------------
+
+https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns
+
+npm i server-only
+import 'server-only'
+export async function getData () {
+  // API call to run on server
+}
+
+Client Component that imports getData() will receive a build-time error explaining that this module can only be used on the server.
+
+---------------------------------------------------------------------------------------
