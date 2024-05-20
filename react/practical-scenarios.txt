@@ -13,6 +13,17 @@ Describe how you would manage theme state and apply styles.
 4. Handling File Uploads
 **** How would you implement a file upload feature in a React application? 
 Including selecting a file, uploading it to the server, and displaying the upload progress?
+Ans: Axios provides "onUploadProgress" and "onDownloadProgress" options
+const config = {
+    headers: {'content-type': 'multipart/form-data',
+    onUploadProgress: function (event) {
+        setProgress(Math.round(event.loaded / event.total * 100));
+    },
+    onDownloadProgress: function (event) {
+        // Do whatever you want with the native progress event
+    },
+}
+axios.post(url, formData, config).then(...).catch(...);
 
 5. Real-Time Data with Polling
 **** How would you implement real-time data updates in a React application using polling?
