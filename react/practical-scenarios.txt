@@ -1,0 +1,19 @@
+1. User Authentication with Token Management:
+**** How would you handle user authentication in a React application, including login, storing tokens, and protecting routes? 
+Describe your approach ?
+
+2. Implementing a Drag-and-Drop Interface
+**** How would you implement a drag-and-drop interface in a React application for rearranging items in a list? 
+Describe the steps and tools you would use.
+
+3. Dynamic Theme Switching
+**** How would you implement a feature that allows users to switch between light and dark themes in a React application? 
+Describe how you would manage theme state and apply styles.
+
+4. Handling File Uploads
+**** How would you implement a file upload feature in a React application? 
+Including selecting a file, uploading it to the server, and displaying the upload progress?
+
+5. Real-Time Data with Polling
+**** How would you implement real-time data updates in a React application using polling?
+Explain how you would manage the polling interval and update the state with new data.
