@@ -5,9 +5,46 @@
 **** How would you implement a drag-and-drop interface in a React application for rearranging items in a list? 
 Describe the steps and tools you would use.
 
+______________________________________________________________________________________________________________
 3. Dynamic Theme Switching
 **** How would you implement a feature that allows users to switch between light and dark themes in a React application? 
 Describe how you would manage theme state and apply styles.
+Ans: Create a ThemeContext and provider and wrap App component with it. 
+     const ThemeContext = createContext();
+     const ThemeProvider = <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
+     <ThemeProvider> <App /> </ThemeProvider>
+
+     There are different ways to apply dark/light mode styles.
+
+     Approach 1: Using CSS class
+     1. Create dark-theme.css and light-theme.css
+     2. Assign class to <body> whenever theme value is updated.
+     const [theme, setTheme] = useState(() => {
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme ? savedTheme : 'light';
+     });
+     /* When theme is changed, assign class to body */
+     useEffect(() => {
+        document.body.className = theme;
+        localStorage.setItem('theme', theme);
+     }, [theme]);
+
+     Approach 2: Using CSS modules
+     1. Create light.module.css, dark.module.css files
+     2. Based on theme, load the respective file class
+      import lightStyles from './lightTheme.module.css';
+      import darkStyles from './darkTheme.module.css';
+      // .. other code
+      const { theme } = useTheme();
+      const styles = theme === 'light' ? lightStyles : darkStyles;  
+
+      <div className={styles.container}>
+
+     NOTE: To get OS theme, use window.matchMedia('(prefers-color-scheme: dark)').matches
+     const getPreferredScheme = () => window?.matchMedia?.('(prefers-color-scheme:dark)')?.matches ? 'dark' : 'light';
+
+     Ref: https://www.linkedin.com/pulse/building-theme-switcher-react-styled-components-alex-lomia
+_____________________________________________________________________________________________________
 
 4. Handling File Uploads
 **** How would you implement a file upload feature in a React application? 
@@ -23,6 +60,7 @@ const config = {
     },
 }
 axios.post(url, formData, config).then(...).catch(...);
+__________________________________________________________________________________________
 
 5. Real-Time Data with Polling
 **** How would you implement real-time data updates in a React application using polling?
