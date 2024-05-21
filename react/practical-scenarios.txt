@@ -1,6 +1,5 @@
 1. User Authentication with Token Management:
-**** How would you handle user authentication in a React application, including login, storing tokens, and protecting routes? 
-Describe your approach ?
+**** How would you handle user authentication in a React application, including login, storing tokens, and protecting routes? Describe your approach.
 
 2. Implementing a Drag-and-Drop Interface
 **** How would you implement a drag-and-drop interface in a React application for rearranging items in a list? 
@@ -28,3 +27,7 @@ axios.post(url, formData, config).then(...).catch(...);
 5. Real-Time Data with Polling
 **** How would you implement real-time data updates in a React application using polling?
 Explain how you would manage the polling interval and update the state with new data.
+Ans: Polling can be done in useEffect by calling a function within setInterval. 
+     Call clearInterval during clean up.
+     A better approach to polling is web sockets eg. Socket.io.
+
