@@ -4,8 +4,9 @@
 2. Implementing a Drag-and-Drop Interface
 **** How would you implement a drag-and-drop interface in a React application for rearranging items in a list? 
 Describe the steps and tools you would use.
-
+Ans: React dnd library https://dev.to/crishanks/transfer-lists-with-react-dnd-3ifo
 ______________________________________________________________________________________________________________
+
 3. Dynamic Theme Switching
 **** How would you implement a feature that allows users to switch between light and dark themes in a React application? 
 Describe how you would manage theme state and apply styles.
