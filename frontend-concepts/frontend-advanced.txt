@@ -1,0 +1,48 @@
+1. What is PWA?
+   - can be installed on device and work offline
+   - all static assets (part of build files) are cached so that page loads faster on subsequent visits
+   - updates are downloaded in the background
+
+2. What are service workers?
+   - Script that runs independently in the browser background
+   - commonly used in 'offline first' applications
+   - Uses: Background sync, push notifications
+
+3. What are CSR, SSR, CSG?
+   Ref: https://res.cloudinary.com/practicaldev/image/fetch/s--bXHuAxci--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/8onh7r5sxmss9f87k726.png
+   - CSR: initially loads empty HTML file, then JS and CSS are loaded. 
+           Users see blank screen initially. Also, it's not SEO friendly.
+   - SSR: each page initiates request to app server, dynamically renders and serves HTML.
+          Advantages: better performance, SEO friendly.
+   - SSG: instead of rendering pages on every request, generate files in build time so that they are server immediately.
+          Useful for static pages eg. blog.
+   - ISR: Incremental Static Regeneration is the next improvement to SSG. 
+          Periodically builds and revalidates new pages so that content never gets too much outdated.
+          Use static generation on a per page basis, without needing to rebuild the entire site.  
+
+4. How to ensure cross-browser compatibility?
+5. Discuss the importance of accessibility in web development
+6. Compare and contrast client-side and server-side state management approaches in web development. 
+   When would you choose one over the other?
+7. How to use automated testing in frontend? End to end testing using Cypress/Selenium?
+8. Real time updates - sockets etc.
+
+======================================================================================================
+
+WEB VITALS: standardized metrics set by Google (in 2020) that quantify user experience of a website. 
+
+CORE WEB VITALS: 3 aspects of UX (loading, interactivity, visual stability).
+1. Largest contentful paint (LCP) - within 2.5 secs
+   => Measures by calculating the time taken to load the largest image/text content since the page first started loading 
+2. Interaction to next paint (INP) - within 200ms
+   => Checks latency of click, tap, keyboard interactions thoughout the lifespan of user's visit to a page.
+3. Cumulative layout shift (CLS) - 0.1 or less	
+   => CLS measures how much content elements move around as the page loads. 
+      Eg. a poor CLS score would result if a user were reading a page and suddenly a banner loaded and the page jumped down.
+
+First contentful paint: < 1.8s 
+First input delay: time takes for a webpage to respond to first user interaction eg. button click (< 100ms)
+
+Next.js improves:
+LCP (SSR, image optimization)
+SEO 	
