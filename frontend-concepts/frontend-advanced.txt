@@ -1,3 +1,32 @@
+npm v/s yarn v/s pnpm:
+
+Ref: https://www.dhiwise.com/post/pnpm-vs-npm-vs-yarn-which-javascript-package-manager
+
+npm (package.json, package.lock.json)
+- hosts the world's largest software registry
+- installs packages in a nested manner, creating separate node_modules folder for each package 
+  (ensuring each package gets the exact version of its dependencies, thus using more disk space)
+
+yarn (package.json, yarn.lock)
+- uses parallel installation to speed up the process
+- uses flat dependency tree to reduce package duplication
+  (it can lead to version conflicts if multiple packages depend on the same package but different versions)
+- caches packages locally, allowing for offline installs
+- checks for integrity and has enhanced security measures
+
+pnpm (package.json, pnpm-lock.yaml)
+- fast, disk space efficient package manager
+- uses symlinks to save disk space and speed up installation
+- global store approach where all packages are stored in a single space on the disk
+- when package is installed, pnpm links files from the global store to the node_modules folder
+- Efficient duplication handling: if multiple projects on the same machine depend on the same package version, pnpm will store the package only once in the global store and link to each project. (Saves disk space and speeds up installation)
+
+For straightforward projects - npm
+For faster install and better security - yarn
+For optimal performance and disk space efficiency - pnpm
+
+__________________________________________________________________
+
 1. What is PWA?
    - can be installed on device and work offline
    - all static assets (part of build files) are cached so that page loads faster on subsequent visits
