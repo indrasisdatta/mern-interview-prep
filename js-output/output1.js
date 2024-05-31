@@ -107,3 +107,18 @@ let arrayCopy = Array.from(arrayOrig);
 arrayCopy.push(5);
 console.log(arrayOrig, arrayCopy);
 
+/* Async output */
+function asyncOperation() {
+  let result;
+  setTimeout(function() {
+    result = "Async operation completed";
+    console.log(result);
+  }, 1000);
+  return function() {
+    console.log(result);
+  }
+}
+  
+
+const asyncCallback = asyncOperation();
+asyncCallback();
