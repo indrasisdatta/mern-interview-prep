@@ -1,3 +1,14 @@
+Webpack Tree shaking - removing unused code from the prod build. It relies on static structure of ES6 modules.
+Tree shaking is not possible for:
+- Common JS modules using require and module.exports are dynamic and not statically analyzable by Webpack.
+- Dynamic imports import(Data).then(...)
+- Importing/exporting entire modules 
+  import * as utils from './utils';
+
+Dependency graph: Starts from the entry point and when a module imports another module, a dependency is formed.
+Webpack recursively follows this dependencies from the entry point to build the entire graph.
+________________________________________________________________________________________________________________
+
 npm v/s yarn v/s pnpm:
 
 Ref: https://www.dhiwise.com/post/pnpm-vs-npm-vs-yarn-which-javascript-package-manager
