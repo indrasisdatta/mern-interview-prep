@@ -69,6 +69,15 @@
       return <Outlet />;
    }
 
+7. Why does useEffect not support direct async callback function?
+Ans: It expects its return function to either return a cleanup function or nothing at all. 
+If we declare callback function as async, it implicitly returns a Promise, which React doesn't recognize as a clean up function. This can cause issue as React expects cleanup function to be a function and not a Promise. 
+
+8. Disadvantage of using state in Context?
+Ans: If there are multiple nested components within parent Context.Provider, state update would cause re-render to all components that are consuming this Context. So it's a good practice to wrap the Context close to the component we want to re-render.  Only components that call useContext re-render whenever the context’s state changes. 
+Solution: Use Multiple Contexts, and keep state close to its Dependent Components
+
+
 
 
    
