@@ -1,0 +1,31 @@
+1. Create new branch 
+   1a. Create new branch from local, carrying forward unstaged and uncommitted changes
+       git checkout -b new-branch 
+       (Useful when you realize that your changes should belong to a new branch rather than the current branch. 
+       It allows you to move forward without needing to stash or commit your changes immediately.)
+   1b. Create new branch from a base branch
+       Approach 1: git checkout base-branch // Switch to base branch
+                   git checkout -b new-branch // Create and switch to new branch
+   1c. Create new branch from a specific commit 
+        git checkout -b new-branch <commit-hash>
+
+2. Delete a remote branch
+    git push origin --delete feature-branch // Delete remote branch
+    git branch -d feature-branch // Delete local branch
+
+3. You accidentally committed changes to the wrong branch. How do you undo the last commit and move the changes to the correct branch?
+  Approach 1: Using stash  
+    git log // Get list of commit with hash, pick the hash which has stable code 
+    git reset --soft <hash> // Undo the commit but keep it in your working directory
+    git stash // Save the uncommitted changes locally to reuse later
+    git checkout correct-branch
+    git stash apply 
+  Approach 2: 
+    git log -1 // Get commit hash of last commit 
+    git checkout correct-branch
+    git cherry-pick <commit-hash> // Cherry pick the commit to the correct branch
+    git checkout wrong-branch
+    git reset --hard HEAD~1  // Remove last commit from the wrong branch 
+
+
+    
