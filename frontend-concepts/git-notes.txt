@@ -27,5 +27,33 @@
     git checkout wrong-branch
     git reset --hard HEAD~1  // Remove last commit from the wrong branch 
 
+4. Find which branches are merged to master
+   git checkout master
+   git branch --merged (--no-merged to check not merged branches)
 
-    
+5. One of your team members accidentally deleted a branch and pushed the changes to the central git repository. How would you recover this branch, given that there are no other git repositories and no other teammates have a local copy?
+   // Use git reflog to find the commit hash where the deleted branch was last pointing.
+   git reflog // Get commit hash where branch checkout was done
+   (Eg. <hash> HEAD@{<time>}: checkout: moving from <branch-name> to <another-branch>)
+   git checkout -b feature-branch <commit-hash>
+
+6. What would you do to squash the last 3 commits into a single commit?
+   git rebase -i HEAD~3
+   // It will open interactive editor where you can pick and squash commits
+   pick 01d1124 Message1....
+   pick 6340aaa Message2.... // squash 6340aaa Message2....
+   pick ebfd367 Message3.... // squash 6340aaa Message3....
+
+7. How would you remove a file from Git without removing it from your file system?
+   git rm --cached test.txt  // Remove the file from git but keep it locally
+   // Add this file to .gitignore
+
+8. Git pull v/s git merge
+   Git pull = Git fetch + Git merge
+   Git fetch - updates remote tracking branches but does not merge or modify local working branch.
+   Git fetch - fetches changes from remote repo and immediately tries to merge them into current branch. 
+
+9. Git merge v/s git rebase
+   Merge - preserves history (merge logs shows complete history of commit merging), suitable for shared branch
+   Rebase - rewrites history (rebase logs are linear), suitable for private branch
+
