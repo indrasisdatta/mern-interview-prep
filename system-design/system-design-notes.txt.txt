@@ -1,0 +1,13 @@
+RADIO Concept
+
+1) Requirements (functional and non-functional)
+2) Architecture/HLD
+3) Data model 
+4) Interface definition (API)
+5) Optimization
+
+https://www.greatfrontend.com/system-design/framework
+
+
+
+
