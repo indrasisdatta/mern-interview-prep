@@ -1,0 +1,14 @@
+1. What is Record type?
+ => Used to create type-safe object.
+    type Environment = "dev" | "stg" | "prod"
+    type Config = {
+      url: string,
+      isEnabled: boolean
+    }
+    type AppConfig = Record<Environment, Config>;
+    const appConfig: AppConfig = {
+      dev: {url:'dev.url', isEnabled: true},
+      stg: {url:'dev.url', isEnabled: false},
+      prod: {url:'dev.url', isEnabled: false}
+    }
+
