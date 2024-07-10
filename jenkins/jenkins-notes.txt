@@ -1,0 +1,23 @@
+Install Jenkins in Docker
+
+1. Pull official Jenkins LTS image from Docker Hub:
+       docker pull jenkins/jenkins:lts
+
+2. Start Jenkins container
+       docker run -d --name jenkins-test -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+       - d (detached mode) 
+       -p 8080:8080 (map port 8080 of the host to 8080 of the container for Jenkins web interface)
+       -p 5000:5000 (map port 5000 of the host to 5000 of the container for Jenkins agents)
+       -v jenkins_home (created a docker volume to persist Jenkins data)
+
+3. Get initial password from /var/jenkins_home/secrets/initialAdminPassword. Open http://localhost:8080 and enter this password.
+
+Jenkins pwd: 2a7630072a314e7eb2cfa38a6077ed35
+Admin user: admin | admin
+
+
+Jenkinsfile - text file containing the definition of Jenkins pipeline (Pipeline as a code)
+https://www.jenkins.io/doc/book/pipeline/
+
+
+
