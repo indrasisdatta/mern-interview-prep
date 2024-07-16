@@ -20,4 +20,18 @@ Jenkinsfile - text file containing the definition of Jenkins pipeline (Pipeline 
 https://www.jenkins.io/doc/book/pipeline/
 
 
+1. Install NodeJS plugin from Manage Jenkins > Plugins 
+2. Manager Jenkins > Tools 
+   http://localhost:8080/manage/configureTools/
+   Enter NodeJs installations options:
+   - name, version, global npm packages to install
+   (Note: this name should match the tool name in Jenkinsfile)
+
+    pipeline {
+        agent any
+        tools { nodejs "NodeJS" }  // "NodeJS" is same as the name mentioned in NodeJS installation option
+
+   
+
+
 
