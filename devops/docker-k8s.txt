@@ -1,0 +1,4 @@
+Kubernetes - container orchestration system for managing containerized workloads and services (allows communication among different containers eg. microservices)
+
+Cluster - set of 1 master and multiple worker nodes 
+
