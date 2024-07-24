@@ -1,0 +1,57 @@
+Kubernetes - container orchestration system for managing containerized workloads and services (allows communication among different containers eg. microservices)
+
+https://www.youtube.com/watch?v=X48VuDVv0do
+
+Cluster - set of 1 master and multiple worker nodes 
+
+Need for container orchestration tool - In Microservices, with increased usage of containers, there's a demand for a proper way to manage hundreds of containers 
+- High availability
+- Scalability
+- Disaster recovery 
+____________________________________________________________
+
+KUBERNETES COMPONENTS:
+
+1. Pod: Smallest unit of K8s, abstraction over container (layer on top of container). Usually 1 application per pod. 
+Each pod gets its own IP address.
+New IP address pon re-creation.
+
+2. Service: Permanent IP address. Life cycle of pod and service are not connected (even if pod dies, service isn't affected). Also acts as load balancer. Define blueprint for pods to create pod replica.
+
+3. Ingress - request comes to ingress first, then forwarded to external service. Ingress has url like https://my-ap.com and ext service has url like 127.0.0.1:80
+
+4. ConfigMap: external configuration of your application (Eg. DB credentials)
+Insted of building app every time config is changed, fetch from ConfigMap.
+Secrets: For DB password 
+
+K8s cluster explicitly doesn't manage data persistence. If DB container or pod is restarted, data will be gone. 
+Volumes - attaches physical storage or hard drive to the pod. Storage can be in local (same server node) or remote storage (cloud).
+
+Deployment: blueprint for my-app pods. Abstraction of pods. Not used for DB.
+
+StatefulSet: for stateful apps eg. DB. 
+DB are often hosted outside K8s cluster.
+____________________________________________________________
+
+WORKER MACHINE IN K8S CLUSTER 
+
+Communication across different nodes is done using services
+Each nodes has multiple pods
+3 processes must be installed on every node 
+ - Container runtime eg. Docker
+ - Kubelet (interacts with both container and node. Starts the pod with a container inside)
+ - Kube proxy (forwarding request from services to pods - intelligent forwarding logi is present as it forwards to replicate on the same node if present, thus saving overhead)
+ 
+Worker node do the actual work.
+Master node helps to manage 
+
+
+
+
+
+
+
+
+
+
+
