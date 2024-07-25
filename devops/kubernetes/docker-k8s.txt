@@ -14,7 +14,7 @@ KUBERNETES COMPONENTS:
 
 1. Pod: Smallest unit of K8s, abstraction over container (layer on top of container). Usually 1 application per pod. 
 Each pod gets its own IP address.
-New IP address pon re-creation.
+New IP address on re-creation.
 
 2. Service: Permanent IP address. Life cycle of pod and service are not connected (even if pod dies, service isn't affected). Also acts as load balancer. Define blueprint for pods to create pod replica.
 
@@ -38,12 +38,59 @@ WORKER MACHINE IN K8S CLUSTER
 Communication across different nodes is done using services
 Each nodes has multiple pods
 3 processes must be installed on every node 
- - Container runtime eg. Docker
- - Kubelet (interacts with both container and node. Starts the pod with a container inside)
- - Kube proxy (forwarding request from services to pods - intelligent forwarding logi is present as it forwards to replicate on the same node if present, thus saving overhead)
+    1. Container runtime eg. Docker
+    2. Kubelet (interacts with both container and node. Starts the pod with a container inside)
+    3. Kube proxy (forwarding request from services to pods - intelligent forwarding logic is present as it forwards to replicate on the same node if present, thus saving overhead)
  
 Worker node do the actual work.
 Master node helps to manage 
+
+MASTER PROCESS 
+4 processes must be in Master node:
+    1. API server - interact with API server using some client. It's like a cluster gateway and acts as a gatekeeper for authentication. (Load balancer)
+    2. Scheduler - checks worker node resources to decide where to put the new pod.
+    Kubelet gets the request.
+    3. Controller manager - detects cluster state changes eg. crashing of pods. When pods die, it makes request to scheduler to restart the pods. 
+    4. etcd - Key value store to save cluster state info (eg. is the cluster state healthy, what resources are available, did the cluster state change) 
+    application data is not stored in etcd.
+    Distributed storage across all master nodes
+
+2 Master - need less resources
+3 Worker nodes - more resources 
+
+Add new master/node server:
+1. Get new bare server
+2. Install all master/worker node processes 
+3. Add it to the cluster.
+
+Minikube - master and worker processes work on 1 node (test/local setup). Docker pre-installed. Creates virtual box on your machine and node runs in that virtual box.
+kubectl - CLI tool to interact with Kubenetes setup.
+
+minikube is used to start and delete cluster. kubectl is used for all other commands.
+
+We can't create pod directly, need to create deployment as it's an abstraction on pod. 
+
+CLI COMMANDS:
+    // Get latest nginx docker image
+    kubectl create deployment nginx-depl --image=nginx 
+    kubectl get deployment 
+    kubectl get pod 
+    kubectl get replicaset 
+    // edit config file generated at the time of creatng the deployment
+    kubectl edit deployment nginx-depl 
+    // open interactive terminal to debug the pod
+    kubectl exec -it <pod-name> -- bin/bash
+    // Run create/update command based on yaml file contents
+    kubectl apply -f config.yaml
+
+Deployment (manages ->) ReplicaSet (manages ->) Pod (abstraction of ->) Container 
+Everything below deployment is managed by Kubernetes 
+If deployment is edited, everything below is re-created automatically.
+
+
+
+
+
 
 
 
