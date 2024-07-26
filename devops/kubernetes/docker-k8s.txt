@@ -82,14 +82,38 @@ CLI COMMANDS:
     kubectl exec -it <pod-name> -- bin/bash
     // Run create/update command based on yaml file contents
     kubectl apply -f config.yaml
+    kubectl describe service service-name
+    # Yaml output written to nginx-depl.yaml
+    kubectl get deployment <deployment-name> -o yaml > nginx-depl.yaml
 
 Deployment (manages ->) ReplicaSet (manages ->) Pod (abstraction of ->) Container 
 Everything below deployment is managed by Kubernetes 
 If deployment is edited, everything below is re-created automatically.
 
+Config file:
+ - metadata
+ - specification 
+ - status (added automatically by K8s, keeps changing)
 
+etcd holds the current status of any K8s components 
 
+metadata:
+    .....
+spec: 
+    # template has its own metadata & specs sections
+    # applies to pods 
+    template:
+        metadata: 
+            ....
+        specs: 
+            containers:
+            ....
 
+Internal service type is ClusterIP
+External service type is LoadBalancer (LB assigns internal + external IP)
+
+# Assign external IP to service
+minikube service <service-name> 
 
 
 
