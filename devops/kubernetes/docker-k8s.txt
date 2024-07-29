@@ -115,7 +115,38 @@ External service type is LoadBalancer (LB assigns internal + external IP)
 # Assign external IP to service
 minikube service <service-name> 
 
+Namespace - use cases:
+1. Structure your components
+2. Avoid conflicts among teams - many teams, same application (same namespace can override existing one)
+3. Resource sharing in different env or Blue/Green deployment 
+4. Access and resource limits on namespaces
+   (Limit CPU, RAM, storage in namespace)
 
+- Each NS should have its own ConfigMap. 
+- Some components live globally in the cluster, NS not allowed (Eg. volume, node)
+
+Install kubens - switch active namespace. No need to mention --namespace in CLI every time
+
+# Install ingress controller in minikube
+# automatically starts K8s nginx implementation of ingress controller 
+minikube addons enable ingress
+
+kubectl get pod -n kube-system
+
+Access K8s dashboard from some domain name 
+kubectl get ns 
+kubectl get all -n kubernetes-dashboard 
+
+Configuring TLS certificate 
+// Secret component 
+metadata: 
+    name: myaoo-secret-tls 
+    namespace: default 
+data: 
+    tls.crt: base64 encoded crt 
+    tls.key: base64 encoded key 
+
+Secret component must be in the same namespace as the ingress component 
 
 
 
