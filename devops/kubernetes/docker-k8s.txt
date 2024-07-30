@@ -1,6 +1,9 @@
-Kubernetes - container orchestration system for managing containerized workloads and services (allows communication among different containers eg. microservices)
+Learning Resources:
+    YouTube: https://www.youtube.com/watch?v=X48VuDVv0do
+    Udemy course: https://cognizant.udemy.com/course/learn-kubernetes/learn/lecture/9703196#overview
+__________________________________________________________________
 
-https://www.youtube.com/watch?v=X48VuDVv0do
+Kubernetes - container orchestration system for managing containerized workloads and services (allows communication among different containers eg. microservices)
 
 Cluster - set of 1 master and multiple worker nodes 
 
@@ -147,6 +150,25 @@ data:
     tls.key: base64 encoded key 
 
 Secret component must be in the same namespace as the ingress component 
+
+HELM CHARTS 
+- Bundle of Yaml files 
+- Create your own Helm charts with Helm and push to helm repo 
+- Dowload and use existing ones 
+
+https://youtu.be/X48VuDVv0do?t=8882
+
+Helm - templating engine: instead of having multiple 1 yaml file for each microservice, use 1 yaml file and replace values dynamically.
+During CI/CD build, replace the values on the fly.
+// values.yaml 
+name: my-app
+container: 
+    name: my-app-container
+    image: my-app-image
+    port: 9001 
+
+helm install <chartname> - template files will be filled with values from values.yaml
+
 
 
 
