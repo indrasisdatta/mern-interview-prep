@@ -169,7 +169,54 @@ container:
 
 helm install <chartname> - template files will be filled with values from values.yaml
 
+Persistent volumes are not namespaced
 
+K8s admin (Devops) - sets up and maintains the cluster, they handle configuration 
+K8s user (Developers) - configure yaml file to use persistent volume components 
+
+Application has to claim the Persistent volume - PVC (Persistent volume claim)
+
+Storage class - provisions persistent volumes dynamically, when PVC claims it.
+
+Deployment - stateless apps (Eg. Node.js app)
+StatefulSet - stateful apps (Eg. MongoDB)
+
+Pod identity 
+ - Deployment: random hash 
+ - StatefulSet: fixed ordered numbers (Eg. mysql-0, mysql-1, mysql-2)
+ Next pod is created if previous one is up and running 
+ Deletetion of pod is done in reverse order (2, 1, 0)
+
+ - Predictable pod name (mysql-0)
+ - fixed individual DNS name (mysql-0.svc2)
+ When pod restarts, IP changes but name and endpoint stays the same.
+
+Stateful apps are not perfect for containerized apps 
+
+____________________________________________________________
+
+K8S SERVICES 
+
+Service features:
+ - Stable IP address (Pods are ephemeral - destroyed frequently so new IP assigned)
+ - Load balancing 
+
+ClusterIP Services (default) 
+How does service know which pod to forward the request to?
+How does service know which port to forward to? If pod has multiple ports.
+=> ports: 
+    - protocol: TCP
+      port: 3200
+      targetPort: 3000 // forwarded to this port 
+
+Headless Service - return pod IP  
+clusterIP: none 
+
+NodePort Service - not secure, not used for external 
+
+LoadBalancer Service - becomes accessible externally through cloud providers 
+
+LoadBalancer -> extension of NodePort -> extension of ClusterIP 
 
 
 
