@@ -218,7 +218,7 @@ LoadBalancer Service - becomes accessible externally through cloud providers
 
 LoadBalancer -> extension of NodePort -> extension of ClusterIP 
 
-
+Udemy course: https://cognizant.udemy.com/course/learn-kubernetes/learn/lecture/10957998
 
 
 
