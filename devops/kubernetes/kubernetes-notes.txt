@@ -220,6 +220,8 @@ LoadBalancer -> extension of NodePort -> extension of ClusterIP
 
 Udemy course: https://cognizant.udemy.com/course/learn-kubernetes/learn/lecture/10957998
 
+Course answers: https://github.com/mmumshad/kubernetes-training-answers
+
 
 
 
