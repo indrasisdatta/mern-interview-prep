@@ -79,6 +79,10 @@ CLI COMMANDS:
     kubectl get deployment 
     kubectl get pod 
     kubectl get replicaset 
+    // Create new kubectl pod
+    kubectl run my-nginx --image=nginx
+    // Dry run command into yaml format
+    kubectl run redis --image=redis123 --dry-run -o yaml
     // edit config file generated at the time of creatng the deployment
     kubectl edit deployment nginx-depl 
     // open interactive terminal to debug the pod
