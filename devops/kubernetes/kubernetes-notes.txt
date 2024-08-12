@@ -222,6 +222,11 @@ LoadBalancer Service - becomes accessible externally through cloud providers
 
 LoadBalancer -> extension of NodePort -> extension of ClusterIP 
 
+The service is created exactly the same without you having to do any additional steps during the service creation for all 3:
+1. single pod in a single node
+2. multiple pods on a single node
+3. multiple pods on multiple nodes
+
 Udemy course: https://cognizant.udemy.com/course/learn-kubernetes/learn/lecture/10957998
 
 Course answers: https://github.com/mmumshad/kubernetes-training-answers
