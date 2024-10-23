@@ -1,0 +1,22 @@
+RADIO Concept
+
+1) Requirements (functional and non-functional)
+2) Architecture/HLD
+3) Data model 
+4) Interface definition (API)
+5) Optimization
+
+https://www.greatfrontend.com/system-design/framework
+
+
+API Rate limiting strategies:
+1. Token Bucket - allows for burst traffic by saving tokens 
+   Eg. video streaming, large uploads
+   Scenario: Ecommerce app launches a sale. Normally it receives 100 req/sec but during sales, it receives 1000/sec.
+   Allow a short burst of up to 500 req/sec (using saved tokens).
+   Once the burst capacity is exhausted, new req are queued or rate-limited.
+2. Leaky Bucket - rate limiting for APIs where requests are served at a steady, fixed rate regarless of traffic spikes (Excess requests are dropped).
+   Scenario. set up API to handle 100 req per sec.
+   If 150 requests are made, the remaining 50 are dropped.
+
+System design blog: https://www.eraser.io/decision-node
