@@ -20,3 +20,23 @@ API Rate limiting strategies:
    If 150 requests are made, the remaining 50 are dropped.
 
 System design blog: https://www.eraser.io/decision-node
+
+====================================================================
+
+How to handle sudden high traffic? Eg. Flipkart Sale start at 10am
+
+ASG takes time to horizontally scale and spin up new instances, do health checks and get it ready (1-2 mins).
+Traffic during these 1-2 mins are not handled and also increases the bill.
+
+Better Solution: To build a highly scalable system, offload non-critical async tasks to Quueue
+
+Critical tasks - place order (handle synchronously)
+Non-critical tasks - send email (handle asyncronously)
+
+Message Queue (Amazon SQS, Kafka) <- Consumer 
+(Consumer pulls messsages. Set up rate limiter and concurrency control)
+
+
+
+
+
