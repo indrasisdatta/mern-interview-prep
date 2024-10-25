@@ -36,6 +36,29 @@ Non-critical tasks - send email (handle asyncronously)
 Message Queue (Amazon SQS, Kafka) <- Consumer 
 (Consumer pulls messsages. Set up rate limiter and concurrency control)
 
+Scenario: User purchases a course and gets email notification on successful payment.
+=> Problems
+    1. Slow response time 
+    2. Server may crash in case of large no. of concurrent requests 
+    3. Email service may get blocked eg. 5,000 req received at once 
+
+   Solution: Create separate Node app for queue (SQS/BullMQ/Kafka).
+
+   BullMQ -> Producer, Consumer (Worker)
+
+   Main app - producer code to save data in Queue 
+   Queue app - consumer to read data from Queue and send emails 
+   (Add limiter eg. max 50 emails per sec)
+
+   Save data in Redis hosted in Aiven.
+
+   
+
+
+
+
+
+
 
 
 
