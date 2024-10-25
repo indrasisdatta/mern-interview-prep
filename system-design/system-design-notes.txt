@@ -52,7 +52,14 @@ Scenario: User purchases a course and gets email notification on successful paym
 
    Save data in Redis hosted in Aiven.
 
-   
+
+Throughput - read/write operations per sec 
+DB Throughput is usually low, so scalability is necessary 
+
+For real time updates, we can't insert data in DB every sec. It affects throughput and causes lag.
+
+Kafka has high throughput but can't store data for long.
+
 
 
 
