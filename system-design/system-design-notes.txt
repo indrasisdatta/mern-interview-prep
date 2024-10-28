@@ -60,6 +60,21 @@ For real time updates, we can't insert data in DB every sec. It affects throughp
 
 Kafka has high throughput but can't store data for long.
 
+1 consumer can consume multiple partitions. 
+1 partition can be consumed by only 1 consumer, not possible (at Group level)
+
+Self balancing - done at consumer group level 
+
+Queue - 1 producer, 1 consumer 
+Pub/Sub - 1 producer, multiple consumers 
+
+Kafka can act both as a queue as well as pub/sub.
+ - Queue: no. of partitions = no. of consumers (each apartition is assigned to each consumer)
+ - Pub/Sub: multiple consumer groups
+
+
+
+
 
 
 
