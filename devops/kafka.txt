@@ -1,0 +1,39 @@
+Throughput - read/write operations per sec 
+DB Throughput is usually low, so scalability is necessary 
+
+For real time updates, we can't insert data in DB every sec. It affects throughput and causes lag.
+
+Kafka has high throughput but can't store data for long.
+
+1 consumer can consume multiple partitions. 
+1 partition can be consumed by only 1 consumer, not possible (at Group level)
+
+Self balancing - done at consumer group level 
+
+Queue - 1 producer, 1 consumer 
+Pub/Sub - 1 producer, multiple consumers 
+
+Kafka can act both as a queue as well as pub/sub.
+ - Queue: no. of partitions = no. of consumers (each apartition is assigned to each consumer)
+ - Pub/Sub: multiple consumer groups
+
+Brokers - kafka runs on a cluster of servers, where each server is called a broker.
+Producers write messages to topics, which are further broken down into partitions.
+
+Zookeeper keeps track of Kafka's system and ensures everything runs smoothly:
+monitoring which brokers are available 
+
+================================================
+
+Kafka Docker installation:
+
+1. Start Zookeper Container and expose PORT 2181.
+     docker run -p 2181:2181 zookeeper
+
+2. Start Kafka Container, expose PORT 9092 and setup ENV variables.
+
+docker run -p 9092:9092 \
+-e KAFKA_ZOOKEEPER_CONNECT=<PRIVATE_IP>:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://<PRIVATE_IP>:9092 \
+-e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+confluentinc/cp-kafka
