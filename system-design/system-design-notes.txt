@@ -1,3 +1,10 @@
+CAP Theorem:
+ - Consistency
+ - Availability
+ - Partition tolerance
+
+======================================================================
+
 RADIO Concept
 
 1) Requirements (functional and non-functional)
@@ -7,7 +14,6 @@ RADIO Concept
 5) Optimization
 
 https://www.greatfrontend.com/system-design/framework
-
 
 API Rate limiting strategies:
 1. Token Bucket - allows for burst traffic by saving tokens 
