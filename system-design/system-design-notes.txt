@@ -3,6 +3,10 @@ CAP Theorem:
  - Availability
  - Partition tolerance
 
+For applications where Consistency is crucial (e.g., banking, finance), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy.
+
+For applications where Availability is more critical than strict data accuracy (e.g., social media feeds, online shopping), an AP system is usually chosen, allowing temporary inconsistencies that can later be corrected.
+
 ======================================================================
 
 RADIO Concept
