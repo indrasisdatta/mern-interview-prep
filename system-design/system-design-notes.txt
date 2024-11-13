@@ -33,7 +33,7 @@ System design blog: https://www.eraser.io/decision-node
 
 ====================================================================
 
-How to handle sudden high traffic? Eg. Flipkart Sale start at 10am
+PROBLEM STATEMENT 1: How to handle sudden high traffic? Eg. Flipkart Sale start at 10am
 
 ASG takes time to horizontally scale and spin up new instances, do health checks and get it ready (1-2 mins).
 Traffic during these 1-2 mins are not handled and also increases the bill.
@@ -62,7 +62,23 @@ Scenario: User purchases a course and gets email notification on successful paym
 
    Save data in Redis hosted in Aiven.
 
+===========================================================================================================================================================
 
+PROBLEM STATEMENT 2: 
+2a: In an image sharing platform, implement a search feature where we can search by name, username and it returns a page with all images posted by the user
+User Service -> User DB (contains millions of records)
+
+Solution: Have a dedicated Search Service -> Search DB 
+Event driven architecture - publish data from User service to a message broker. Search service subscribes to it. This keeps user data in sync.
+
+2b: In newsfeed, show posts of all users which are followed by current logged in user.
+Solution:  User A followes User B and User C.
+
+user_id    timeline - sorted list of posts
+user_a     userb_post1, userc_post1, userb_post2, userc_post2
+
+
+ 
 
 
 
