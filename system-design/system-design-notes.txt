@@ -1,7 +1,6 @@
-CAP Theorem:
- - Consistency
- - Availability
- - Partition tolerance
+CQRS Pattern (Command Query Responsibility Segregation)
+
+CAP Theorem (Consistency, Availability, Partition tolerance)
 
 For applications where Consistency is crucial (e.g., banking, finance), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy.
 
@@ -62,7 +61,7 @@ Scenario: User purchases a course and gets email notification on successful paym
 
    Save data in Redis hosted in Aiven.
 
-===========================================================================================================================================================
+=========================================================================================================================
 
 PROBLEM STATEMENT 2: 
 2a: In an image sharing platform, implement a search feature where we can search by name, username and it returns a page with all images posted by the user
@@ -73,9 +72,24 @@ Event driven architecture - publish data from User service to a message broker. 
 
 2b: In newsfeed, show posts of all users which are followed by current logged in user.
 Solution:  User A followes User B and User C.
+user_id  |  timeline - sorted list of posts
+---------------------------------------------
+user_a   |  userb_post1, userc_post1, userb_post2, userc_post2
 
-user_id    timeline - sorted list of posts
-user_a     userb_post1, userc_post1, userb_post2, userc_post2
+=> Posts service -> produce event (img_url, user_id, timestamp) when User B, C posts an image
+=> Timeline service -> consume the event asynchronously (new_post -> newly created post)
+   Subscribed data (img_url, user_id, timestamp)
+   Send request to UserService to get followers of current logged in user 
+   user_a -> user_b, userc (follower ids)
+   
+   user_b  [new_post, post1, post2 ... post5]
+   user_c  [new_post, post3, post10,...]
+   user_f [post7, post 8...]  // not updated as this user is not a follower
+
+CQRS Pattern (Command Query Responsibility Segregation)
+ - Command: user registration/updatest to user service
+ - Query: search operations go to Search Service 
+
 
 
  
