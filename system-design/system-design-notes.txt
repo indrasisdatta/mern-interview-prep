@@ -1,3 +1,5 @@
+System design tutorial: https://www.geeksforgeeks.org/system-design-tutorial/
+
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
