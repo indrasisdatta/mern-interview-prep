@@ -1,5 +1,23 @@
 System design tutorial: https://www.geeksforgeeks.org/system-design-tutorial/
 
+Functional requirements (What the system should do to meet user needs - user authentication, data processing, user actions)
+Non-functional requirements (How the system should perform - scalability, security, response time, reliability)
+
+Components of System design:
+ - Load balancer (ELB)
+ - Caching (Redis, Memcache)
+ - CDN (Cloudfront)
+ - API Gateway (AWS API gateway)
+ - Key value store (AWS DynamoDB)
+ - Blob (Object) storage and database (AWS S3)
+ - Rate limiter (AWS API gateway throttling)
+ - Monitoring system (CloudWatch)
+ - Distributed system messaging queue (SQS)
+ - Distributed unique id generator (DynamoDB with UUID generation)
+ - Distributed search/Elastic search - AWS Opensearch
+ - Distributed logging service (CouldTrail, CloudWatch logs)
+ - Distributed task scheduler (SNS)
+
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
