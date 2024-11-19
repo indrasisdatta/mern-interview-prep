@@ -18,13 +18,20 @@ Components of System design:
  - Distributed logging service (CouldTrail, CloudWatch logs)
  - Distributed task scheduler (SNS)
 
+Database Sharding (eg. 4M rows -> 4 shards with 1M rows each)
+- horizontal scaling of DB where data is split across multiple DB instances or shards 
+Types of sharding:
+ - Key based sharding (serverIndex = hashValue % numOfServers)
+ - Range based sharding (customer name A-P in shard 1 and the rest in shard 2)
+ - Vertical sharding (split multiple columns in single table to multiple tables)
+    Eg. users (id, email, name, created_at) -> users (id, email, name) user_shard2 (user_id, created_at)
+ - Directory based sharding (maintain lookup table for each shard)
+
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
-
-For applications where Consistency is crucial (e.g., banking, finance), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy.
-
-For applications where Availability is more critical than strict data accuracy (e.g., social media feeds, online shopping), an AP system is usually chosen, allowing temporary inconsistencies that can later be corrected.
+ For applications where Consistency is crucial (e.g., banking, finance), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy. 
+ For applications where Availability is more critical than strict data accuracy (e.g., social media feeds, online shopping), an AP system is usually chosen, allowing temporary inconsistencies that can later be corrected.
 
 ======================================================================
 
