@@ -18,6 +18,26 @@ Components of System design:
  - Distributed logging service (CouldTrail, CloudWatch logs)
  - Distributed task scheduler (SNS)
 
+Horizontal scaling/scale-out (add more servers to handle increased workload)
+Vertical scaling/scale up (adding more CPU cores, memory or storage capacity to handle increased workload)
+
+Load balancer - distribute the incoming traffic among servers to provide high availability, efficient server utilization and high performance.
+
+Latency - time taken for a single task to complete (Request time + Response time) 
+Throughput - No. of tasks completed in a given time period (High throughput usually means low latency)
+
+Improve latency:
+ - Deploy services closed to users (using CDN)
+ - Load balancer and horizontal scaling
+ - Optimize DB queries and index DB tables
+ - Use caching Redis/Memcache
+ - Async processing (handle non-critical tasks in the background eg. email notification in Amazon SQS)
+ - DB sharding
+
+Improve throughput: All above works, in addition to these: 
+- Batch processing (Eg. instead of updating 100 transactions, 1 single query is fired instead of 100)
+- Replication (use DB replica for read-heavy operations)
+
 Database Sharding (eg. 4M rows -> 4 shards with 1M rows each)
 - horizontal scaling of DB where data is split across multiple DB instances or shards 
 Types of sharding:
