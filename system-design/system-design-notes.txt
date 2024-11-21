@@ -47,6 +47,8 @@ Types of sharding:
     Eg. users (id, email, name, created_at) -> users (id, email, name) user_shard2 (user_id, created_at)
  - Directory based sharding (maintain lookup table for each shard)
 
+Serverless - if traffic goes up and down a lot, serverless is cost-efficient by using resources only when needed
+
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
@@ -137,9 +139,32 @@ CQRS Pattern (Command Query Responsibility Segregation)
  - Command: user registration/updatest to user service
  - Query: search operations go to Search Service 
 
+===============================
 
+Choosing the right scaling 
 
- 
+1. If app is small, choose vertical scaling 
+   - increases capacity of single server like RAM, CPU core, storage capacity
+   - simpler and requires fewer changes to architecture compared to horizontal scaling 
+   - suitable for small scale users that don't need to handle a lot of concurrent users 
+
+2. If you expect a high increase in user traffic, choose horizontal scaling
+   - adds more servers as user base grows 
+   - effective for microservice, allowing to scale each service independently 
+   
+3. For variable loads, choose serverless 
+    - automatically manages the scaling of resources based on demand 
+    - only pay for the actual resources used, making it cost effective 
+    - AWS Lambda handles underlying infrasructure reducing the infrastructure overhead 
+
+4. Low latency and high performance - choose horizontal scaling 
+    - Load balancers can help distribute the requests 
+    
+
+How does horizontal scaling work in microservice architecture? By scaling only specific service? 
+Serverless vs ASG?
+Low latency and high performance - ALB v/s API gateway?
+How to check the scalalibility of app? 
 
 
 
