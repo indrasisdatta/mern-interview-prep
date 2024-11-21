@@ -166,7 +166,7 @@ Serverless vs ASG?
 Low latency and high performance - ALB v/s API gateway?
 How to check the scalalibility of app? 
 
-
+AWS Microservice whitepaper: https://docs.aws.amazon.com/pdfs/whitepapers/latest/microservices-on-aws/microservices-on-aws.pdf
 
 
 
