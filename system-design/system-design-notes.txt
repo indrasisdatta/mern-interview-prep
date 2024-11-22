@@ -49,6 +49,21 @@ Types of sharding:
 
 Serverless - if traffic goes up and down a lot, serverless is cost-efficient by using resources only when needed
 
+Event streaming (High volume real time data streams eg. Amazon Kinesis)
+Message broker (Communication b/w distributed system producers and consumers eg. Amazon SQS)
+
+API gateway
+ - API composition (this layer fetches and combines data from multiple microservices 
+   eg. when product details is called, data is aggregated from product service, review service, price service)
+ - Authentication (Identity provider)
+ - Rate limiting (Manage burst limit, API throttling, IP based blocking, API queue)
+ - Service discovery (location of registered microservice - IP and port)
+ - Request/response transformation
+ - Response caching 
+ - Logging
+
+Client request -> AWS Route 53 DNS -> API gateway  
+
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
