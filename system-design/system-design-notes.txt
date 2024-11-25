@@ -67,10 +67,26 @@ Client request -> AWS Route 53 DNS -> API gateway
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
- For applications where Consistency is crucial (e.g., banking, finance), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy. 
+ For applications where Consistency is crucial (e.g., banking, finance, ticket booking), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy. 
  For applications where Availability is more critical than strict data accuracy (e.g., social media feeds, online shopping), an AP system is usually chosen, allowing temporary inconsistencies that can later be corrected.
 
-======================================================================
+SQL - scale vertically, useful when (C)onsistency is important
+NoSQL - scale horizontally, useful when (A)vailability is important with fast response time   
+
+DB Replication - high availability, disaster recovery, fault tolerance 
+- Master/slave: master receives write operations (insert, update, delete) and changes are replicated to the slave DB
+- Master/master: change to 1 master is synched to other master. In case of conflicting writes, conflict resoluton mechanisms are needed to ensure data consistency.
+- Snapsnot replication: create a copy of DB at any specific point in time and then replicate it on one or more servers.
+- Transactional replication: any change to one DB table (publisher) is immediately replicated to other DB (subscribers)
+
+Synchronous replication 
+- helps in Data consistency, failover capability, data loss tolerance 
+- causes latency due to waiting for acknowledgement
+
+Async replication 
+ - improves performance with low latency at the cost of consistency
+
+=====================================================================================================
 
 RADIO Concept
 
