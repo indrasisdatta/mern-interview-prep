@@ -86,6 +86,16 @@ Synchronous replication
 Async replication 
  - improves performance with low latency at the cost of consistency
 
+High level design roadmap
+ - Capacity estimation (predicting resources like CPU, memory, storage to meet the expected workload)
+ - HTTP methods - sockets, polling
+ - Server-sent events (one way eg. real time streaming)
+ - Resiliency - through replication, redundancy and availability 
+ - Paging (divide large datasets into smaller manageable sets)
+ - Logging (used to monitor application flow)
+
+ 
+
 =====================================================================================================
 
 RADIO Concept
