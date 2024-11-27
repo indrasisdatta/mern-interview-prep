@@ -67,8 +67,29 @@ Client request -> AWS Route 53 DNS -> API gateway
 CQRS Pattern (Command Query Responsibility Segregation)
 
 CAP Theorem (Consistency, Availability, Partition tolerance)
+ (P)artition tolerance is the most important
  For applications where Consistency is crucial (e.g., banking, finance, ticket booking), a CP system is more appropriate. Availability might be sacrificed temporarily to ensure data accuracy. 
- For applications where Availability is more critical than strict data accuracy (e.g., social media feeds, online shopping), an AP system is usually chosen, allowing temporary inconsistencies that can later be corrected.
+ For applications where Availability is more critical than strict data accuracy (e.g., social media feeds), an AP system is usually chosen, allowing temporary inconsistencies that can later be corrected.
+ For Ecommerce, we can use a hybrid approach:
+ - product browsing (AP)
+ - checkout and payment (CP)
+
+Consistency strategies:
+   -> Design Pattern (single source of truth, versioning, transaction management)
+   -> Consistency models
+      - strongly consistency (sync eg. SQl DB with single master node and multiple replicas)
+      - eventual consistency (async eg. DynamoDB - initally stored locally in single node, then asynchronously propagated to other nodes)
+      - weak consistency (no guarantee when or if replicas will converge eg. Redis or memcache)
+        Weak consistency enables high performance and scalability for caching frequently accessed data.
+   -> Conflict resolution techniques (Last writer wins, merge strategies)
+
+Thread - lightweight as each thread in a process shares code, data and memory.
+it takes less time to create and do context switching
+
+Concurrency v/s Parallelism
+ - Concurrency eg. single threaded Node.js application 
+   (receives request from user A and makes DB call. While waiting for the DB response, it processes user B request) 
+ - Parallelism eg. server CPU with 4 cores runs 4 threads, each thread handling separate user request 
 
 SQL - scale vertically, useful when (C)onsistency is important
 NoSQL - scale horizontally, useful when (A)vailability is important with fast response time   
@@ -93,8 +114,6 @@ High level design roadmap
  - Resiliency - through replication, redundancy and availability 
  - Paging (divide large datasets into smaller manageable sets)
  - Logging (used to monitor application flow)
-
- 
 
 =====================================================================================================
 
