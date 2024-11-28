@@ -115,6 +115,24 @@ High level design roadmap
  - Paging (divide large datasets into smaller manageable sets)
  - Logging (used to monitor application flow)
 
+CDN:
+ - when user requests a content to a CDN, the CDN identifies user's location and routes the request to the nearest edge server 
+ - Edge server contains the cached copies of the content, quickly delivers the response
+ - Since edge servers are distributed globally, it reduces latency and decreases load time
+ - CDN also helps to offload traffic from the main server 
+Eg. Cloudflare, Amazon Cloudfront
+
+Cache
+ - Application server cache (each server has its own cache, when LB routes to diff server it's unaware of the same data being cached on another server)
+ - Distributed cache (data is cached across multiple nodes in a cluster eg. Redis, Memcache)
+ - Global cache (single cache space used by multiple nodes eg. Cloudfront)
+Caching Types 
+ - Webpage caching 
+ - DB caching 
+ - CDN 
+ - Session caching 
+ - API response caching
+
 =====================================================================================================
 
 RADIO Concept
