@@ -133,6 +133,35 @@ Caching Types
  - Session caching 
  - API response caching
 
+Message Queue - addresses a no. of challenges:
+ - asyncronous communication 
+ - decoupling (decouples apps from each other, making them independent)
+
+Dead letter Queue - handle messages that cannot be processed successfully 
+
+Scaling Message Queues:
+ - Distributed system (A queue that spans multiple nodes, enables horizontal scalability
+   Messages are load balanced across all consumers)
+ - Partition (A topic user_action is distributed across 3 partitions - user_id%2 - P1, user_id % 2 !=0 P2
+   each parition can be consumed independently improving parallelism)
+
+A system can handle thousands of requests by:
+ - distributing the workload using multiple brokers 
+ - processing orders in parallel using partitions 
+
+Forward Proxy 
+ - acts on behalf of the client to send request to server 
+ - hides client's identity, used for security, content filtering, bypassing restrictions 
+ - Eg. VPN used in companies to restrict access to certain sites 
+
+Reverse Proxy 
+ - acts on behald of the server
+ - hides server identity (eg. IP address)
+ - Used for load balancing, caching, security 
+ - Scenario: Ecommerce site uses multipleservers to handle traffic. Reverse proxy sends requests to different servers
+ - Eg. AWS ELB forwards incoming traffic to multiple EC2 instances 
+       Nginx uses proxy_pass directive to forward request to one of the servers using load balancing strategy.
+
 =====================================================================================================
 
 RADIO Concept
