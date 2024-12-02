@@ -275,6 +275,21 @@ How to check the scalalibility of app?
 
 AWS Microservice whitepaper: https://docs.aws.amazon.com/pdfs/whitepapers/latest/microservices-on-aws/microservices-on-aws.pdf
 
+=========================
+
+Some real world examples of DSA in System design:
+
+1. Trie for autocomplete - Tree like data structure used to efficiently store and retrieve keys. 
+   Useful for prefix based search. 
+2. Hash table for caching - key value pair with fast lookup. When a request is made, the key is hashed to compute its storage location allowing rapid access.
+   DB query result caching, web page caching (URL key to HTML value), DNS caching (domain name to IP address)
+3. Graphs for social network - network of friends can be represented using a graph. 
+   Using graph traversal, identify mutual friends or suggest connections based on shared interests. 
+4. Binary search - retrieving a user profile by id 
+5. Segment trees - is a binary tree used for range based queries and update in an array 
+   Eg. efficiently calculate revenue within a time range 
+
+
 
 
 
