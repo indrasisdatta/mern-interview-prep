@@ -290,6 +290,8 @@ Some real world examples of DSA in System design:
    Eg. efficiently calculate revenue within a time range 
 
 
+Frontend System design: 
+https://www.geeksforgeeks.org/system-design-tutorial-for-front-end-developers/
 
 
 
