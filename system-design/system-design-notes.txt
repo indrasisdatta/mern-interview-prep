@@ -246,6 +246,25 @@ CQRS Pattern (Command Query Responsibility Segregation)
  - Command: user registration/updatest to user service
  - Query: search operations go to Search Service 
 
+Event driven architecture 
+Advantages:
+ - Scalability 
+ - Real time responsiveness 
+ - Loose coupling
+Challenges:
+ - Event order and consistency
+ - Event latency 
+ - Debugging and tracing 
+
+Event-driven v/s Message driven:
+ - Event driven is about broadcasting events to multiple interested systems
+   Eg. Eventbridge, SNS 
+   When user uploads photo to S3, an event triggers services to resize image, save and update user profile 
+ - Message driven is about explicit communication of task to specific systems 
+   Eg. SQS, Rabbit MQ
+
+
+
 ===============================
 
 Choosing the right scaling 
