@@ -1,0 +1,45 @@
+API - REST, GraphQL (when to use which one)
+
+Accessibility:
+ - Semantic code 
+ - Images with alt tag 
+ - Keyboard navigation support 
+ - Mobile AA (as they use thumb)
+
+PR process:
+ - Dev branches (accesible to developers)
+ - Staging branch (QA) 
+ - Master (Prod)
+OR Feature flag 
+
+CI/CD: 
+ - Jenkins
+ - Github actions 
+
+Testing: 
+ - ESLint formatter 
+ - RTL, JEST 
+ - Lighthouse 
+ - For E2E test Cypress 
+
+Deployment - Infra: 
+ - Static site: S3 deploy 
+ - Serverless 
+ - Docker EC2 
+
+Monitor & Logging:
+ - Sentry 
+
+Styling:
+ - SASS 
+ - Design system (Reusable)
+ - Tailwind/Bootstrap 
+
+==============================================================
+
+SEO needed in some pages - React JS with partial hydration 
+
+Full fledged SSR supports SEO - Next.js 
+
+
+
