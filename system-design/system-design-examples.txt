@@ -1,0 +1,28 @@
+LIVE STREAMING APPLICATION
+
+RTMP (highly quality video)
+WebRTC (loses some data but useful for live streaming)
+
+How to convert raw data (8K) and serve to customers (480p, 720p)?
+Transformation service to convert to different resolutions 
+
+h.264 
+
+Map reduce design pattern 
+Break raw video into segments of 10 sec and send it to multiple servers 
+  S1, S2, S3 
+
+MPEG - DASH (depending on the bandwidth, video quality is adjusted)
+Cache last 10 sec video in DB
+
+User actions:
+- Play video at timestamp x
+- Pause video (buffer next 10 sec from last seek point)
+- After logout and login, resume from earlier viewed timestamp 
+
+Dynamic Adaptive Streaming over HTTP (DASH) also known as MPEG-DASH 
+ - adaptive bitrate streaming technique 
+ - enable high quality streaming of media content delivered over the internet 
+ - delivered from conventional HTTP server 
+
+(Exponential backoff at TCP)
