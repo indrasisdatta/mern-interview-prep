@@ -26,3 +26,6 @@ Dynamic Adaptive Streaming over HTTP (DASH) also known as MPEG-DASH
  - delivered from conventional HTTP server 
 
 (Exponential backoff at TCP)
+
+Class and sequence diagram: 
+https://excalidraw.com/#json=geYPBQk8_7PJcit8RavZG,dMy9aYwXnOvAVtu2CBjuDA
