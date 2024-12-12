@@ -29,3 +29,10 @@ Dynamic Adaptive Streaming over HTTP (DASH) also known as MPEG-DASH
 
 Class and sequence diagram: 
 https://excalidraw.com/#json=geYPBQk8_7PJcit8RavZG,dMy9aYwXnOvAVtu2CBjuDA
+
+
+Key takeaways:
+1. What are some of the ways to perform live streaming?
+   HLS, RTMP, RTSP, SRT, WebRTC
+
+2. What is Map Reduce design pattern?
