@@ -44,21 +44,28 @@ Key takeaways:
       WebRTC (Delivers video streams with real time latency - Peer to peer streaming)
       SRT (Secure Reliable Transport - low latency, top-notch security)
     Legacy protocol:
-      RTMP 
+      RTMP (for ingest i.e streaming from broadcaster to server eg. Facebook live)
       RTSP
 
+    Summary of Protocols by Use Case:
+    HLS/DASH: Scalable video-on-demand and live streaming (e.g., YouTube, Netflix).
+    RTMP: Live stream ingestion (e.g., Twitch, Facebook Live).
+    WebRTC: Real-time low-latency communication (e.g., Zoom, WhatsApp).
+    RTSP: Surveillance and point-to-point live feeds (e.g., Nest, Ring).
+
+    Internal working:
+    Raw video files that cameras capture are very large & impossible to stream over the internet. 
+    Video encoders - works as middleman to convert these massive files to streamable digital files.
+    In broadcasting, encoded files are sent to a CDN. From there they are sent to viewer's devices where they are decoded and converted back to video files for viewing.
+
+    Compressing and decompressing are done through video codecs:
+    MP3, H.264, H.265
+
+    Video transcoding - makes multi bitrate and adaptive bitrate streaming possible. 
+    - Multi bitrate: Multiple renditions or versions of 1 video in different quality 
+    - Adaptive bitrate: automatically choose the appropriate rendition based on the user's internet speed 
+__________________________________________________________________________________________________________________
+
 2. What is Map Reduce design pattern?
-
-
-Raw video files that cameras capture are very large & impossible to stream over the internet. 
-Video encoders - works as middleman to convert these massive files to streamable digital files.
-In broadcasting, encoded files are sent to a CDN. From there they are sent to viewer's devices where they are decoded and converted back to video files for viewing.
-
-Compressing and decompressing are done through video codecs:
-MP3, H.264, H.265
-
-Video transcoding - makes multi bitrate and adaptive bitrate streaming possible. 
- - Multi bitrate: Multiple renditions or versions of 1 video in different quality 
- - Adaptive bitrate: automatically choose the appropriate rendition based on the user's internet speed 
 
 
