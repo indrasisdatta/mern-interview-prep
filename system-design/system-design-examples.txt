@@ -33,6 +33,32 @@ https://excalidraw.com/#json=geYPBQk8_7PJcit8RavZG,dMy9aYwXnOvAVtu2CBjuDA
 
 Key takeaways:
 1. What are some of the ways to perform live streaming?
-   HLS, RTMP, RTSP, SRT, WebRTC
+    Legacy: Low-latency but hard to scale.
+    Modern: Low-latency and adaptable for real-time needs.
+    HTTP-Based: Scalable but with higher latency, ideal for mass audiences.
+
+    HTTP based protocol:
+      HLS (HTTP Live streaming - can't maintain latency)
+      MPEG-DASH (Dynamic Adaptive streaming over HTTP - HTTP based - not compatible with Apple devices)
+    Modern protocol:
+      WebRTC (Delivers video streams with real time latency - Peer to peer streaming)
+      SRT (Secure Reliable Transport - low latency, top-notch security)
+    Legacy protocol:
+      RTMP 
+      RTSP
 
 2. What is Map Reduce design pattern?
+
+
+Raw video files that cameras capture are very large & impossible to stream over the internet. 
+Video encoders - works as middleman to convert these massive files to streamable digital files.
+In broadcasting, encoded files are sent to a CDN. From there they are sent to viewer's devices where they are decoded and converted back to video files for viewing.
+
+Compressing and decompressing are done through video codecs:
+MP3, H.264, H.265
+
+Video transcoding - makes multi bitrate and adaptive bitrate streaming possible. 
+ - Multi bitrate: Multiple renditions or versions of 1 video in different quality 
+ - Adaptive bitrate: automatically choose the appropriate rendition based on the user's internet speed 
+
+
