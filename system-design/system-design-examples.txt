@@ -69,3 +69,39 @@ ________________________________________________________________________________
 2. What is Map Reduce design pattern?
 
 
+==============================
+
+How does Facebook live scale? (Thundering herd problem)
+
+Thudering herd - multiple process or threads are waiting for a resource to be availale. When it's available, they all rush to acquire it at the same time.
+This leads to sudden spike in demand causing high latency, poor network and server crash. 
+Common solutions:
+ - Edge Caching (store frequently accessed data on edge server closer to end user rather than central server)
+ - Load balancing 
+ - Queue 
+ - Throttling (Eg. exponential backoff with jitter)
+ - Connectin pooling 
+
+User request -> Edge cache -> Origin server -> Streaming server 
+
+Streaming server: handles broadcaster's live stream ingestion 
+Origin server: processes, stores and distributes the stream to edge cache 
+Edge cache: serves content to viewers
+
+Person A (Broadcaster):
+ - camera/mobile captures the video and streams it real time to the streaming server  
+ - streaming server ingests the raw live video using a protocol called RTMP
+ - forwards the stream to the origin server for further processing (eg. transcoding, packaging, distribution) 
+
+Person B, C, D (viewer):
+ - request the stream from edge cache 
+ - if edge cache doesn't have the content, it goes to the origin server
+
+FB uses Request collescing - when 10 simultaenous req for the same data are made to the edge cache, they all are added to the request queue and only 1 goes through to the origin server.
+Same arch is followed in origin server i.e 1 req goes to the live streaming server.
+
+Request collescing using Nginx - set 
+proxy_cache_lock = on
+proxy_cache_lock_timeout = 10
+
+
