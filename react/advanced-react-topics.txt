@@ -1,3 +1,35 @@
+React 19 latest features
+https://react.dev/blog/2024/12/05/react-19
+
+1. Support for async functions in transitions to handle pending states, errors, forms and optimistic updates 
+   const [isPending, startTransition] = useTransition();
+   /* Handles pending state */
+   startTransition(async() => {
+      const response = await getData();
+      return response.data;
+   })
+
+2. New hook useActionState()
+
+3. New hook useFormStatus() - reads status of the parent form 
+   const { pending } = useFormStatus();
+   <button disabled={pending} >Submit</button>
+
+4. New hook useOptimistic() - immediately render optimisticName while the async request is in progress.
+   When update finishes or errors, React automatically switches to the currentName value.
+   const [ optimisticName, setOptimisticName ] = useOptimistic(currentName)
+
+5. New API use() - reada promise with use and React will suspend until the promise resolves 
+
+6. Improvements 
+   - ref as a prop instead of forwardRef 
+   - cleanup function from ref callbacks 
+   - Support for document metadata 
+   - Support for stylesheet precedence 
+   
+
+====================================================================================================
+
 1. React advanced hooks 
    a) useDeferredValue  https://react.dev/reference/react/useDeferredValue
    b) useTransition https://blog.webdevsimplified.com/2022-04/use-transition
