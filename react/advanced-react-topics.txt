@@ -10,9 +10,17 @@ https://react.dev/blog/2024/12/05/react-19
    })
 
 2. New hook useActionState()
+   const [error, submitAction, isPending] = useActionState(submitDataAction, null);
+   <form action={submitAction}>
+      ....
+   </form>
+   const submitAction = async (prevState, formData) => {
+      formData.get('fullName') // Get full name input
+      await axios.post(...)
+   }
 
-3. New hook useFormStatus() - reads status of the parent form 
-   const { pending } = useFormStatus();
+3. New hook useFormStatus() - reads status of the parent form (useful when submit button is a separate child component, so no need to pass any props)
+   const { pending, data, method, action } = useFormStatus();
    <button disabled={pending} >Submit</button>
 
 4. New hook useOptimistic() - immediately render optimisticName while the async request is in progress.
