@@ -27,7 +27,10 @@ https://react.dev/blog/2024/12/05/react-19
    When update finishes or errors, React automatically switches to the currentName value.
    const [ optimisticName, setOptimisticName ] = useOptimistic(currentName)
 
-5. New API use() - reada promise with use and React will suspend until the promise resolves 
+5. New API use() - reada promise or context with use and React will suspend until the promise resolves 
+   use is preferred over useContext as use can be called within if statement
+   use(Promise)
+   use(Context)
 
 6. Improvements 
    - ref as a prop instead of forwardRef 
