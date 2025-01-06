@@ -10,5 +10,17 @@ AI
 Foundation Models (FM)
   -> Large Language Models (LLM) - subset of Foundation models
 
+Open AI's ChatGPT - GPT (Generative Pretrained Transformer) uses GPT 4o
+Google's Gemini - uses combination of LaMDA, PALM2
+Anthropic's Claude - uses Claude Opus 
 
-  
+AI Tools for Developers: Github Copilot, Aider, Cursor, Windsurf
+
+Agentic AI assistants (Aider, Cursor, Windsurf)
+AI assistants (Gitub copilot)
+AI agents (Devin, Github Copilot workspace, MetaGPT) 
+AI code review assistants (CodeRabbit)
+AI app builders (Github Spark)
+
+
+
