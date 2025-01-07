@@ -86,3 +86,5 @@ First input delay: time takes for a webpage to respond to first user interaction
 Next.js improves:
 LCP (SSR, image optimization)
 SEO 	
+
+React + AI stack: https://www.builder.io/blog/react-ai-stack
