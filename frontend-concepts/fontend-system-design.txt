@@ -1,3 +1,12 @@
+2025 Tools 
+Styling - Tailwind + Shadcn UI 
+Client state management - Zustand 
+Server state management - Tanstack Query
+Table - Tanstack table 
+Forms - React hooks form (validation using Yup or Zod)
+Component development - Storybook
+-------------------------------------------------------
+
 API - REST, GraphQL (when to use which one)
 
 Accessibility:
