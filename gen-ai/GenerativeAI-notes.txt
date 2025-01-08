@@ -22,5 +22,10 @@ AI agents (Devin, Github Copilot workspace, MetaGPT)
 AI code review assistants (CodeRabbit)
 AI app builders (Github Spark)
 
+Visual Copilot - Design to code 
+Cursor - AI code editor 
+Bolt - Prompt to build 
+
+
 
 
