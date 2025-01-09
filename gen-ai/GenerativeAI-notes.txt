@@ -26,6 +26,13 @@ Visual Copilot - Design to code
 Cursor - AI code editor 
 Bolt - Prompt to build 
 
-
+Cursor advantages over Copilot:
+1. Project-wide smarts: 
+   Cursor's ability to understand and work with your entire codebase is still unmatched. 
+   Copilot's context awareness can get sluggish with larger projects.
+2. Speed and reliability: 
+   Cursor's Composer consistently outperforms when it comes to project-wide operations. 
+   While Copilot's new Edits feature is promising, it often gets stuck or slows to a crawl. Cursor just gets the job done.
+3. Agent power: With Cursor, you get a polished Agent mode that just gets what you're trying to do
 
 
