@@ -35,4 +35,14 @@ Cursor advantages over Copilot:
    While Copilot's new Edits feature is promising, it often gets stuck or slows to a crawl. Cursor just gets the job done.
 3. Agent power: With Cursor, you get a polished Agent mode that just gets what you're trying to do
 
+Cursor Usage:
+1. Terminal Ctrl + K 
+2. Chat panel 
+3. Context - adding files 
+4. Composer agent option - do the work for us based on the instruction 
+5. Cursor settings and rules (Set up your own cursor rules file)
+6. Composer checkpoints (revert to previous version)
 
+
+Constantly stage your changes to Git
+Use checkpoints for Composer generated code (to revert to previous version)
