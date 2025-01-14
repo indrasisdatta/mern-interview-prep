@@ -1,0 +1,10 @@
+Amazon Q Business:
+ - faster integrations with enterprise systems and data repositories
+ - alignment with existing user access controls for enterprise data
+ - reduces the time spent on coding to create a generative AI-powered digital assistant
+
+Retrieval Augmented Generation (RAG) 
+  - technique to retrieve data outside a foundation model & augments the prompts by adding relevant retrieved data as context 
+  - this helps gen AI based digital assistants to provide tailored response, by augmenting enterprise data source to FM 
+  - admin can configure Amazon Q to respond strictly from enterprise docs or allow external knowledge if not available in the doc 
+
