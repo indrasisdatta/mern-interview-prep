@@ -8,3 +8,11 @@ Retrieval Augmented Generation (RAG)
   - this helps gen AI based digital assistants to provide tailored response, by augmenting enterprise data source to FM 
   - admin can configure Amazon Q to respond strictly from enterprise docs or allow external knowledge if not available in the doc 
 
+Gen AI for images from text - Diffusion models (eg. Stable diffusion)
+Training is done by forward diffusion process (image to noise)
+Generating: reverse diffusion process o/p "Cat with a computer" 
+
+Amazon Bedrock ( build GenAI apps on AWS)
+ - makes a copy of the FM, available only to us, which we can further fine tune with our own data 
+
+Amazon Titan - High performing FM from AWS
