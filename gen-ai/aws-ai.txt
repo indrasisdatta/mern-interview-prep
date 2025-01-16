@@ -31,3 +31,21 @@ S3 docs are chunked and fed to Embedding Models -> generates Vectors and placed 
 
 RAG Data Sources - S3, Confluence, Sharepoint, Salesforce, Web pages  
 
+Tokenization - converting raw text into sequence of tokens 
+
+Context Window (first factor to look at when considering a model)
+ - no. of tokens an LLM can consider while generating text 
+ - Large context window means more info 
+ - Large context window requires more memory and processing power 
+
+Guardrails 
+ - filter harmful and undesirable content 
+ - remove PII 
+
+Agents
+ - configured to perform certain pre-defined action groups 
+ - Leverage RAG to retrieve info when needed 
+
+
+
+
