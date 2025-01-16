@@ -16,3 +16,18 @@ Amazon Bedrock ( build GenAI apps on AWS)
  - makes a copy of the FM, available only to us, which we can further fine tune with our own data 
 
 Amazon Titan - High performing FM from AWS
+
+Instruction based fine-tuning uses labeled examples that are prompt-response pairs
+Fine tuning is a specific kind of Transfer Learning 
+
+Bedrock RAG 
+ - Search for relevant info in Knowledge Base (backed by Vector DB)
+ - Retrieval text - Knowledge base returns relevant information 
+ - Augmented Prompt (Query + Retrieval Text) passed to FM
+ - FM generates response 
+
+RAG Vector DB - OpenSearch Service (serverless), Aurora, MongoDB 
+S3 docs are chunked and fed to Embedding Models -> generates Vectors and placed in Vector DB 
+
+RAG Data Sources - S3, Confluence, Sharepoint, Salesforce, Web pages  
+
