@@ -46,6 +46,12 @@ Agents
  - configured to perform certain pre-defined action groups 
  - Leverage RAG to retrieve info when needed 
 
+Provisioned throughput 
+ - purchase model units for a certain time (6 months)
+ - throughput is max no. of input/output tokens per minute 
+
+Prompt = Instructions + Context + Input Data + Output indicator 
+
 
 
 
