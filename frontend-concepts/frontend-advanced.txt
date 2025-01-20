@@ -100,3 +100,6 @@ ShadCN reusable component library: https://21st.dev/
   Forms - React hooks form (validation using Yup or Zod)
   Component development - Storybook
   DB - Supabase (Open source PostgreSQL BE with an option of self-hosting without vendor lock-in)
+
+JS Top trends: https://risingstars.js.org/2024/en
+JS Tooling - Vite, Biome, Bun
