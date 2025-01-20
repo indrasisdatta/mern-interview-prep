@@ -67,3 +67,49 @@ const runPromise = async() => {
 runPromise()
 	.then(res => console.log(res))
 	.catch(err => console.error(err))
+
+/* Promise all 4 practice examples */
+const promise1 = new Promise((resolve, reject) => resolve("Promise 1 resolved"));
+const promise2 = Promise.resolve("Promise 2 resolved");
+const promise3 = Promise.reject("Promise 3 rejected");
+const promise4 = Promise.reject("Promise 4 resolved");
+
+// Returns Promise 3 rejected (All resolved or first rejected)
+Promise
+	.all([promise1, promise2, promise3, promise4])
+  .then(data => {
+  	console.log('Success: ', data);
+  })
+  .catch(e => {
+  	console.log('Error: ', e);
+  })
+
+// Returns [{status: "fulfilled/rejected", value: ...}]
+Promise
+	.allSettled([promise1, promise2, promise3, promise4])
+  .then(data => {
+  	console.log('Success 2: ', data);
+  })
+  .catch(e => {
+  	console.log('Error 2: ', e);
+  })
+  
+// First resolved/rejected promise  
+Promise
+	.race([promise1, promise2, promise3, promise4])
+  .then(data => {
+  	console.log('Success 3: ', data);
+  })
+  .catch(e => {
+  	console.log('Error 3: ', e);
+  })
+
+// First resolved/rejected promise  
+Promise
+	.any([promise3, promise2, promise1, promise4])
+  .then(data => {
+  	console.log('Success 4: ', data);
+  })
+  .catch(e => {
+  	console.log('Error 4: ', e);
+  })
