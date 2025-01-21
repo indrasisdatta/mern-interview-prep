@@ -1,8 +1,3 @@
-Amazon Q Business:
- - faster integrations with enterprise systems and data repositories
- - alignment with existing user access controls for enterprise data
- - reduces the time spent on coding to create a generative AI-powered digital assistant
-
 Retrieval Augmented Generation (RAG) 
   - technique to retrieve data outside a foundation model & augments the prompts by adding relevant retrieved data as context 
   - this helps gen AI based digital assistants to provide tailored response, by augmenting enterprise data source to FM 
@@ -52,6 +47,21 @@ Provisioned throughput
 
 Prompt = Instructions + Context + Input Data + Output indicator 
 
+Prompt performance optimization: 
+ - Temperature: creativity of the model's output 
+ - Top P: higher means consider a broad range of diverse words 
+ - Top K: limits the no. of probable words 
+ - Length: max length of the answer 
 
+Amazon Q Business:
+ - faster integrations with enterprise systems and data repositories
+ - alignment with existing user access controls for enterprise data
+ - reduces the time spent on coding to create a generative AI-powered digital assistant
+ - built on Amazon bedrock (but FM can't be changed)
+ - Authenticated through IAM identity center 
+
+Amazon Q Developer 
+ - Real time code suggestions (similar to Github Copilot)
+ 
 
 
