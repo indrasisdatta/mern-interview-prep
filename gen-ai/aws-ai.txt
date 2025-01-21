@@ -1,3 +1,15 @@
+ML Terms:
+
+GPT (Generate Pretrained Transformer)
+BERT (Bidirectional Encoder Representation for Transformers)
+GAN (Generative Adversarial Network) - models used to generate synthetic data such as images, videos or sounds that resemble the training data. Helpful for data augmentation.
+RNN (Recurrent Neural Network) - sequential data like time series or text, speech recognition 
+ResNet (Residual Network) - Deep Convolutional Neural Network (CNN) used for image recognition, object detection, facial recognition 
+SVM (Support Vector Machine)
+WaveNet 
+
+Reinforcement Learning
+
 Retrieval Augmented Generation (RAG) 
   - technique to retrieve data outside a foundation model & augments the prompts by adding relevant retrieved data as context 
   - this helps gen AI based digital assistants to provide tailored response, by augmenting enterprise data source to FM 
@@ -62,6 +74,6 @@ Amazon Q Business:
 
 Amazon Q Developer 
  - Real time code suggestions (similar to Github Copilot)
- 
+
 
 
