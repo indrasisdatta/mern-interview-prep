@@ -37,6 +37,14 @@ Regression Metrics: MAE, MAPE, RMSE, R square
 
 Inferencing - predictions on new data 
 
+Hyperparameters:
+ - Learning rate 
+ - Batch size 
+ - No. of epochs 
+
+Comprehend - Named Entity recognition 
+
+
 ========================================================================
 
 Amazon Bedrock ( build GenAI apps on AWS)
