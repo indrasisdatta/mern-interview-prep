@@ -42,30 +42,6 @@ Hyperparameters:
  - Batch size 
  - No. of epochs 
 
-AWS Managed AI Services:
-Comprehend - Named Entity recognition 
-Polly - Lixcons, SSML, Voice engine, speech mark 
-Rekognition 
-- custom labels (find your logo in social media posts)
-- integrated with Amazon Augmented AI (AAI) for human review 
-Lex 
- - integration with lambda function, comprehend and Kendra 
- - Eg: chatbot converts speech-to-text and recognizes customers' intentions
-Personalize, Recipes (for recommendation)  
-Kendra - document search service to extract answer from within documents 
-Mechanical Turk - crowdsourcing marketplace to perform simple human task (distributed workforce)
-Augmented AI (human oversight of machine learning predictions on production)
-Comprehend Medical
- - detects and returns useful info in unstructured clinical text (physician notes, medical tests etc)
- - Uses NLP to detect Protected Health Information (PHI) using DetectPHI API
- - Store docs in S3 and analyze realtime with Kinesis Data Firehose 
- - Use Transcribe to convert patient narratives into text that can be analyzed by Comprehend Medical 
-
-AWS hardware for AI (GPU based EC2 instances)
- - AWS Trainium (50% cost reduction when training a model)
- - AWS Inferentia (4x throughput, 70% cost reduction)
-
-
 ========================================================================
 
 Amazon Bedrock ( build GenAI apps on AWS)
@@ -124,5 +100,35 @@ Amazon Q Business:
 Amazon Q Developer 
  - Real time code suggestions (similar to Github Copilot)
 
+AWS Managed AI Services:
+Comprehend - Named Entity recognition 
+Polly - Lixcons, SSML, Voice engine, speech mark 
+Rekognition 
+- custom labels (find your logo in social media posts)
+- integrated with Amazon Augmented AI (AAI) for human review 
+Lex 
+ - integration with lambda function, comprehend and Kendra 
+ - Eg: chatbot converts speech-to-text and recognizes customers' intentions
+Personalize, Recipes (for recommendation)  
+Kendra - document search service to extract answer from within documents 
+Mechanical Turk - crowdsourcing marketplace to perform simple human task (distributed workforce)
+Augmented AI (human oversight of machine learning predictions on production)
+Comprehend Medical
+ - detects and returns useful info in unstructured clinical text (physician notes, medical tests etc)
+ - Uses NLP to detect Protected Health Information (PHI) using DetectPHI API
+ - Store docs in S3 and analyze realtime with Kinesis Data Firehose 
+ - Use Transcribe to convert patient narratives into text that can be analyzed by Comprehend Medical 
 
+AWS hardware for AI (GPU based EC2 instances)
+ - AWS Trainium (50% cost reduction when training a model)
+ - AWS Inferentia (4x throughput, 70% cost reduction)
+
+Amazon Sagemaker 
+ - Fully managed service to build ML models 
+ - Deployment: Real time inference, serverless inference, asynchronous inference, batch transform
+
+Sagemaker pipelines:
+ Processing, training, tuning, auto ML, model, ClarifyCheck, QualityCheck 
+Sagemaker Canvas (no code)
+ 
 
