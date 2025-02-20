@@ -1,0 +1,17 @@
+Loading time includes:
+ - TTFB (Time to first byte) 
+ - FCP (First contentful paint)
+ - LCP (Last contentful paint)
+ - TTI (Time to interactive) 
+ 
+How to improve TTFB? (Goal: Process server request fast and deliver to client fast)
+ - Use CDN to serve static files
+ - Optimize server side processing (eg. DB queries) 
+ - Optimize DNS lookup times with DNS prefetching 
+ - Enable compression (Gzip, Brotli) to reduce response size 
+ - Use Redis to cache heavy responses 
+ - Use HTTP/2 or HTTP/3 for multiplexing or lower latency 
+ - Reduce HTTP overhead by minimizing headers and cookies 
+
+How to improve FCP? (Pre-loading or cache for above-the-fold content i.e before scollbar content and lazy load the rest) 
+  
