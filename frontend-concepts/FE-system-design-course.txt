@@ -1,46 +1,50 @@
-Loading time includes:
- - TTFB (Time to first byte) 
- - FCP (First contentful paint)
- - LCP (Last contentful paint)
- - TTI (Time to interactive) 
- 
-How to improve TTFB? (Goal: Process server request fast and deliver to client fast)
- - Use CDN to serve static files
- - Optimize server side processing (eg. DB queries) 
- - Optimize DNS lookup times with DNS prefetching 
- - Enable compression (Gzip, Brotli) to reduce response size 
- - Use Redis to cache heavy responses 
- - Use HTTP/2 or HTTP/3 for multiplexing or lower latency 
- - Reduce HTTP overhead by minimizing headers and cookies 
+WEB OPTIMIZATION
 
-How to improve FCP? (Pre-loading or cache for above-the-fold content i.e before scollbar content and lazy load the rest) 
-PRPL Pattern
- - Preload the late-discovered resources   <link rel="preload" as="image" href="image.jpg" > 
- - Render the initial route as soon as possible (inline critical JS and set others as async, inline critical CSS used above the fold, server-side rendering but can harm TTI time to interactive)
- - Pre-cache remaining assets (service workers)
- - Lazy load other routes and non-critical assets (split your bundle)
-https://web.dev/articles/apply-instant-loading-with-prpl
- 
-How to improve LCP? 
- - Optimize images using modern formats (avif, webp), compression and lazy loading 
- - Don't lazy load above the fold images to avoid delay in LCP 
- - JS optimizations - reduce bundle size (tree shaking, code splitting), delay or async load non-critical JS 
- 
-How to improve TTI? 
- - Break down long-running JS tasks (Use web workers for heavy computation, split tasks using setTImeout, requestIdleTimeout )
- - Prioritize loading essential scripts first 
- - Minimize 3rd party scripts that may be blocking interactivity
- - Server side rendering (SSR, hydration, static rendering) 
- - Preload resources based on user behaviour 
- 
-Backend communication - long polling, server-sent events (SSE), web sockets 
+	Loading time includes:
+	 - TTFB (Time to first byte) 
+	 - FCP (First contentful paint)
+	 - LCP (Last contentful paint)
+	 - TTI (Time to interactive) 
+	 
+	How to improve TTFB? (Goal: Process server request fast and deliver to client fast)
+	 - Use CDN to serve static files
+	 - Optimize server side processing (eg. DB queries) 
+	 - Optimize DNS lookup times with DNS prefetching 
+	 - Enable compression (Gzip, Brotli) to reduce response size 
+	 - Use Redis to cache heavy responses 
+	 - Use HTTP/2 or HTTP/3 for multiplexing or lower latency 
+	 - Reduce HTTP overhead by minimizing headers and cookies 
 
-For smooth animation:
-  - Use GPU Acceleration (Use GPU friendly CSS properties like transform and opacity)
-  - Prefer CSS animation 
-  - Use the composion thread/explicit layer creation 
-  
-GPU animations don't trigger re-layouts and re-paints since they are handled at composition layer 
+	How to improve FCP? (Pre-loading or cache for above-the-fold content i.e before scollbar content and lazy load the rest) 
+	PRPL Pattern
+	 - Preload the late-discovered resources   <link rel="preload" as="image" href="image.jpg" > 
+	 - Render the initial route as soon as possible (inline critical JS and set others as async, inline critical CSS used above the fold, server-side rendering but can harm TTI time to interactive)
+	 - Pre-cache remaining assets (service workers)
+	 - Lazy load other routes and non-critical assets (split your bundle)
+	https://web.dev/articles/apply-instant-loading-with-prpl
+	 
+	How to improve LCP? 
+	 - Optimize images using modern formats (avif, webp), compression and lazy loading 
+	 - Don't lazy load above the fold images to avoid delay in LCP 
+	 - JS optimizations - reduce bundle size (tree shaking, code splitting), delay or async load non-critical JS 
+	 
+	How to improve TTI? 
+	 - Break down long-running JS tasks (Use web workers for heavy computation, split tasks using setTImeout, requestIdleTimeout )
+	 - Prioritize loading essential scripts first 
+	 - Minimize 3rd party scripts that may be blocking interactivity
+	 - Server side rendering (SSR, hydration, static rendering) 
+	 - Preload resources based on user behaviour 
+	 
+	Backend communication - long polling, server-sent events (SSE), web sockets 
+
+	For smooth animation:
+	  - Use GPU Acceleration (Use GPU friendly CSS properties like transform and opacity)
+	  - Prefer CSS animation 
+	  - Use the composion thread/explicit layer creation 
+	  
+	GPU animations don't trigger re-layouts and re-paints since they are handled at composition layer 
+
+===============================
 
 
   
