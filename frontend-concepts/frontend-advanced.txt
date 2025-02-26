@@ -52,13 +52,11 @@ __________________________________________________________________
    Ref: https://res.cloudinary.com/practicaldev/image/fetch/s--bXHuAxci--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/8onh7r5sxmss9f87k726.png
    - CSR: initially loads empty HTML file, then JS and CSS are loaded. 
            Users see blank screen initially. Also, it's not SEO friendly.
-   - SSR: each page initiates request to app server, dynamically renders and serves HTML.
-          Advantages: better performance, SEO friendly.
-   - SSG: instead of rendering pages on every request, generate files in build time so that they are server immediately.
-          Useful for static pages eg. blog.
+   - SSR: each page initiates request to app server, dynamically renders and serves HTML. Advantages: better performance, SEO friendly.
+   - SSG: instead of rendering pages on every request, generate files in build time so that they are server immediately. Useful for static pages eg. blog, portfolio sites.
    - ISR: Incremental Static Regeneration is the next improvement to SSG. 
-          Periodically builds and revalidates new pages so that content never gets too much outdated.
-          Use static generation on a per page basis, without needing to rebuild the entire site.  
+     Periodically builds and revalidates new pages so that content never gets too much outdated.
+     Use static generation on a per page basis, without needing to rebuild the entire site.  
 
 4. How to ensure cross-browser compatibility?
 5. Discuss the importance of accessibility in web development

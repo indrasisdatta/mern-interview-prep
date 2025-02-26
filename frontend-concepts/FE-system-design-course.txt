@@ -44,8 +44,9 @@ WEB OPTIMIZATION
 	  
 	GPU animations don't trigger re-layouts and re-paints since they are handled at composition layer 
 
-===============================
+=======================================
 
+Is lazy loading not supported in SSR? 
+Full page reloads 
 
-  
  
