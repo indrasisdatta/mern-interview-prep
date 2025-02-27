@@ -49,4 +49,23 @@ WEB OPTIMIZATION
 Is lazy loading not supported in SSR? 
 Full page reloads 
 
+SSR, CSR, SSG, Pre-rendering 
+
+Case Study 1: Social Network
+ - Public faced website with millions of DAU 
+   (SEO needed, must start quickly, work on low powered devices, UI should be smooth and fast)
+ - Content is dynamically rendered 
+Solution: SSR with hydration 
+Uncanny valley - inspite the page is render and looks normal, it's not interactive. Hydration types: 
+ - Full hydration (request the full JS bundle once and hydrate the application)  
+ - Partial/selective hydration (hydrate only interactive parts of the aplication)
+ - Progressive hydration (individually hydrate nodes over time)
+ Island architecture - similar to Partial hydration. Divide the page into independent interactive static components that can be rendered and updated separately. 
+https://www.patterns.dev/vanilla/islands-architecture/
+
+
+ 
+
+
+
  

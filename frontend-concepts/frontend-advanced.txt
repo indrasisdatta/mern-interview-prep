@@ -58,6 +58,9 @@ __________________________________________________________________
      Periodically builds and revalidates new pages so that content never gets too much outdated.
      Use static generation on a per page basis, without needing to rebuild the entire site.  
 
+   - Pre-rendering: used for creating SEO friendly applications with client side rendering. Have 2 verions for the app - one for humans and one for web crawlers.
+   Prerender.io, SSR proxy 
+
 4. How to ensure cross-browser compatibility?
 5. Discuss the importance of accessibility in web development
 6. Compare and contrast client-side and server-side state management approaches in web development. 
