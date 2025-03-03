@@ -63,6 +63,24 @@ Uncanny valley - inspite the page is render and looks normal, it's not interacti
  Island architecture - similar to Partial hydration. Divide the page into independent interactive static components that can be rendered and updated separately. 
 https://www.patterns.dev/vanilla/islands-architecture/
 
+Import on interaction - Different ways to load resources: 
+- lazy (route based)
+- lazy (on interaction) - load when user clicks the UI eg. YouTube video 
+- lazy (in viewport) - when user scrolls towards the component 
+- Prefetch - load prior to needed but after critical resources are loaded 
+- Preload - eagerly with a great level of urgency
+https://www.patterns.dev/vanilla/import-on-interaction
+
+Import on visibility - lazy load images that are not directly visible in the viewport but only get loaded when user scrolls down 
+Use IntersectionObserver API or use libraries like react-lazyload or react-loadable-visibility 
+
+Prefetch:
+const EmojiPicker = import(/* webpackPrefetch: true */ "./EmojiPicker");
+
+
+
+
+
 
  
 
