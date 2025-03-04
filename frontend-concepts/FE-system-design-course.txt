@@ -77,6 +77,16 @@ Use IntersectionObserver API or use libraries like react-lazyload or react-loada
 Prefetch:
 const EmojiPicker = import(/* webpackPrefetch: true */ "./EmojiPicker");
 
+Prevent layout shifting and flashes of unstyled text by preloading optional fonts 
+<link rel="preload" href="pacifico.woff2" as="font" crossorigin="anonymous">
+@font-face {
+  font-family: 'Pacifico';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Pacifico Regular'), local('Pacifico-Regular'), url(pacifico.woff2) format('woff2');
+  font-display: swap;
+}
+
 
 
 
