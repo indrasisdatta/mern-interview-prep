@@ -87,9 +87,11 @@ Prevent layout shifting and flashes of unstyled text by preloading optional font
   font-display: swap;
 }
 
+List virtualization:
+ react-virtualized 
+ react-window (rewrite of react-virtualized to be smaller, faster)
 
-
-
+CRACO - Create react app configuration override (without eject)
 
 
  
