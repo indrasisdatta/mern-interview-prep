@@ -120,3 +120,116 @@ Function.prototype.myBind = function(context = {}, ...args) {
 }
 const showInterest = calculateInterest.myBind(savingsBank, 'Will');
 showInterest('$');
+
+/**
+ * 7. Promise polyfill
+ */
+function PromisePolyfill(executor) {
+  let status = 'pending';
+  let value, onResolve, onReject;
+
+  function resolve(val) {
+    value = val;
+    status = 'fulfilled';
+    if (onResolve) onResolve(val);
+  }
+  function reject(val) {
+    value = val;
+    status = 'rejected';
+    if (onReject) onReject(val);
+  }
+
+  this.then = function(callback) {
+    onResolve = callback;
+    if (status === 'fulfilled') onResolve(value);
+    return this;
+  }
+  this.catch = function(callback) {
+    onReject = callback;
+    if (status === 'rejected') onReject(value);
+    return this;
+  }
+
+  executor(resolve, reject);
+}
+
+// var promiseEg = new Promise((resolve, reject) => resolve(5));
+var promiseEg = new PromisePolyfill((resolve, reject) => resolve(5));
+
+promiseEg
+  .then(res => console.log('Resolved: ', res))
+  .catch(e => console.error(e));
+
+/**
+ * 7. Promise.all polyfill
+ */
+Promise.allPolyfill = function(promises) {
+  return new Promise((resolve, reject) => {
+    /* Empty args */
+    if (!Array.isArray(promises) || promises.length === 0) {
+      resolve([]);
+      return;
+    }
+    let results = [];
+    let completed = 0;
+    promises.forEach((promise, index) => {
+      Promise.resolve(promise)
+        .then(res => {
+          results.push(res);
+          completed++;
+          /* When all are completed, return all results together */
+          if (completed === promises.length) {
+            resolve(results)
+          }
+        })
+        .catch(e => reject(e));
+    });
+  });
+}
+
+var promise1 = new Promise((resolve, reject) => resolve(5));
+var promise2 = 42;
+var promise3 = Promise.resolve(13);
+
+Promise.allPolyfill([promise1, promise2, promise3])
+  .then(res => console.log('Resolved: ', res))
+  .catch(e => console.error(e));
+
+/** 
+ * Promise.allSettled polyfill
+ */
+Promise.allSettledPolyfill = function(promises) {
+  return new Promise((resolve, reject) => {
+    /* Empty args */
+    if (!Array.isArray(promises) || promises.length === 0) {
+      resolve([]);
+      return;
+    }
+    let results = [];
+    let completed = 0;
+    promises.forEach((promise, index) => {
+      Promise.resolve(promise)
+        .then(res => {
+          results[index] = {status: 'fulfilled', value: res };
+        })
+        .catch(e => {
+          results[index] = {status: 'rejected', value: e };                  
+        })
+        .finally(() => {
+          completed++;  
+          /* When all are settled, return all results together */
+          if (completed === promises.length) {
+            resolve(results);
+          }
+        })
+    });
+  });
+}
+
+var promise1 = new Promise((resolve, reject) => resolve(5));
+var promise2 = 42;
+var promise3 = Promise.reject(13);
+
+Promise.allSettledPolyfill([promise1, promise2, promise3])
+  .then(res => console.log('Resolved: ', res))
+  .catch(e => console.error(e));
