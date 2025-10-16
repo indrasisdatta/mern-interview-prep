@@ -233,3 +233,88 @@ var promise3 = Promise.reject(13);
 Promise.allSettledPolyfill([promise1, promise2, promise3])
   .then(res => console.log('Resolved: ', res))
   .catch(e => console.error(e));
+
+/* ------------- Debounce ---------------- */
+
+/*
+
+<style>
+  .container { 
+    display: flex;
+    gap: 10px;  
+    margin: 10px 0;
+  }
+  .container div {
+    padding: 0 10px;
+    background: #ddd; 
+    text-align: center;;
+  }
+</style>
+<button id="debounce-btn">Debounce</button> 
+<button id="throttle-btn">Throttle</button> 
+
+<div class="container">
+  <div>
+    <h4>Debounce counts:</h4>
+    <p id="count-no">0</p>
+    <p id="delay-count-no">0</p>
+  </div>
+  <div>
+    <h4>Throttle counts:</h4>
+    <p id="throttle-no">0</h4>
+    <p id="throttle-count-no">0</h4>
+  </div>
+</div>*/
+
+let num = 0;
+const debounce = (func, delay) => {
+  let timer;
+  return function(...args) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      func(...args);
+    }, delay);
+  }
+}
+
+const debounceCount = debounce((num) => {
+  document.getElementById('delay-count-no').innerText = num;
+}, 1000);
+
+/* Debounce button handler */
+document.getElementById('debounce-btn').addEventListener('click', function() {
+  num++;
+  document.getElementById('count-no').innerText = num;
+  /* Debounce function call */
+  debounceCount(num);
+});
+
+/* ------------- Throttle ------------------ */
+
+let throttleNum = 0;
+
+const throttle = (func, delay) => {
+  let lastCalledTime = 0;
+  return function(...args) {
+    let currentTime = new Date().getTime();
+    if (currentTime - lastCalledTime < delay) {
+      return;
+    }
+    lastCalledTime = currentTime;
+    func(...args);
+  }
+}
+
+const throttleCount = throttle((num) => {
+  document.getElementById('throttle-count-no').innerText = num;
+}, 1000);
+
+/* Throttle button handler */
+document.getElementById('throttle-btn').addEventListener('click', function() {
+  num++;
+  document.getElementById('throttle-no').innerText = num;
+  throttleCount(num);
+});
+
