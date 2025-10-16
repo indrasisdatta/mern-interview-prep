@@ -318,3 +318,62 @@ document.getElementById('throttle-btn').addEventListener('click', function() {
   throttleCount(num);
 });
 
+/* Memoize function using closure */
+const memoize = (func) => {
+  let cache = {};
+  return function(...args) {
+    let key = JSON.stringify([...args]);
+    // console.log('Check cache: ', cache);
+    if (cache.hasOwnProperty(key)) {
+      console.log('Cache hit: ', key);
+      return cache[key];
+    }
+    console.log('Cache miss: ', key);
+    let result = func(...args);
+    cache[key] = result;
+    return result;
+  }
+}
+
+const calculate = (a, b) => {
+  let c = 0;
+  for (let i = 0; i < 100000000; i++) {
+    c += i + a + b;
+  }
+  // console.log('Calculate called')
+  return c;
+}
+
+const memoCalc = memoize(calculate);
+console.log('--- Result 5, 10', memoCalc(5, 10));
+console.log('--- Result 5, 10', memoCalc(5, 10));
+console.log('--- Result 5, 10', memoCalc(5, 10));
+console.log('--- Result 10, 3', memoCalc(10, 3));
+console.log('--- Result 5, 4', memoCalc(5, 4));
+
+/* Call function only once */
+const callOnce = function(func) {
+  let isCalled = false;
+  return (...args) => {
+    if (!isCalled) {
+      isCalled = true;
+      return func(...args);
+    }    
+  }
+}
+
+const calculate = (a, b) => {
+  let c = 0;
+  for (let i = 0; i < 100000000; i++) {
+    c += i + a + b;
+  }
+  return c;
+}
+
+const onceFunc = callOnce(calculate);
+console.log('--- Call 1', onceFunc(5, 10));
+console.log('--- Call 2', onceFunc(5, 10));
+console.log('--- Call 3', onceFunc(5, 10));
+console.log('--- Call 4', onceFunc(10, 3));
+console.log('--- Call 5', onceFunc(5, 4));
+
