@@ -1,0 +1,2 @@
+NodeJS 24 latest features
+https://blog.codeminer42.com/whats-new-in-node-js-24/

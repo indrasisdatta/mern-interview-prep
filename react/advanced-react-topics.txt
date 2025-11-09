@@ -1,3 +1,6 @@
+React 19.2 latest features 
+https://dev.to/elvissautet/react-192-just-dropped-what-actually-matters-my-3-week-production-test-5387
+
 React 19 latest features
 https://react.dev/blog/2024/12/05/react-19
 
