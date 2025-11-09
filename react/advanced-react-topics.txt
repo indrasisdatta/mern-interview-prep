@@ -4,6 +4,10 @@ https://dev.to/elvissautet/react-192-just-dropped-what-actually-matters-my-3-wee
 React 19 latest features
 https://react.dev/blog/2024/12/05/react-19
 
+React hooks cheatsheet:
+https://www.tapascript.io/books/react-hooks-cheatsheet
+
+
 1. Support for async functions in transitions to handle pending states, errors, forms and optimistic updates 
    const [isPending, startTransition] = useTransition();
    /* Handles pending state */
@@ -122,6 +126,7 @@ If we declare callback function as async, it implicitly returns a Promise, which
 8. Disadvantage of using state in Context?
 Ans: If there are multiple nested components within parent Context.Provider, state update would cause re-render to all components that are consuming this Context. So it's a good practice to wrap the Context close to the component we want to re-render.  Only components that call useContext re-render whenever the context’s state changes. 
 Solution: Use Multiple Contexts, and keep state close to its Dependent Components
+
 
 
 
