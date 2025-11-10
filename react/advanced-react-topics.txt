@@ -46,7 +46,7 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    - Support for stylesheet precedence 
    
 
-====================================================================================================
+==========================================================================
 
 1. React advanced hooks 
    a) useDeferredValue  https://react.dev/reference/react/useDeferredValue
@@ -127,8 +127,47 @@ If we declare callback function as async, it implicitly returns a Promise, which
 Ans: If there are multiple nested components within parent Context.Provider, state update would cause re-render to all components that are consuming this Context. So it's a good practice to wrap the Context close to the component we want to re-render.  Only components that call useContext re-render whenever the context’s state changes. 
 Solution: Use Multiple Contexts, and keep state close to its Dependent Components
 
+========================================================================
 
+React 19.2 latest features:
+1. Activity component - two modes visible and hidden 
+   hidden - hides the children and unmounts effects 
+   visible - shows the children and mounts effects 
+   Use Case: it preserves the component state, scroll position etc (useState, useRef)
+   In Activity, the component stays mounted but React pauses its effects and deprioritizes updates — saving performance while preserving state.
 
+   <Activity mode={tabName == 'profile' ? 'visible' : 'hidden'}>
+      <Profile />
+   </Activity>
+   <Activity mode={tabName == 'dashboard' ? 'visible' : 'hidden'}>
+      <Dashboard />
+   </Activity>
+
+2. useEffectEvent - use latest state, props inside an effect without re-running the effect every time 
+
+useEffect(() => {
+   const fetchData = async() => {
+      const res = await api.getData(userId, sortBy);
+      setData(res);
+   };
+   fetchData();
+}, [userId, sortBy]);
+
+// Always uses the latest sortBy value
+const fetchData = useEffectEvent(async() => {
+      const res = await api.getData(userId, sortBy);
+      setData(res);
+});
+// Effect runs only when userId is changed
+useEffect(() => {
+   fetchData();
+}, [userId]);
+
+3. Partial pre-rendering: combines the benefits of SSG (Static Site generation) and SSR (Server side rendering). 
+Static contents generated at build time are loaded immediately. 
+Dynamic parts (personalized data or API results) are loaded on demand and streamed in once ready.
+   
+4. Batching suspense boundaries for SSR - reveal more content together instead of one by one. Earlier, server-rendered suspense loaded one by one but client-rendered suspense loaded in batch, so it felt janky.
 
 
    
