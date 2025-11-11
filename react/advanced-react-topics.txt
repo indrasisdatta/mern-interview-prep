@@ -8,7 +8,7 @@ React hooks cheatsheet:
 https://www.tapascript.io/books/react-hooks-cheatsheet
 
 
-1. Support for async functions in transitions to handle pending states, errors, forms and optimistic updates 
+1. Support for async functions in transitions to handle pending states, errors, forms and optimistic updates (introduced in React 18)
    const [isPending, startTransition] = useTransition();
    /* Handles pending state */
    startTransition(async() => {
@@ -17,14 +17,24 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    })
 
 2. New hook useActionState()
-   const [error, submitAction, isPending] = useActionState(submitDataAction, null);
-   <form action={submitAction}>
-      ....
-   </form>
-   const submitAction = async (prevState, formData) => {
-      formData.get('fullName') // Get full name input
-      await axios.post(...)
+   Simplifies form submission by automatically managing pending, success, error states.
+   
+   const submitDataAction = async (prevState, formData) => {
+      formData.get('email') // Get email input
+      try {
+         await axios.post(formData);
+         return {success: true}
+      } catch (e) {
+         return {error: e.message}
+      }
    }
+   const [state, formAction, isPending] = useActionState(submitDataAction, { success: false, error: null });
+   
+
+   <form action={formAction}>
+      <input name="email" />
+      <button disabled={isPending}>Submit</button> 
+   </form>
 
 3. New hook useFormStatus() - reads status of the parent form (useful when submit button is a separate child component, so no need to pass any props)
    const { pending, data, method, action } = useFormStatus();
@@ -34,7 +44,7 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    When update finishes or errors, React automatically switches to the currentName value.
    const [ optimisticName, setOptimisticName ] = useOptimistic(currentName)
 
-5. New API use() - reada promise or context with use and React will suspend until the promise resolves 
+5. New API use() - read a promise or context with use and React will suspend until the promise resolves 
    use is preferred over useContext as use can be called within if statement
    use(Promise)
    use(Context)
@@ -43,7 +53,7 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    - ref as a prop instead of forwardRef 
    - cleanup function from ref callbacks 
    - Support for document metadata 
-   - Support for stylesheet precedence 
+   - Support for stylesheet precedence, preloading, prefetch assets, async script tags 
    
 
 ==========================================================================
