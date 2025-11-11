@@ -62,7 +62,8 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    a) useDeferredValue  https://react.dev/reference/react/useDeferredValue
    b) useTransition https://blog.webdevsimplified.com/2022-04/use-transition
       -> useDeferredValue is suited for optimizing rendering (show old content while fresh content is loading)
-      -> useTransition gives lower priority to state updates written within startTransition to prevent blocking
+      -> useTransition gives lower priority to state updates written within startTransition to prevent blocking, so UI doesn't freeze 
+      (Without useTransition, React treats every update as urgent so results in blocking UI)
    c) useId (Assign unique id to div etc when component is called multiple times)
    d) useImperativeHandle (Expose only few methods/custom methods from child component's forwardRef)
    e) useInsertionEffect (fired synchronously before DOM mutations eg. runtime injection of style tag)
