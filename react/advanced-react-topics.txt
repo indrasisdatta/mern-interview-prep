@@ -179,7 +179,15 @@ Dynamic parts (personalized data or API results) are loaded on demand and stream
    
 4. Batching suspense boundaries for SSR - reveal more content together instead of one by one. Earlier, server-rendered suspense loaded one by one but client-rendered suspense loaded in batch, so it felt janky.
 
+=============================
 
+In React 19, React Compiler is introduced which checks the code during build time and adds memoization code wherever necessary to avoid re-render. It thus eliminates the use of useMemo, useCallback, React.memo manually in most cases.
+Edge cases e.g. external dependencies 3rd party like Maps library 
+
+const markerClickHandler = useCallback((markerId) => {
+   // Logic
+}, []);
+return <Map onMarkerClick={markerClickHandler} />
    
    
    
