@@ -1,0 +1,29 @@
+1) JSON.stringify v/s structuredClone 
+ structuredClone advantages:
+ - structuredClone can handle circular references 
+ - Date, Map, Set are preserved 
+ - faster for complex objects 
+ Use JSON.stringify for simple JSON compatible data (API payload, response)
+
+2) Retry with exponential backoff 
+
+3) Avoid updating state of unmounted components - AbortController 
+
+4) Implement a custom debounce JS function 
+
+5) How to avoid full app re-render on theme change? 
+ - Use CSS variables instead of React layer
+ - useSyncExternalStore 
+
+    // Without any React re-render
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
+
+    /* CSS */
+    :root[data-theme="light"] {
+    --bg-color: #fff;
+    --text-color: #000;
+    }
+
+
