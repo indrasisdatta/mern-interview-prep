@@ -6,11 +6,13 @@
  Use JSON.stringify for simple JSON compatible data (API payload, response)
 
 2) Retry with exponential backoff 
+ - Refer to fetchWithAutoRetry.js
 
 3) Avoid updating state of unmounted components - AbortController 
 
 4) Implement a custom debounce JS function 
-
+ - Refer to pollyfills.js 
+ 
 5) How to avoid full app re-render on theme change? 
  - Use CSS variables instead of React layer
  - useSyncExternalStore 
