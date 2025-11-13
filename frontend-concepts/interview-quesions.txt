@@ -42,4 +42,14 @@
 
 Note: Old jest.config and eslint.config before Node 20 supported only CommonJS with module.exports syntax 
 
+7) Write a function compose(fn1, fn2, fn3...) that performs function composition — i.e.,
+compose(f, g, h)(x) should return f(g(h(x))).
+
+8) Implement a deepClone(obj) function that can clone nested objects, arrays, and handles circular references.
+ - Refer to deepClone.js
+
+9) Custom functions for:
+ - Promise.all 
+ - bind 
+
    
