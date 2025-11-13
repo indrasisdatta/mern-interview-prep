@@ -52,4 +52,8 @@ compose(f, g, h)(x) should return f(g(h(x))).
  - Promise.all 
  - bind 
 
-   
+10) Redux toolkit:
+    - createSlice
+    - RTK Query   
+    - createAPI
+    - crateAsyncThunk
