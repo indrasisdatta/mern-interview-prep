@@ -7,8 +7,7 @@ Tree shaking is not possible for:
 
 Dependency graph: Starts from the entry point and when a module imports another module, a dependency is formed.
 Webpack recursively follows this dependencies from the entry point to build the entire graph.
-________________________________________________________________________________________________________________
-
+_________________________________________________________________________
 npm v/s yarn v/s pnpm:
 
 Ref: https://www.dhiwise.com/post/pnpm-vs-npm-vs-yarn-which-javascript-package-manager
@@ -17,6 +16,7 @@ npm (package.json, package.lock.json)
 - hosts the world's largest software registry
 - installs packages in a nested manner, creating separate node_modules folder for each package 
   (ensuring each package gets the exact version of its dependencies, thus using more disk space)
+Note: npm 10+ supports parallel install and caching as well
 
 yarn (package.json, yarn.lock)
 - uses parallel installation to speed up the process
@@ -25,12 +25,20 @@ yarn (package.json, yarn.lock)
 - caches packages locally, allowing for offline installs
 - checks for integrity and has enhanced security measures
 
+Note: npm 10 and yarn v1 have almost similar performance 
+Yarn v3 (Berry) uses Plug n Play (PnP) instead of node_modules
+.pnp.cjs -> for an import statement, it checks package location and package dependencies 
+.yarn/cache/ folder stores all dependencies as compressed zip files 
+
 pnpm (package.json, pnpm-lock.yaml)
 - fast, disk space efficient package manager
 - uses symlinks to save disk space and speed up installation
 - global store approach where all packages are stored in a single space on the disk
 - when package is installed, pnpm links files from the global store to the node_modules folder
 - Efficient duplication handling: if multiple projects on the same machine depend on the same package version, pnpm will store the package only once in the global store and link to each project. (Saves disk space and speeds up installation)
+
+Global cache: ~/.pnpm-store
+Project node_modules/.pnpm -> synlinks to pnpm-store
 
 For straightforward projects - npm
 For faster install and better security - yarn

@@ -28,4 +28,18 @@
     --text-color: #000;
     }
 
+6) CommonJS          v/s    ES Module 
+   require, exports       import/export
+   synchronous            asynchronous
+   cached by default      not cached by default 
+   useful in server-side  both client & server side
+   (Node)
+   dynamic import X       supports dynamic import 
+                          (useful for lazy or conditional loading)
+   Tree shaking X         tree shaking is supported 
+   Legacy NodeJS projects Modern Node JS BE projects with "type": "module"
+                          frontend apps with webpack, vite, Next.js 
 
+Note: Old jest.config and eslint.config before Node 20 supported only CommonJS with module.exports syntax 
+
+   
