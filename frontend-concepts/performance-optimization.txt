@@ -3,7 +3,11 @@ https://blog.logrocket.com/optimizing-performance-react-app/
 1. Memoize components to avoid unnecessary rerenders
    (Use React.memo, useMemo, useCallback)
    memo(Component, arePropsEqual)  --> arePropsEqual internally uses Object.is to compare old and new props
-   It compares the current props with the next props using Object.is for primitive values and a shallow equality check for objects. 
+   It does shallow comparison of the current props with the next props using Object.is for primitive values and a shallow equality check for objects. 
+   NOTE: Shallow comparison compares values for primitive types and references for objects/arrays/functions.
+   
+   // Default-> Object.is(prev.user, next.user) - always false even if user object contents are the same
+
    // For comparing object props, create a custom equality function
    const arePropsEqual = (prevProps, nextProps) => {
       return JSON.stringify(prevProps) === JSON.stringify(nextProps);
@@ -29,7 +33,7 @@ https://blog.logrocket.com/optimizing-performance-react-app/
    - bundle analyzer (debug and analyze bundle files)
 
 8. Dev Tools - Profiling, Performance to find bottlenecks
-_____________________________________________________________________________________________________
+____________________________________________________________________
 
 Security measures:
 
