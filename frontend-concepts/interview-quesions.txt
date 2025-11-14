@@ -53,7 +53,13 @@ compose(f, g, h)(x) should return f(g(h(x))).
  - bind 
 
 10) Redux toolkit:
-    - createSlice
-    - RTK Query   
-    - createAPI
-    - crateAsyncThunk
+    - createSlice (auto-generates actions & reducers)
+    - RTK Query - createAPI 
+      -> createApi slice has reducer and  middleware
+      -> defines base url, endpoints, caching behaviour
+      -> auto-generates hooks based on query name 
+         (useGetUsersQuery/useAddUsersMutation)      
+    - createAsyncThunk
+       -> built on top of Redux thunk 
+       -> automatically generates pending, fulfilled, rejected actions 
+
