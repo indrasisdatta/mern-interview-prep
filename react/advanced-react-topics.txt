@@ -207,6 +207,15 @@ const markerClickHandler = useCallback((markerId) => {
    // Logic
 }, []);
 return <Map onMarkerClick={markerClickHandler} />
+
+
+Re-rendering logic for Context:
+- When Provider re-renders → All children re-render (unless wrapped in React.memo)
+- When Provider’s value changes → All useContext() consumers re-render
+(React.memo CANNOT prevent it)   
    
-   
-   
+flushSync - synchronous update to the DOM 
+https://www.dhiwise.com/post/understanding-react-flushsync-a-deep-dive-into-synchronous-rendering
+
+state is updated and the component is re-rendered immediately, without waiting for other pending updates.
+
