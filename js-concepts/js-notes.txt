@@ -38,3 +38,32 @@ Symbol
 
 
 ---------------------------
+
+const obj = {
+   dev: 'ABC',
+   d: function() {
+   return (() => {
+      return this.dev; // inherits parent this 
+   })()
+   }
+}
+
+obj.d() // ABC 
+
+Type cooertion:
+ Number(undefined) = NaN 
+ Number(null) = 0 
+ null == 0 // false (null is only loosely equal to undefined and nothing else)
+ null >= 0 ->  !(null > 0) !false = true 
+ null <= 0 -> !(null < 0) !false = true 
+
+For + => if any is not a number, all are converted to string 
+For - => all operands are converted to numbers 
+
+[].toString(); // ""
+[1].toString(); // "1" returns the number irrespective of how nested it is
+({}).toString(); // [object Object]
+Number([]); // 0
+Number([1]); // 1 returns the number irrespective of how nested it is
+Number({}); // NaN
+
