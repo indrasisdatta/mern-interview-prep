@@ -247,3 +247,12 @@ Phases:
 
 Fiber tree - data structure used by React to track UI updates 
 
+Lane - React uses a system of Lanes to manage and prioritize work. 
+Fiber scheduler works on the highest-priority lane first. 
+
+onChange = () => setState('123') // SyncLane (highest priority)
+setTimeout // default lane (normal priority)
+startTransition // TransitionLane (lower priority)
+
+
+
