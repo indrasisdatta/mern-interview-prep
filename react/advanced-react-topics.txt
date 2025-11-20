@@ -219,3 +219,31 @@ https://www.dhiwise.com/post/understanding-react-flushsync-a-deep-dive-into-sync
 
 state is updated and the component is re-rendered immediately, without waiting for other pending updates.
 
+==================
+
+IMP: React internals (For understanding)
+
+Reconciliation - process used by React to update UI efficiently 
+
+Virtual DOM is the conceptual model (the what)
+Fiber is the engine for reconciliation (the how)
+
+React <= v15 - The reconciliation process was a synchronous, recursive process. Once it started, it couldn't be interrupted, which could lead to blocking the main thread and janky user experience for large updates.
+
+React >= 16 - Fiber is a complete rewrite of the core reconciliation algorithm. It breaks the work into small units (Fibers) that can be scheduled, paused, and prioritized. This enables the new features: Concurrent Mode and prioritized/async updates.
+
+Diffing - algo used by old React to compare old and new virtual DOM differences
+
+Virtual DOM - JS objects representing UI for comparing changes (till React 15)
+
+Fiber - React's new Reconciation system which breaks the reconciliation work down into small, interruptible units (the Fiber Nodes) and allows React to pause, resume, and prioritize updates. This is known as Concurrent Rendering and is enabled by the Fiber architecture.
+
+  - Current tree (old VDOM state)
+  - Work in Progress tree (new VDOM state is calculated)
+
+Phases: 
+ - Render: perform the entire calculation of updates in the background (can be paused, interrupted) 
+ - Commit: commit the final changes to the real DOM (cannot be paused, interrupted) 
+
+Fiber tree - data structure used by React to track UI updates 
+
