@@ -63,3 +63,8 @@ compose(f, g, h)(x) should return f(g(h(x))).
        -> built on top of Redux thunk 
        -> automatically generates pending, fulfilled, rejected actions 
 
+11) script normal v/s async v/s defer 
+
+Script = HTML parsing + (parsing paused) JS download + JS execution + Resume HTML parsing 
+script async = HTML parsing and JS download parallelly + (parsing paused) JS execution + Resume HTML parsing (order is not maintained, the one downloaded first is executed first)
+script defer = HTML parsing full and JS download parallelly + JS execution (maintains order)

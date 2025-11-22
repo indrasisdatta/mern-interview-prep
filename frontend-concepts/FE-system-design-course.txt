@@ -74,6 +74,21 @@ https://www.patterns.dev/vanilla/import-on-interaction
 Import on visibility - lazy load images that are not directly visible in the viewport but only get loaded when user scrolls down 
 Use IntersectionObserver API or use libraries like react-lazyload or react-loadable-visibility 
 
+RESOURCE HINTS:
+https://web.dev/learn/performance/resource-hints
+ - preload (Load resource right now needed immediately eg. fonts, main js)
+ - prefetch (Load resource in background eg. next page, other route assets)
+ - preconnect (DNS resolution, open TCP, TLS handshake eg. CDN, fonts)
+ - dns-prefetch (DNS resolution eg. )
+ - pre-render (Load and render an entire page in a hidden tab anticipating users will visit. Very powerful but heavy.)
+ - module-preload (Preload ES modules and dependencies before execution)
+
+Normally, the browser calculates layout + paint for everything on the page, even elements far below the fold.
+.card {
+	content-visibility: auto; // Doesn't render until needed 
+	contain-intrinsic-size: 300px;
+}
+
 Prefetch:
 const EmojiPicker = import(/* webpackPrefetch: true */ "./EmojiPicker");
 
@@ -86,6 +101,22 @@ Prevent layout shifting and flashes of unstyled text by preloading optional font
   src: local('Pacifico Regular'), local('Pacifico-Regular'), url(pacifico.woff2) format('woff2');
   font-display: swap;
 }
+
+ <link rel="dns-prefetch" href="https://www.google.com">
+ <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+
+ When a browser first contacts a new domain eg. google.com, it does: 
+ Step 1: DNS resolution - look up domain's IP address 
+ Step 2: Open TCP connection
+ Step 3: Negotiate TLS (HTTPS handshake)
+
+ dns-prefetch does step 1 while the page is still loading 
+ preconnect does step 1, 2, 3 (Reduces time to first byte TTFP for subsequent requests)
+
+ These are used in Google fonts and CDNs.
+
+COMPRESSION: brotli, gzip 
+
 
 List virtualization:
  react-virtualized 
