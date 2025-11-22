@@ -115,8 +115,7 @@ Prevent layout shifting and flashes of unstyled text by preloading optional font
 
  These are used in Google fonts and CDNs.
 
-COMPRESSION: brotli, gzip 
-
+COMPRESSION: brotli, gzip (done at server-side Node.js, nginx)
 
 List virtualization:
  react-virtualized 
@@ -126,9 +125,62 @@ CRACO - Create react app configuration override (without eject)
 
 ===================
 
+ASSET OPTIMIZATION TECHIQUES:
 
+1) Image 
+   https://medium.com/@arulvalananto/9-image-optimization-tricks-for-a-seamless-web-experience-b41867e87e54
+   - WebP, AVIF  <img srcset="image.webp image.jpg" src="image.jpg" /> 
+   - Responsive images (provide multiple sizes, browser chooses the best match)  
+   - Adaptive images (served based on connection speed)
+   - Blur-up placeholder (show a tiny blurred placeholder image first)
+   - CSS image sprites
+   - lazy loading 
+   - CDN image compression (Cloudflare, Akamai, Cloudinary)
+
+   Responsive example:
+   <img src="image.jpg"
+     srcset="
+		image-small.jpg 480w,
+		image-medium.jpg 800w,
+		image-large.jpg 1200w
+	 "
+	 sizes="(max-width: 600px) 480px, 800px"
+	/>
  
+2) Video 
+   - Progressive enhancement (use webM) 
+   - Replace gifs with videos 
+   - Responsive poster image 
+   - Streaming (HLS/DASH delivery large videos in chunks, only downloaded when users watch) 
+   - Videos with no audio 
+   - Preload 
 
+3) Fonts 
+   https://blog.pixelfreestudio.com/how-to-optimize-web-fonts-for-faster-loading-times/
+   - font-display: swap (No invisible text, load system font first, switch to custom font later)
+   - preload critical font
+   <link rel="preload" href="main.woff2" as="font" type="font/woff2" crossorigin>
+   - Progressive enhancement (use woff2 first and woff as fallback)
+   - Use only needed font variants (eg. 400, 600 instead of 100-900)
+   - font face observer (JS library which detects when fonts finish loading)
+     	const font = new FontFaceObserver("MyFont");
+		font.load().then(() => {
+		document.body.classList.add("font-loaded");
+		});
+   - Self host fonts instead of Google fonts
 
+4) CSS 
+   - critical CSS rendering (Above the fold CSS)
+   - lazy loading (browser downloads the CSS early but doesn't block rendering)   
+
+   <link rel="preload" href="style.css" as="style" onload="this.rel='stylesheet'" />
+   <noscript>
+	<link rel="stylesheet" href="style.css" />
+   </noscript>
+ 
+5) JS 
+   - defer v/s async 
+   - web worker 
+   - lazy loading
 
  
