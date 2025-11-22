@@ -2,27 +2,32 @@
  * https://leetcode.com/problems/maximum-subarray/?envType=problem-list-v2&envId=array
  * Kadane's algorithm approach
  */
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
 const maxSubArray = function(nums) {
     if (!nums || !Array.isArray(nums) || nums.length === 0) {
         console.error("Invalid input");
-        return;
+        return 0;
     }
     if (nums.length === 1) {
         return nums[0];
     }
-    // [-2,1,-3,4,-1,2,1,-5,4]
-    let sum = 0, maxSum = 0;
-    for (let i = 0; i < nums.length; i++) {
-        sum += nums[i];
-        if (sum < 0) {
-            sum = 0;
-        }
-        if (sum > maxSum) {
-            maxSum = sum;
-        }
+    let sum = 0;
+    let currentMax = nums[0];
+    let resultMax = nums[0];
+    for (let i = 1; i < nums.length; i++) {
+      currentMax = Math.max(nums[i], nums[i] + currentMax);
+      resultMax = Math.max(resultMax, currentMax);
     }
-    return maxSum;
+    return resultMax;
 }
+
+console.log(maxSubArray([-5, -2, -4, -14]));
+// -5 -2 -4 -14
+
+
 
 
 
@@ -30,7 +35,7 @@ const maxSubArray = function(nums) {
  * @param {number[]} nums
  * @return {number}
  */
-var maxSubArray = function(nums) {
+var maxSubArray_brute = function(nums) {
     if (!nums || !Array.isArray(nums) || nums.length === 0) {
         console.error("Invalid input");
         return;
