@@ -133,3 +133,10 @@ const io = new IntersectionObserver(async (entries) => {
 Scroll v/s IntersectionObserver:
 Use scroll for continuous scroll-based effects (like progress bars or parallax).
 Use IntersectionObserver for event-based actions (like lazy loading or infinite scroll).
+
+8. How to handle efficient file upload to S3 in a React app?
+Ans: 
+i) React app requests a pre-signed URL from backend  
+ii) uploads the file directly to S3 using PUT request (No AWS creds needed)
+This gives fastest uploads, offloads backend load, avoids exposing AWS credentials.
+
