@@ -183,4 +183,28 @@ ASSET OPTIMIZATION TECHIQUES:
    - web worker 
    - lazy loading
 
- 
+==============================================
+
+Adaptive Bitrate Streaming (ABS): video is split into small chunks at multiple quality levels and the player adjust quality based on the network speed.
+Uses HLS, DASH. No buffering, smooth playback. Quality 144p, 480p, 1080p etc. 
+
+Progressive Video Download: video is downloaded from start to end and starts playing once enough data is buffered (Eg. MP4 file, not chunked)
+
+
+Netflix architecture (SEO driven, dynamic, media-heavy) - Next.js is the best choice 
+ - SSR/ISR 
+ - Image optimization (automatic compression, resize, lazy load, serves webp/avif from Vercel's Edge CDN cache)
+ - Edge middleware (small serverless function running on Vercel's edge nodes close to the user, before request hits the route. Used for auth check, geo-based personalization, device based redirects m.example.com)
+ - Routing (file-based routing)
+ - Performance primitives (tree shaking, code splitting, prefetch links on hover/viewport, SSG)
+
+For self hosted (Docker on EC2 instead of Vercel):
+- Image optimization 
+   Approach 1: install sharp so that Next.js can do webp, avif conversion (image is uploaded in this server itself)
+   Approach 2: use external image CDN (eg. Cloudflare images) by updating next.config.js image loader and path options  
+
+- Edge middleware 
+	Cloudfront + Lambda@Edge 
+Note: Next.js edge middleware runs on edge runtime, which is available on Vercel's edge network or Cloudflare workers. EC2 can't run edge functions.
+
+
