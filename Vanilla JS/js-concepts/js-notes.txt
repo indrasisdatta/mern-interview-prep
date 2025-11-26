@@ -1,0 +1,69 @@
+http://github.com/leonardomso/33-js-concepts?tab=readme-ov-file#1-call-stack
+
+1. Global execution context is created when JS file starts running. 
+   It has 2 parts - memory and thread of execution
+2. Memory creation phase 
+   - memory is allocated to variables and functions   
+   - variables are set to undefined 
+   - functions declarations are stored as full function definitions
+3. Execution phase - assign values to variables. 
+   If a function is there, create a new Execution context for the function. 
+   Push the Function exec context (FEC) onto the call stack
+   Then have memory creation and execution phases for that function.
+   Function execution phase - executes the func body.
+   Context is popped out of the stack.
+
+let a = 1;
+let b = 2;
+function add(x, y) {
+    let total = x + y;
+    return total;
+}
+let result1 = add(a, b);
+let result2 = add(10, 5);
+
+Call stack - Code is stored line by line (first GEC, then let a and so on)
+
+--------------
+
+BigInt 
+Number range is -(2^53 - 1) to 2^53 - 1. 
+If we need to assign a value beyond this range, then we should opt for BigInt. 
+let a = 2 ** 54;   // Number (might lose precision)
+let b = 2n ** 54n; // BigInt (exact)
+
+Symbol 
+- don't appear in for in loop, Objet.keys, JSON.stringify 
+- can be used as object keys to assign unique identifier
+
+
+---------------------------
+
+const obj = {
+   dev: 'ABC',
+   d: function() {
+   return (() => {
+      return this.dev; // inherits parent this 
+   })()
+   }
+}
+
+obj.d() // ABC 
+
+Type cooertion:
+ Number(undefined) = NaN 
+ Number(null) = 0 
+ null == 0 // false (null is only loosely equal to undefined and nothing else)
+ null >= 0 ->  !(null > 0) !false = true 
+ null <= 0 -> !(null < 0) !false = true 
+
+For + => if any is not a number, all are converted to string 
+For - => all operands are converted to numbers 
+
+[].toString(); // ""
+[1].toString(); // "1" returns the number irrespective of how nested it is
+({}).toString(); // [object Object]
+Number([]); // 0
+Number([1]); // 1 returns the number irrespective of how nested it is
+Number({}); // NaN
+
