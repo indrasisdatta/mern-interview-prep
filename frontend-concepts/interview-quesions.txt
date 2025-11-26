@@ -1,0 +1,70 @@
+1) JSON.stringify v/s structuredClone 
+ structuredClone advantages:
+ - structuredClone can handle circular references 
+ - Date, Map, Set are preserved 
+ - faster for complex objects 
+ Use JSON.stringify for simple JSON compatible data (API payload, response)
+
+2) Retry with exponential backoff 
+ - Refer to fetchWithAutoRetry.js
+
+3) Avoid updating state of unmounted components - AbortController 
+
+4) Implement a custom debounce JS function 
+ - Refer to pollyfills.js 
+ 
+5) How to avoid full app re-render on theme change? 
+ - Use CSS variables instead of React layer
+ - useSyncExternalStore 
+
+    // Without any React re-render
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+    }, [theme]);
+
+    /* CSS */
+    :root[data-theme="light"] {
+    --bg-color: #fff;
+    --text-color: #000;
+    }
+
+6) CommonJS          v/s    ES Module 
+   require, exports       import/export
+   synchronous            asynchronous
+   cached by default      not cached by default 
+   useful in server-side  both client & server side
+   (Node)
+   dynamic import X       supports dynamic import 
+                          (useful for lazy or conditional loading)
+   Tree shaking X         tree shaking is supported 
+   Legacy NodeJS projects Modern Node JS BE projects with "type": "module"
+                          frontend apps with webpack, vite, Next.js 
+
+Note: Old jest.config and eslint.config before Node 20 supported only CommonJS with module.exports syntax 
+
+7) Write a function compose(fn1, fn2, fn3...) that performs function composition — i.e.,
+compose(f, g, h)(x) should return f(g(h(x))).
+
+8) Implement a deepClone(obj) function that can clone nested objects, arrays, and handles circular references.
+ - Refer to deepClone.js
+
+9) Custom functions for:
+ - Promise.all 
+ - bind 
+
+10) Redux toolkit:
+    - createSlice (auto-generates actions & reducers)
+    - RTK Query - createAPI 
+      -> createApi slice has reducer and  middleware
+      -> defines base url, endpoints, caching behaviour
+      -> auto-generates hooks based on query name 
+         (useGetUsersQuery/useAddUsersMutation)      
+    - createAsyncThunk
+       -> built on top of Redux thunk 
+       -> automatically generates pending, fulfilled, rejected actions 
+
+11) script normal v/s async v/s defer 
+
+Script = HTML parsing + (parsing paused) JS download + JS execution + Resume HTML parsing 
+script async = HTML parsing and JS download parallelly + (parsing paused) JS execution + Resume HTML parsing (order is not maintained, the one downloaded first is executed first)
+script defer = HTML parsing full and JS download parallelly + JS execution (maintains order)

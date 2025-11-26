@@ -1,11 +1,12 @@
 1. User Authentication with Token Management:
 **** How would you handle user authentication in a React application, including login, storing tokens, and protecting routes? Describe your approach.
+_______________________________________________________________________
 
 2. Implementing a Drag-and-Drop Interface
 **** How would you implement a drag-and-drop interface in a React application for rearranging items in a list? 
 Describe the steps and tools you would use.
 Ans: React dnd library https://dev.to/crishanks/transfer-lists-with-react-dnd-3ifo
-______________________________________________________________________________________________________________
+_________________________________________________________________________
 
 3. Dynamic Theme Switching
 **** How would you implement a feature that allows users to switch between light and dark themes in a React application? 
@@ -45,7 +46,7 @@ Ans: Create a ThemeContext and provider and wrap App component with it.
      const getPreferredScheme = () => window?.matchMedia?.('(prefers-color-scheme:dark)')?.matches ? 'dark' : 'light';
 
      Ref: https://www.linkedin.com/pulse/building-theme-switcher-react-styled-components-alex-lomia
-_____________________________________________________________________________________________________
+__________________________________________________________________________
 
 4. Handling File Uploads
 **** How would you implement a file upload feature in a React application? 
@@ -61,7 +62,7 @@ const config = {
     },
 }
 axios.post(url, formData, config).then(...).catch(...);
-__________________________________________________________________________________________
+________________________________________________________________________
 
 5. Real-Time Data with Polling
 **** How would you implement real-time data updates in a React application using polling?
@@ -69,4 +70,73 @@ Explain how you would manage the polling interval and update the state with new 
 Ans: Polling can be done in useEffect by calling a function within setInterval. 
      Call clearInterval during clean up.
      A better approach to polling is web sockets eg. Socket.io.
+_________________________________________________________________________
+
+6. How are auto-suggestions provided so fast in Google search? 
+ Front-end: 
+ - On input: Debouncing, caching previous results for repeated queries
+ - On enter: Pre-resolved DNS 
+ - After search: patial rendering (SPA), cached assets via service workers or CDN 
+
+ Back-end:
+  https://www.geeksforgeeks.org/software-engineering/search-engine/
+  - Search results consists of two main concepts - indexing and querying 
+  - Indexing is done by Googlebot (the web crawler) which continuously scans the web, downloads pages, analyzes their content, and updates the search index (a massive database that maps words to the web pages containing them)
+  - Querying happens when a user types something in the search box. The system quickly looks up that query in the index, finds all matching pages, ranks them based on relevance and returns the best results
+
+ Notes:
+ <link rel="dns-prefetch" href="https://www.google.com">
+ <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+
+ When a browser first contacts a new domain eg. google.com, it does: 
+ Step 1: DNS resolution - look up domain's IP address 
+ Step 2: Open TCP connection
+ Step 3: Negotiate TLS (HTTPS handshake)
+
+ dns-prefetch does step 1 while the page is still loading 
+ preconnect does step 1, 2, 3 (Reduces time to first byte TTFP for subsequent requests)
+
+ These are used in Google fonts and CDNs.
+___________________________________________________________________________
+
+7. How to implement infinite scroll in a JS application?
+
+APPROACH 1: Using scroll event listener 
+https://how.dev/answers/how-to-implement-infinite-scrolling-in-javascript
+
+scrollHeight - total height of the document (visible + part hidden below) 
+scrollY - how much the content is scrolled from the top 
+innerHeight - height of visible viewport
+
+// means we've reached the end of the document
+innerHeight + scrollY >= scrollHeight
+
+// provide a small threshold so it triggers just before reaching the bottom 
+innerHeight + scrollY >= scrollHeight - 20
+
+Improvements:
+ - Debounce the scroll event to avoid too many calls 
+ - Add a threshold 
+
+APPROACH 2: Using Intersection Observer API 
+ https://www.geeksforgeeks.org/javascript/infinite-scroll-using-javascript-intersection-observer-api/
+
+const io = new IntersectionObserver(async (entries) => {
+  const entry = entries[0];
+  if (!entry.isIntersecting) return;
+
+  io.unobserve(entry.target); // stop observing while fetching
+  await addItems();
+  io.observe(entry.target); // resume after loading
+}, { rootMargin: '200px' });
+
+Scroll v/s IntersectionObserver:
+Use scroll for continuous scroll-based effects (like progress bars or parallax).
+Use IntersectionObserver for event-based actions (like lazy loading or infinite scroll).
+
+8. How to handle efficient file upload to S3 in a React app?
+Ans: 
+i) React app requests a pre-signed URL from backend  
+ii) uploads the file directly to S3 using PUT request (No AWS creds needed)
+This gives fastest uploads, offloads backend load, avoids exposing AWS credentials.
 

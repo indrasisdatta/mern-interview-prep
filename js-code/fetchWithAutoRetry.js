@@ -32,4 +32,43 @@ const fetcher = (retryCount) => {
 })();
 
 
+/* Exponential backoff */
+
+const delayCall = (delayTime) => {
+  console.log('Delay time: ', delayTime)
+  return new Promise(resolve => setTimeout(resolve, delayTime));
+}
+
+const retry = async (callback, retryAttempt=1, maxRetries=4) => {
+  // 2^2 * 100, 2^3 * 100 ... -> 100ms, 200ms, 400ms, 800ms
+  const delayTime = 2 ** (retryAttempt - 1) * 1000;
+  try {
+    // Add delay for 2nd attempt onwards
+    if (retryAttempt > 1) {
+      await delayCall(delayTime);
+    }
+    return await callback(retryAttempt);
+  } catch (e) {
+    if (retryAttempt < maxRetries) {
+      return await retry(callback, retryAttempt+1);
+    } 
+    console.error('Reached maximum retry limit.. ' + e.message);
+  }
+};
+
+const fakeApiCall = async (count) => {
+  console.log("API call: ", count);
+  if (count < 3) {
+    return Promise.reject("Promise Error API call");
+  }
+  return Promise.resolve("Promise Success API call");
+}
+
+
+(async() => {
+  await retry(fakeApiCall);
+  console.log('Finished!');
+})();
+
+
 

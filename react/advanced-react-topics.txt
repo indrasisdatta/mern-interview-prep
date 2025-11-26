@@ -1,7 +1,14 @@
+React 19.2 latest features 
+https://dev.to/elvissautet/react-192-just-dropped-what-actually-matters-my-3-week-production-test-5387
+
 React 19 latest features
 https://react.dev/blog/2024/12/05/react-19
 
-1. Support for async functions in transitions to handle pending states, errors, forms and optimistic updates 
+React hooks cheatsheet:
+https://www.tapascript.io/books/react-hooks-cheatsheet
+
+
+1. Support for async functions in transitions to handle pending states, errors, forms and optimistic updates (introduced in React 18)
    const [isPending, startTransition] = useTransition();
    /* Handles pending state */
    startTransition(async() => {
@@ -10,14 +17,24 @@ https://react.dev/blog/2024/12/05/react-19
    })
 
 2. New hook useActionState()
-   const [error, submitAction, isPending] = useActionState(submitDataAction, null);
-   <form action={submitAction}>
-      ....
-   </form>
-   const submitAction = async (prevState, formData) => {
-      formData.get('fullName') // Get full name input
-      await axios.post(...)
+   Simplifies form submission by automatically managing pending, success, error states.
+   
+   const submitDataAction = async (prevState, formData) => {
+      formData.get('email') // Get email input
+      try {
+         await axios.post(formData);
+         return {success: true}
+      } catch (e) {
+         return {error: e.message}
+      }
    }
+   const [state, formAction, isPending] = useActionState(submitDataAction, { success: false, error: null });
+   
+
+   <form action={formAction}>
+      <input name="email" />
+      <button disabled={isPending}>Submit</button> 
+   </form>
 
 3. New hook useFormStatus() - reads status of the parent form (useful when submit button is a separate child component, so no need to pass any props)
    const { pending, data, method, action } = useFormStatus();
@@ -27,7 +44,7 @@ https://react.dev/blog/2024/12/05/react-19
    When update finishes or errors, React automatically switches to the currentName value.
    const [ optimisticName, setOptimisticName ] = useOptimistic(currentName)
 
-5. New API use() - reada promise or context with use and React will suspend until the promise resolves 
+5. New API use() - read a promise or context with use and React will suspend until the promise resolves 
    use is preferred over useContext as use can be called within if statement
    use(Promise)
    use(Context)
@@ -36,21 +53,33 @@ https://react.dev/blog/2024/12/05/react-19
    - ref as a prop instead of forwardRef 
    - cleanup function from ref callbacks 
    - Support for document metadata 
-   - Support for stylesheet precedence 
+   - Support for stylesheet precedence, preloading, prefetch assets, async script tags 
    
 
-====================================================================================================
+==========================================================================
 
 1. React advanced hooks 
    a) useDeferredValue  https://react.dev/reference/react/useDeferredValue
    b) useTransition https://blog.webdevsimplified.com/2022-04/use-transition
       -> useDeferredValue is suited for optimizing rendering (show old content while fresh content is loading)
-      -> useTransition gives lower priority to state updates written within startTransition to prevent blocking
+      -> useTransition gives lower priority to state updates written within startTransition to prevent blocking, so UI doesn't freeze 
+      (Without useTransition, React treats every update as urgent so results in blocking UI)
    c) useId (Assign unique id to div etc when component is called multiple times)
    d) useImperativeHandle (Expose only few methods/custom methods from child component's forwardRef)
    e) useInsertionEffect (fired synchronously before DOM mutations eg. runtime injection of style tag)
    f) useLayoutEffect (fired synchronously after DOM mutation)
    g) useEffect (runs asynchronously once browser paints DOM changes to screen)
+
+   React has 3 phases - Trigger, Render and Commit. 
+   1. Trigger phase: re-render based on state/props/context/forceUpdate or initial render 
+   2. Render phase: 
+      - calculate virtual DOM 
+      - Call useInsertionEffect       
+   3. Commit phase: 
+      - DOM mutation (update real DOM)
+      - call useLayoutEffect (runs synchronously)
+      - paint real DOM in UI 
+      - call useEffect (after paint, side effects)
 
    Other hooks
     useState v/s useReducer - useReducer is better choice when multiple vars need to be managed 
@@ -112,6 +141,13 @@ https://react.dev/blog/2024/12/05/react-19
       return <Outlet />;
    }
 
+   Access token = short-lived, stored in memory (not accessible after refresh)
+   Refresh token = in HttpOnly cookie, auto-sent with requests
+   Refresh API issues new access + refresh tokens
+   Backend invalidates old refresh token
+
+   Use BroadcastChannel so that when one tab refreshes the token, the other tabs refresh it instantly. 
+
 7. Why does useEffect not support direct async callback function?
 Ans: It expects its return function to either return a cleanup function or nothing at all. 
 If we declare callback function as async, it implicitly returns a Promise, which React doesn't recognize as a clean up function. This can cause issue as React expects cleanup function to be a function and not a Promise. 
@@ -120,9 +156,103 @@ If we declare callback function as async, it implicitly returns a Promise, which
 Ans: If there are multiple nested components within parent Context.Provider, state update would cause re-render to all components that are consuming this Context. So it's a good practice to wrap the Context close to the component we want to re-render.  Only components that call useContext re-render whenever the context’s state changes. 
 Solution: Use Multiple Contexts, and keep state close to its Dependent Components
 
+========================================================================
+
+React 19.2 latest features:
+1. Activity component - two modes visible and hidden 
+   hidden - hides the children and unmounts effects 
+   visible - shows the children and mounts effects 
+   Use Case: it preserves the component state, scroll position etc (useState, useRef)
+   In Activity, the component stays mounted but React pauses its effects and deprioritizes updates — saving performance while preserving state.
+
+   <Activity mode={tabName == 'profile' ? 'visible' : 'hidden'}>
+      <Profile />
+   </Activity>
+   <Activity mode={tabName == 'dashboard' ? 'visible' : 'hidden'}>
+      <Dashboard />
+   </Activity>
+
+2. useEffectEvent - use latest state, props inside an effect without re-running the effect every time 
+
+useEffect(() => {
+   const fetchData = async() => {
+      const res = await api.getData(userId, sortBy);
+      setData(res);
+   };
+   fetchData();
+}, [userId, sortBy]);
+
+// Always uses the latest sortBy value
+const fetchData = useEffectEvent(async() => {
+      const res = await api.getData(userId, sortBy);
+      setData(res);
+});
+// Effect runs only when userId is changed
+useEffect(() => {
+   fetchData();
+}, [userId]);
+
+3. Partial pre-rendering: combines the benefits of SSG (Static Site generation) and SSR (Server side rendering). 
+Static contents generated at build time are loaded immediately. 
+Dynamic parts (personalized data or API results) are loaded on demand and streamed in once ready.
+   
+4. Batching suspense boundaries for SSR - reveal more content together instead of one by one. Earlier, server-rendered suspense loaded one by one but client-rendered suspense loaded in batch, so it felt janky.
+
+=============================
+
+In React 19, React Compiler is introduced which checks the code during build time and adds memoization code wherever necessary to avoid re-render. It thus eliminates the use of useMemo, useCallback, React.memo manually in most cases.
+Edge cases e.g. external dependencies 3rd party like Maps library 
+
+const markerClickHandler = useCallback((markerId) => {
+   // Logic
+}, []);
+return <Map onMarkerClick={markerClickHandler} />
+
+
+Re-rendering logic for Context:
+- When Provider re-renders → All children re-render (unless wrapped in React.memo)
+- When Provider’s value changes → All useContext() consumers re-render
+(React.memo CANNOT prevent it)   
+   
+flushSync - synchronous update to the DOM 
+https://www.dhiwise.com/post/understanding-react-flushsync-a-deep-dive-into-synchronous-rendering
+
+state is updated and the component is re-rendered immediately, without waiting for other pending updates.
+
+==================
+
+IMP: React internals (For understanding)
+
+Reconciliation - process used by React to update UI efficiently 
+
+Virtual DOM is the conceptual model (the what)
+Fiber is the engine for reconciliation (the how)
+
+React <= v15 - The reconciliation process was a synchronous, recursive process. Once it started, it couldn't be interrupted, which could lead to blocking the main thread and janky user experience for large updates.
+
+React >= 16 - Fiber is a complete rewrite of the core reconciliation algorithm. It breaks the work into small units (Fibers) that can be scheduled, paused, and prioritized. This enables the new features: Concurrent Mode and prioritized/async updates.
+
+Diffing - algo used by old React to compare old and new virtual DOM differences
+
+Virtual DOM - JS objects representing UI for comparing changes (till React 15)
+
+Fiber - React's new Reconciation system which breaks the reconciliation work down into small, interruptible units (the Fiber Nodes) and allows React to pause, resume, and prioritize updates. This is known as Concurrent Rendering and is enabled by the Fiber architecture.
+
+  - Current tree (old VDOM state)
+  - Work in Progress tree (new VDOM state is calculated)
+
+Phases: 
+ - Render: perform the entire calculation of updates in the background (can be paused, interrupted) 
+ - Commit: commit the final changes to the real DOM (cannot be paused, interrupted) 
+
+Fiber tree - data structure used by React to track UI updates 
+
+Lane - React uses a system of Lanes to manage and prioritize work. 
+Fiber scheduler works on the highest-priority lane first. 
+
+onChange = () => setState('123') // SyncLane (highest priority)
+setTimeout // default lane (normal priority)
+startTransition // TransitionLane (lower priority)
 
 
 
-   
-   
-   
