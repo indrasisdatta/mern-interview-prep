@@ -68,3 +68,75 @@ compose(f, g, h)(x) should return f(g(h(x))).
 Script = HTML parsing + (parsing paused) JS download + JS execution + Resume HTML parsing 
 script async = HTML parsing and JS download parallelly + (parsing paused) JS execution + Resume HTML parsing (order is not maintained, the one downloaded first is executed first)
 script defer = HTML parsing full and JS download parallelly + JS execution (maintains order)
+
+==================
+
+https://prepfully.com/interview-questions/agoda/frontend-engineer?page=1
+
+Coding:
+
+How to differentiate between null and undefined? What are the best practices?
+
+How do you plan to tackle the serialization and deserialization of unconventional data types like Dates or Functions in JS? 
+
+How do implement hierarchical checkbox structure with group selection and deselection?
+
+What would be your approach to developing the getElementsByStyle function in JavaScript, aimed at locating elements with a given CSS style, and how would you navigate the DOM?
+
+Can you create a store class featuring set(Node, value), get(Node), and has(Node) methods for managing Nodes and their values?
+
+In JavaScript, how can you develop a system for handling cookies, including their storage and retrieval?
+
+Please explain how to modify localStorage in JavaScript to make stored items expire after a certain time.
+
+What is your strategy for running an array of promises sequentially?
+
+Can you elucidate on what constitutes a compositing layer in CSS?
+
+In your experience, how do you write a JavaScript function to retrieve the sibling on the left of a DOM element?
+
+How do you go about placing an element in the middle of an image?
+
+Can you demonstrate the process of creating a two-way binding in JavaScript, ensuring an input field's changes are immediately mirrored in another element?
+
+Can you construct the useIsMounted() hook in React that returns a true or false based on the component's mount state?
+
+Could you walk us through the process of creating a deep clone function in JavaScript, with a focus on tackling complex data structures and circular references?
+
+How do you code the promisify() function to change callback-based functions into Promise-based in JavaScript?
+
+================================
+
+System Design:
+
+How would you architect the frontend of a video-sharing site like YouTube, considering key aspects like playback and user experience?
+
+How would you go about creating a typeahead widget that offers instant suggestions to users for fast and efficient search results?
+
+How would you approach creating a user interface component like a dropdown menu using HTML, CSS, and JavaScript?
+
+How to set up and prepare an npm package? 
+
+In your experience, what are the critical factors in creating an image upload and preview component for web applications, especially in handling files and generating previews?
+
+How do you plan to design a video streaming service that can accommodate a large user base and deliver content efficiently?
+
+How would you implement a menu structure that collapses open sub-menus when a new parent is selected, while maintaining the expanded state when interacting with nested sub-menus?
+
+Can you create an HTML and CSS prototype to display information over an image upon mouse hover?
+
+Can you outline the process for developing a carousel widget featuring a rotation of images or content with customizable navigation and effects?
+
+When creating a system for a Jira sprint board with high ticket volumes, what components and optimizations would you prioritize for optimal performance?
+
+How would you engineer a secure login process using QR codes for mobile device verification?
+
+What's your approach to creating a visual progress bar that accurately reflects the status of an API request or data loading process?
+
+What would be your strategy for designing the frontend of a messenger app that includes instant messaging, group discussions, message archiving, and alerts for users?
+
+
+
+
+
+
