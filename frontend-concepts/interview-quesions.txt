@@ -93,22 +93,28 @@ How do you plan to tackle the serialization and deserialization of unconventiona
 How do implement hierarchical checkbox structure with group selection and deselection?
     Refer to hierarchical-checkbox.js
 
+What is your strategy for running an array of promises sequentially?
+    Refer to promise-sequential.js
+
+How to modify localStorage in JavaScript to make stored items expire after a certain time.
+    Refer to localstorage-expiry.js
+
+How do you write a JavaScript function to retrieve the sibling on the left of a DOM element?
+    const el = document.getElementById("option_1b");
+    const leftSibling = el.previousElementSibling;
+
+How do you go about placing an element in the middle of an image?
+    Parent relative, child p absolute with top, left, transform: translate(-50%, -50%)
+
 What would be your approach to developing the getElementsByStyle function in JavaScript, aimed at locating elements with a given CSS style, and how would you navigate the DOM?
-    
+
 
 Can you create a store class featuring set(Node, value), get(Node), and has(Node) methods for managing Nodes and their values?
 
 In JavaScript, how can you develop a system for handling cookies, including their storage and retrieval?
 
-Please explain how to modify localStorage in JavaScript to make stored items expire after a certain time.
-
-What is your strategy for running an array of promises sequentially?
 
 Can you elucidate on what constitutes a compositing layer in CSS?
-
-In your experience, how do you write a JavaScript function to retrieve the sibling on the left of a DOM element?
-
-How do you go about placing an element in the middle of an image?
 
 Can you demonstrate the process of creating a two-way binding in JavaScript, ensuring an input field's changes are immediately mirrored in another element?
 
