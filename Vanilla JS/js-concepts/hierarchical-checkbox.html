@@ -1,0 +1,71 @@
+<div class="container">
+  <div class="main-option">    
+    <input type="checkbox" id="all" data-parent="" />
+    <label for="all">Select All</label>
+  </div>
+  <div class="option-child-container all-child-container">    
+    <input type="checkbox" id="option_1" data-parent="all" />
+    <label for="option_1">Option 1</label>
+    <div class="option-child-container option_1-child-container">
+      <div class="option-container">
+        <input type="checkbox" id="option_1b" data-parent="option_1" />
+        <label for="option_1b">Option 1b</label>
+      </div>
+      <div class="option-container option_1-child-container">        
+        <input type="checkbox" id="option_1a" data-parent="option_1" />
+        <label for="option_1a">Option 1a</label>
+      </div>
+    </div>
+  </div>
+  <div class="option-child-container all-child-container">    
+    <input type="checkbox" id="option_2" data-parent="all" />
+    <label for="option_2">Option 2</label>
+  </div>
+</div>
+
+<script>
+function handleChildren(targetId, isChecked, parent) {
+  // option_1-child-container
+  let children = document.querySelectorAll(`.${targetId}-child-container`);
+  console.log('Children: ', children)
+  if(children && children?.length > 0) {
+    children.forEach(child => {
+      child.querySelector('input[data-parent="'+targetId+'"]').checked = isChecked;
+    });
+  }
+}
+
+function handleParent(targetId, parent) {
+  if (!parent) return;
+
+  let container = document.getElementById(targetId).closest('.option-child-container');
+  if (!container) return;
+  
+  let siblingCheckboxes = container.querySelectorAll(':scope > input[type="checkbox"], :scope > .option-container > input[type="checkbox"]');
+
+  let checked = 0, total = 0;
+  siblingCheckboxes?.forEach(chk => {
+    if (chk.checked) {
+      checked++;
+    }    
+    total++;
+  });
+  if (total === 0) return;
+  if (checked === total) {
+    document.getElementById(parent).checked = true;
+  } else {
+    document.getElementById(parent).checked = false;
+  }
+}
+
+document.querySelector('.container').addEventListener('change', e => {
+
+  if (e.target.type !== 'checkbox') return;
+  
+  // If parent exists, check parent if all siblings are checked
+  handleParent(e.target.id, e.target.dataset?.parent);
+
+  // If children exists, check/uncheck all
+  handleChildren(e.target.id, e.target.checked);
+});
+</script>

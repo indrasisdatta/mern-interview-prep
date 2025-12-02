@@ -207,4 +207,15 @@ For self hosted (Docker on EC2 instead of Vercel):
 	Cloudfront + Lambda@Edge 
 Note: Next.js edge middleware runs on edge runtime, which is available on Vercel's edge network or Cloudflare workers. EC2 can't run edge functions.
 
+==========================================
+
+Atomic Design
+https://www.linkedin.com/pulse/atomic-design-react-components-building-scalable-uis-wijerathna--kwzkc
+
+Atoms
+Molecules
+Organisms
+Templates
+Pages 
+
 

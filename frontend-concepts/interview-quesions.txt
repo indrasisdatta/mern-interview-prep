@@ -78,10 +78,23 @@ Coding:
 How to differentiate between null and undefined? What are the best practices?
 
 How do you plan to tackle the serialization and deserialization of unconventional data types like Dates or Functions in JS? 
+    const copied = JSON.parse(
+        JSON.stringify(obj),
+        (key, val) => {
+            if (key === 'password') return null;
+            // if (key === 'createdAt') {
+            if (typeof val === "string" && /^\d{4}-\d{2}-\d{2}/.test(val)) {
+            return new Date(val);
+            }
+            return val;
+        }
+    );
 
 How do implement hierarchical checkbox structure with group selection and deselection?
+    Refer to hierarchical-checkbox.js
 
 What would be your approach to developing the getElementsByStyle function in JavaScript, aimed at locating elements with a given CSS style, and how would you navigate the DOM?
+    
 
 Can you create a store class featuring set(Node, value), get(Node), and has(Node) methods for managing Nodes and their values?
 
