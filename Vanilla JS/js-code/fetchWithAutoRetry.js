@@ -70,5 +70,45 @@ const fakeApiCall = async (count) => {
   console.log('Finished!');
 })();
 
+/* ------------------------------- */
+
+/* Auto retry implementation */
+
+const retryApi = async (fn, retryCount) => {
+  return async (...args) => {
+    let attempts = retryCount;
+    while (attempts > 0) {
+      try {
+        return await fn(...args, attempts);
+      } catch(e) {
+        attempts--;
+        if (attempts === 0) throw e;
+      }
+    }
+  }
+}
+
+const apiCall = async (a, b, retryCount) => {
+  console.log('Promise', a, b, retryCount)
+  return new Promise((resolve, reject) => {
+    if (retryCount === 3) {
+      resolve("Promise Success!", a, b);
+      return;
+    }
+    reject("Promise error!");
+  });
+}
+
+(async() => {
+  const retryApiFunc = await retryApi(apiCall, 4);
+  const response = await retryApiFunc('one', 'two');
+  console.log('Final response', response)
+})();
+
+
+
+
+
+
 
 
