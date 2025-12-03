@@ -58,4 +58,34 @@ export async function getData () {
 
 Client Component that imports getData() will receive a build-time error explaining that this module can only be used on the server.
 
----------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+By default every component is SSR 
+For CSR, we need to mention "use client" 
+
+export const dynamic = "force-dynamic"; // force-static for SSG 
+export defaut async function Page() {
+  const data = await axios.get(url;
+}
+
+// ISR - use fetch 
+export default async function Page() {
+  const response = await fetch(url, {
+    // It tells Next.js to re-generate the page at most once every 60 seconds.
+    next: { revalidate: 60 },
+  });
+  const data = await response.json();
+  // ... rest of your component logic
+}
+Note: after 60 secs, the next user request will trigger a background re-generation of the page and then serve the fresh static page to next subsequent user. 
+
+// app/users/[id]/page.js (Runs at Build Time)
+export async function generateStaticParams() {
+  // 1. Fetch the list of all user IDs
+  const users = await fetch('https://api.example.com/users').then((res) => res.json());
+
+  // 2. Return an array of objects, where each object represents one static page
+  return users.map((user) => ({
+    id: user.id.toString(), // The folder name/parameter is [id]
+  }));
+}

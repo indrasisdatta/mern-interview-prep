@@ -140,3 +140,12 @@ i) React app requests a pre-signed URL from backend
 ii) uploads the file directly to S3 using PUT request (No AWS creds needed)
 This gives fastest uploads, offloads backend load, avoids exposing AWS credentials.
 
+Micro-Frontend: 
+- App is split into independent modules and deployed separately 
+  (e.g. Search, Booking, Payment made in different technologies)
+- Host application loads the layout, navbar, routing 
+- Remote applications (SearchApp, BookingApp) are exposed via bundles via Module Federation
+- Host dynamically loads remote apps at runtime based on the URL 
+
+Communication among remote apps? 
+Common libs? Where to keep (in host?) and how to reuse?
