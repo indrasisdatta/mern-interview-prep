@@ -60,6 +60,15 @@ AUTHENTICATION:
 - Axios response interceptor checks if status is 401 then access token has expired 
 - It silently sends refresh token to refresh endpoint, gets new access token and reties API 
 
+Note: React cannot read or write httpOnly cookies. In login API, server returns Set-Cookie in response header (with refresh token) and browser automatically understands and stores it. In all subsequent requests, it sends this cookie if {withCredentials: true} is set in axios.
+
+HTTP/1.1 200 OK
+Set-Cookie: refreshToken=abc123; HttpOnly; Secure; SameSite=Lax; Path=/auth/refresh
+Content-Type: application/json
+{
+  "accessToken": "xyz456"
+}
+
 axios.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -284,3 +293,34 @@ confidence score
 LLM Security:
 1. DOMPurify to sanitize HTML and markdown and allow specific tags only
 2. Server - API rate limiting, don't expose secrets
+
+Preconnect Google font and image CDN URLs 
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://images.cdn">
+
+========================================================================
+
+How does data flow from React to DB and then update back to React? 
+1. React websocket connection is established for A and B 
+2. A sends message - React fires emit event when a message is sent 
+3. This message goes to backend (Node.js) and saved in Kafka topic 
+4. Node.js consumers listens to this topic and broadcasts to all registered socket listeners 
+5. React app who are subscribed to websocket (person B) receives this message
+
+Custom JS scripts (based on project):
+1) Exponential backoff 
+2) Debounce, throttle 
+3) Infinite scroll using Intersection Observer 
+
+Additional FE system design:
+- Hotel booking system 
+- File upload 
+
+Micro frontend architecture 
+
+Next.js - project overview of files 
+
+TODO:
+1. Infinite scroll FSD
+2. Redux toolkit workflow 
+3. Current project HLD/LLD 

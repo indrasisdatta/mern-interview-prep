@@ -9,6 +9,18 @@
  - Refer to fetchWithAutoRetry.js
 
 3) Avoid updating state of unmounted components - AbortController 
+    useEffect(() => {
+        const controller = new AbortController();
+        fetch(
+            '/api/data', 
+            {signal: controller.signal}
+        )
+        .then(res => res.json())
+        .then(
+            (data) => setData(data)
+        ).catch(e => setData([]));
+        return () => controller.abort();
+    }, []);
 
 4) Implement a custom debounce JS function 
  - Refer to pollyfills.js 
@@ -106,6 +118,70 @@ How do you write a JavaScript function to retrieve the sibling on the left of a 
 How do you go about placing an element in the middle of an image?
     Parent relative, child p absolute with top, left, transform: translate(-50%, -50%)
 
+Could you walk us through the process of creating a deep clone function in JavaScript, with a focus on tackling complex data structures and circular references?
+    structuredClone in modern browsers 
+    custom fn - use WeakMap to handle circular references and avoid memory leaks
+
+    WeakMap is safer because it avoids memory leaks during deep cloning. 
+    WeakMap removes entries automatically once original objects are garbage-collected, and it only allows objects as keys, which matches the deep-clone use case
+
+How do you code the promisify() function to change callback-based functions into Promise-based in JavaScript?
+    /** Callback based approach */
+    function readData(data, callback) {
+    if (!data) {
+        callback(new Error('Invalid input'), null);
+        return;
+    }
+    callback(null, 'Success');
+    }
+    readData("Hello", (err, success) => {
+    console.log('Response: ', err,success)
+    });
+    readData(null, (err, success) => {
+    console.log('Response: ', err,success)
+    });
+
+    /* Promise based approach */
+    async function readData(data) {
+    return new Promise((resolve, reject) => {
+        if (!data) {
+        reject(new Error('Invalid input'));
+        return;
+        }
+        resolve('Success'); 
+    });
+    }
+
+    (async() => {
+    try {
+        const response = await readData("Promise test");
+        console.log(response);
+    } catch (e) {
+        console.error('Promise error', e)
+    }
+    })();
+
+In your experience, what are the critical factors in creating an image upload and preview component for web applications, especially in handling files and generating previews?
+
+    1) Upload image (click and drop & drop)
+    2) File size and type validation (jpg/png within 5MB)
+    3) Image preview with clean up
+        const previewUrl = URL.createObjectURL(file);
+        URL.revokeObjectURL(previewUrl); // prevents memory leaks
+
+        FileReader.readAsdataURL is slow for large files and takes more memory as it has to read the entire file and convert to Base64 string.  createObjectURL creates a temporary URL that reads the File from memory directly.
+    
+    4) Compress, resize image (e.g. browser-image-compression library)
+    5) Accessibility and UX:
+        - Drag & drop 
+        - Upload progress (axios onUploadProgress event.loaded, event.total)
+        - Error state 
+        - Loading preview skeleton image 
+        - Aria attribute for screen reader 
+    6) Handling cancel and retry (Abort controller)
+    7) Security - don't allow SVG as it can contain JS and cause XSS
+
+
 What would be your approach to developing the getElementsByStyle function in JavaScript, aimed at locating elements with a given CSS style, and how would you navigate the DOM?
 
 
@@ -120,13 +196,12 @@ Can you demonstrate the process of creating a two-way binding in JavaScript, ens
 
 Can you construct the useIsMounted() hook in React that returns a true or false based on the component's mount state?
 
-Could you walk us through the process of creating a deep clone function in JavaScript, with a focus on tackling complex data structures and circular references?
-
-How do you code the promisify() function to change callback-based functions into Promise-based in JavaScript?
 
 ================================
 
 System Design:
+
+In your experience, what are the critical factors in creating an image upload and preview component for web applications, especially in handling files and generating previews?
 
 How would you architect the frontend of a video-sharing site like YouTube, considering key aspects like playback and user experience?
 
@@ -135,8 +210,6 @@ How would you go about creating a typeahead widget that offers instant suggestio
 How would you approach creating a user interface component like a dropdown menu using HTML, CSS, and JavaScript?
 
 How to set up and prepare an npm package? 
-
-In your experience, what are the critical factors in creating an image upload and preview component for web applications, especially in handling files and generating previews?
 
 How do you plan to design a video streaming service that can accommodate a large user base and deliver content efficiently?
 
