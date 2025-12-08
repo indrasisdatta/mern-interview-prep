@@ -199,6 +199,9 @@ Can you construct the useIsMounted() hook in React that returns a true or false 
 
 ================================
 
+
+
+
 System Design:
 
 In your experience, what are the critical factors in creating an image upload and preview component for web applications, especially in handling files and generating previews?
