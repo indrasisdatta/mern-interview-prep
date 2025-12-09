@@ -45,15 +45,18 @@ Security measures:
     npm audit / npm audit fix  (Check vunerabilities)
     npm outdated
 
-
 CSRF in cookies
+ - HttpOnly, Secure, SameSite=Lax
+ - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
+ - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
 
-HttpOnly, Secure, SameSite=Lax
+For local development - use npm install and commit package.json and package.lock.json files to git For dev/stg/prod - Jenbuils build uses npm ci (clean install) so that the exact versions mentioned in package.lock.json are installed and no new package can be installed
 
-SameSite=Lax (recommended):
-Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
+Supply chain attacks can't be flagged immediately (by npm audit/SonarCube) as attackers publish a new version and it's not a known vulnerability yet.
 
-SameSite=Strict (very secure but bad UX):
-Blocks cookies on any cross-site navigation → User often appears logged out
-(Eg. clicking google URL/email URL)
-
+Prevent:
+ - Lock versions in package.lock.json 
+ - Use npm ci (clean install) in Jenkins build 
+ - Use private/internal npm registry (JFrog/AWS Code artifact)
+ - Use tools like SonarQube, npm audit 
+ - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 

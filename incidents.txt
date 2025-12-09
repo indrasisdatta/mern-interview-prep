@@ -1,0 +1,31 @@
+Sept 8 2025 - npm account was compromised via phising mail to affect packages like chalk, debug, ansi-styles. Crypto stealer payload was injected to intercept crypto transactions and redirect funds to attacker controller wallets 
+
+Supply chain attacks can't be flagged immediately (by npm audit/SonarCube) as attackers publish a new version and it's not a known vulnerability yet.
+
+Prevent:
+ - Lock versions in package.lock.json 
+ - Use npm ci (clean install) in Jenkins build 
+ - Use private/internal npm registry (JFrog/AWS Code artifact)
+ - Use tools like SonarQube, npm audit 
+ - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 
+
+
+Dec 2, 2025 - Critical RCE (remote code execution) in React server components 
+With RCE, attacker can run their code in our env 
+
+Issue was in React's own RSC packages
+Core vulnerability was an insecure deserialization flaw in RSC flight protocol implementation provided by the official React packages 
+- react-server-dom-webpack
+- react-server-dom-parcel 
+- react-server-dom-turbopack 
+
+Root cause: server side code in these packages responsible for handling deserializing the incoming RSC payload failed to adequately validate the untrusted input. This allowed an attacker to inject malicious data that caused the server to execute arbitrary functions. 
+
+Vulnerability came from how frameworks (Next.js, Remix) handled the incoming request, not from React.
+
+Mistakes:
+- trusted that RSC requests would only come from React client 
+- didn't validate incoming RSC payloads 
+- parsed user inputs too generously 
+- let untrusted fields reach RSC server logic 
+

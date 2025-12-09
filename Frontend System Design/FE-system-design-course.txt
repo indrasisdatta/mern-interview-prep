@@ -34,7 +34,12 @@ WEB OPTIMIZATION
 	 - Minimize 3rd party scripts that may be blocking interactivity
 	 - Server side rendering (SSR, hydration, static rendering) 
 	 - Preload resources based on user behaviour 
-	 
+
+	How to improve CLS? (Cumulative Layout Shift)
+	- Always set width/height for images and iframes.
+	- Reserve space for ads and dynamic content.
+	- Avoid layout shifts caused by late-loading fonts (use font-display).
+		
 	Backend communication - long polling, server-sent events (SSE), web sockets 
 
 	For smooth animation:
