@@ -1,5 +1,8 @@
 System design tutorial: https://www.geeksforgeeks.org/system-design-tutorial/
 
+System design concepts:
+https://designgurus.substack.com/p/50-system-design-concepts-for-beginners
+
 Functional requirements (What the system should do to meet user needs - user authentication, data processing, user actions)
 Non-functional requirements (How the system should perform - scalability, security, response time, reliability)
 
@@ -15,7 +18,7 @@ Components of System design:
  - Distributed system messaging queue (SQS)
  - Distributed unique id generator (DynamoDB with UUID generation)
  - Distributed search/Elastic search - AWS Opensearch
- - Distributed logging service (CouldTrail, CloudWatch logs)
+ - Distributed logging service (ClouldTrail, CloudWatch logs)
  - Distributed task scheduler (SNS)
 
 Horizontal scaling/scale-out (add more servers to handle increased workload)
@@ -193,7 +196,7 @@ PROBLEM STATEMENT 1: How to handle sudden high traffic? Eg. Flipkart Sale start 
 ASG takes time to horizontally scale and spin up new instances, do health checks and get it ready (1-2 mins).
 Traffic during these 1-2 mins are not handled and also increases the bill.
 
-Better Solution: To build a highly scalable system, offload non-critical async tasks to Quueue
+Better Solution: To build a highly scalable system, offload non-critical async tasks to Queue
 
 Critical tasks - place order (handle synchronously)
 Non-critical tasks - send email (handle asyncronously)
