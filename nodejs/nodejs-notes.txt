@@ -1,3 +1,30 @@
 NodeJS 24 latest features
 https://blog.codeminer42.com/whats-new-in-node-js-24/
 
+Node JS process 
+
+Main thread:
+ - init project 
+ - top level code 
+ - require module 
+ - event callback register
+ - start event loop 
+ - offload CPU intensive tasks to thread pool (File system, Crypto (encrypt/decrypt, Compression)
+
+Event loop phases:
+1) Timers: Expired timer callbacks setTimeout, setInterval 
+2) Pending callbacks: callbacks that couldn't be executed in the previous loop iteration are executed here
+3) Poll: I/O polling FS 
+4) Check: setImmediate() callback 
+5) close callbacks (server/socket close CB)
+Any tasks pending? true then exit, otherwise restart event loop 
+
+Promise callback - executed during event loop transition 
+
+setTimeout() and setImmediate() order is non-deterministic at top level code. 
+Inside I/O callback, setImmediate() is executed first 
+
+Call stack -> process.nextTick() -> promise microtasks -> event loop phases
+
+https://www.linkedin.com/pulse/mastering-event-loop-tricky-node-interview-questions-aayush-patniya-lbobf
+
