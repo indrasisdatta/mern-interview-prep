@@ -1,0 +1,31 @@
+1) Find all Electronics that have less than 20 items in stock for the "Black" variant.
+    WRONG: variants: [{}...] may not meet both conditions color and stock 
+    db.products.find({
+        "category": "Electronics", 
+        "variants.color": "Black",  
+        "variants.stock": {"$lt" : 20 }
+    })
+    CORRECT: use $elemMatch 
+    db.products.find({
+        "category": "Electronics",
+        "variants": {
+            "$elemMatch": {
+                "color": "Black",
+                "stock": {"$lt": 20}
+            }
+        }
+    })
+
+
+2) Find all users living in London or Tokyo who are not subscribed to the newsletter.
+
+3) Find all users living in London or Tokyo who are not subscribed to the newsletter.
+
+4) Find the 5 most recent orders with a totalAmount greater than 300, and only show the orderNum and totalAmount fields.
+
+5) Find the 5 most recent orders with a totalAmount greater than 300, and only show the orderNum and totalAmount fields.
+
+
+6) Revenue Analysis Find the total revenue and average order value for each City.
+
+7) Product Performance Find the top 3 products (SKUs) that have been ordered the most by quantity.
