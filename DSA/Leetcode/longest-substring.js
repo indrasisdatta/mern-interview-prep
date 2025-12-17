@@ -7,7 +7,7 @@
  *
  * s[i] != s[i+1] charLen++
  */
-const lengthOfLongestSubstring = function(s) {
+const lengthOfLongestSubstring_brute = function(s) {
     let charLen = 0;
     let maxLen = 0;
     let chars = '';
@@ -33,3 +33,22 @@ const lengthOfLongestSubstring = function(s) {
 lengthOfLongestSubstring('abcabcbb');
 lengthOfLongestSubstring('pwwkew');
 lengthOfLongestSubstring('bbbbb');
+
+
+var lengthOfLongestSubstring = function(s) {
+    if (!s) return 0;
+    if (s.length === 1) return 1;
+    let currentMap = {};
+    let start = 0;
+    currentMap[s[start]] = 1;
+    let longestChar = 0;
+    for (let end = 1; end < s.length; end++) {
+        while (s[end] in currentMap) {
+            delete currentMap[s[start]];
+            start++;            
+        }
+        currentMap[s[end]] = 1;
+        longestChar = Math.max(longestChar, end - start + 1);
+    }
+    return longestChar;
+}
