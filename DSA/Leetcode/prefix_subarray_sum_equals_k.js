@@ -7,16 +7,17 @@
  * [1, 2, 4, 5, 6], k = 11   Output: 2
  */
 const subarraySum = function(nums, k) {
-    let numMap = new Map();
-    numMap.set(0, 1);
-    let currSum = 0, prefixSum = 0, count = 0;
-    for (let num of nums) {
-        prefixSum += num;    
-        let target = prefixSum - k;    
-        if (numMap.has(target)) {
-            count += numMap.get(target);
+    let output = 0;
+    let sum = 0;
+    let charMap = new Map();
+    charMap.set(0, 1);
+    for (let i = 0; i < nums.length; i++) {
+        sum += nums[i];    
+        let target = sum - k;
+        if (charMap.has(target)) {
+            output += charMap.get(target);
         }
-        numMap.set(prefixSum, (numMap.get(prefixSum) || 0) + 1);
+        charMap.set(sum, (charMap.get(sum) || 0) + 1 );        
     }
-    return count;
-};
+    return output;
+ }
