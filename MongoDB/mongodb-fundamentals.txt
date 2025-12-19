@@ -1,0 +1,486 @@
+Mongo DB fundamentals
+_____________________
+
+MongoDB tutorial Udemy: https://tcsglobal.udemy.com/course/mongodb-the-complete-developers-guide/learn/lecture/11739246#overview
+
+RDBMS to MongoDB: 
+https://university.mongodb.com/mercury/M100/2022_July_26/chapter/Chapter_1_Concepts_of_RDBMS_and_MongoDB/lesson/5e84f40fcbcbee7c651d54a0/lecture
+
+MongoDB advanced:
+https://university.mongodb.com/mercury/M121/2022_July_26/chapter/Chapter_2_Basic_Aggregation_-_Utility_Stages/lesson/59dbd25de4331362ffadf0a2/lecture
+
+Build a GraphQL Server with Node.js and MongoDB: https://www.youtube.com/watch?v=YFkJGEefgU8
+
+MongoDB Compass connect: mongodb://localhost:27017
+
+show dbs                          - Show all existing DB list
+use angular5crud              - Use this DB
+db.getName()                   - Current DB name
+db.getCollectionNames()   - All collection names
+
+db.coins.find({})              - All data of collection "coins"
+
+db.notes.insert({"name": "ten"}) - Create new collection (if doesn't exist already) and insert data
+
+db.students.insert(
+	[
+		{"StudentId": 1, "FirstName": "John", "LastName": "Doe", "Age": 16},
+		{"StudentId": 2, "FirstName": "Jane", "LastName": "Cook", "Age": 17},
+		{"StudentId": 3, "FirstName": "Will", "LastName": "Jennings", "Age": 14},
+		{"StudentId": 4, "FirstName": "Sarah", "LastName": "Smith", "Age": 15},
+		{"StudentId": 5, "FirstName": "Stephen", "LastName": "Parker", "Age": 16},
+	]
+)
+
+FIND CONDITIONS
+
+{$or: [ {FirstName: {$eq: "John"}, Age: {$lte: 16}}, {FirstName: {$eq: "Jane"}}  ] }
+
+age >= 15 and (studentid = 1/2/3)
+{Age: {$gte: 15}, $or: [{StudentId: 1}, {StudentId: 2}, {StudentId: 3}] }
+
+[{$group: (_id: "$Age", Res: ($sum: 1) }]
+
+.sort({ name: 1 }).limit(3)
+
+db.books.find(
+	{}, // condition
+	{ name: 1, _id: 0 } // fields to retrieve
+)
+
+Querying Arrays:
+genres: ["fantasy"] // check for exactly 1 genre matching fantasy 
+genres: "fantasy" // check if fantasy exists, along with other genres
+genres: {$all: ["fantasy", "sci-fi"]} // check if these 2 are present, along with other entries
+
+{ "reviews.name": "user1" }  // find by object name --> reviews: [ {_id: "...", name: "..."}, {_id: "...", name: "..."} ]
+
+
+UPDATE
+
+db.books.updateMany(
+	{author: "ABC"},
+	{$set: {author: "XYZ"}} // update this value
+)
+
+db.books.updateOne({
+	_id: ObjectId("..."),
+	{ $pull: {genres: "fantasy"}} // remove "fasntasy" from genres array 
+})
+
+{ $push: {genres: "fantasy"}} // add "fasntasy" to genres array 
+
+
+
+https://www.youtube.com/watch?v=TCT5ulUzfR8&list=PLS1QulWo1RIZtR6bncmSaH8fB81oRl6MP&index=5
+
+AGGREGATE PIPELINE
+--------------------------------
+
+db.reviews.aggregate([
+	{
+		$group: {
+			_id: "rating", 
+			totalRating: {$sum: "$rating"},
+			minRating: {$min: "$rating"},
+			maxRating: {$max: "$rating"},
+			avgRating: {$avg: "$rating"} 
+		}
+	}
+])
+
+// Frequency of each rating value
+db.reviews.aggregate([
+	{
+		$group: {
+			_id: "$rating", 
+			count: {$sum: 1}
+		}
+	}
+])
+
+
+
+// If 'tags' field is not present, update all documents with tags array data
+db.reviews.update(
+	{'tags': {$exists: false}},
+	{
+		$set: {tags: ["must_watch",  "awesome", "average", "blockbuster", "time_waste", "horrible"]}
+	},
+	{ multi: true }
+)
+
+// unwind - break up array field to multiple rows
+db.reviews.aggregate([{
+  $unwind: "$tags"
+}
+])
+
+// Remove blank tags and merge back to original
+db.reviews.aggregate([
+{ $unwind: "$tags" },
+{ $match: { tags: {$ne: ""} } },
+{
+  $group: {
+    _id: "$movie",
+    customTag: {$push: "$tags"}
+  }
+}
+])
+
+// Select specific fields/rename fields using project
+db.reviews.aggregate([
+	{ $project: {_id: 1, "userRating": "$rating"} }
+])
+
+// group - push data (need to check)
+db.reviews.aggregate([
+	{ $group: {_id: "$rating", "ratings": {$push: "$rating"}} }
+])
+
+// group by multiple fields
+db.persons.aggregate([
+    {
+        $group: {_id: {age: "$age", gender: "$gender"}}
+    }
+])
+
+// match + group
+db.persons.aggregate([
+    {
+        $match: { gender: "male" }
+    },
+    {
+        $group: {_id: {eyeColor: "$eyeColor", fav: "$favoriteFruit", gender: "$gender"}}
+    }
+])
+
+// count distinct countries of people with brown eyes
+db.persons.aggregate([
+    {$match: {eyeColor: {$eq: "brown"}}},
+    {$group: {_id: {country: "$company.location.country", eyeColor: "$eyeColor"}}},
+    {$count: "distinct_country"}
+])
+
+// project with custom fields
+db.persons.aggregate([
+    {
+        $project: {
+            info: {
+                officeName: "$company.title", officeEmail: "$company.email", userName: "$name"
+            }
+        }
+    }
+])
+
+// Instead of using $project and having to include all fields that won't change, 
+// just to replace an existing field, you can use $addFields to quickly replace the value
+// addFields adds these fields in addition to all existing fields
+// For project, if 1 custom field needs to be included, we need to mention all other fields as well
+db.companies.aggregate([
+    {
+        $addFields: {
+            "url": "$blog_url",
+            "ccode": "$category_code"
+        }
+    },
+    { $limit: 20 }
+])
+
+
+
+// $lookup used for subquery
+db.getCollection('reviews').aggregate([
+    {
+        $lookup: {
+            from: "users",
+            localField: "reviewed_by",
+            foreignField: "_id",
+            as: "reviewer"
+        }
+    }
+])
+
+// Split tags array and find unique tags
+db.getCollection('persons').aggregate([
+    {$unwind: "$tags"},
+    {$group: {_id: "$tags"}}
+])
+
+// calculate count of all ages ( similar to count(*) )
+db.getCollection('persons').aggregate([
+    {
+        $group: {
+            _id: "$age",            
+            count: {$sum: NumberInt(1)}
+        }
+    }
+])
+
+// IF ELSE STATEMENT - If account is integer, return it. Otherwise return null.
+
+db.accounts.aggregate([
+    { 
+        "$addFields": {
+            "acc_id": {
+                "$cond": {
+                    if: {
+                        "$ne": [
+                            { "$type": "$account_id" }, "int"
+                        ]
+                    },
+                    then: null,
+                    else: "$account_id"
+                }
+            }
+        }
+    },
+]);
+
+// JOIN accounts and transactions collections, retrieve related data 
+
+db.accounts.aggregate([
+    /* Account id condition (match these 3 accounts */
+    {
+        $match: {account_id: {$in: [371138, 557378, 278603]} }
+    },
+	/* JOIN with transactions */
+    { 
+        $lookup: {
+            from: "transactions",
+            let: {
+                "acc_id": "$account_id",
+                txn_acc_id: "$transactions.account_id"
+            },
+            pipeline: [
+                {
+                    "$match":{
+                        "$expr":{
+                            "$eq":["$$acc_id","$account_id"]
+                        }
+                    }
+                }
+            ],
+            as: "acc_txn"
+        }        
+    }    
+]);
+
+
+
+Aggregate series: 
+https://www.youtube.com/watch?v=WZLPgnQA_9Q&list=PLWkguCWKqN9OwcbdYm4nUIXnA2IoXX0LI&index=26
+
+Great channel:
+https://www.youtube.com/c/CodingTutorials/playlists
+
+
+==============================================================================
+
+PRACTICE QUERIES sample_training collection:
+
+1. Find company names and url which have more than 100,000 employees (sorted in asc)
+
+	db.companies
+		.find(
+			{ number_of_employees: { $gt: 100000} },
+			{ name: 1, homepage_url: 1 }
+		)
+		.sort({
+			name: 1
+		})
+
+2. 
+
+
+https://gist.github.com/nnguyen150468/c73fdd3ba0aa5a85c4a5b86296efa906
+
+
+https://www.mongodb.com/community/forums/t/how-to-join-nested-array-elements/119027/3
+
+// All office address needs to be concatenated
+db.companies
+    .aggregate([
+        {$limit: 10}, 
+        {
+            $project: {
+                _id: 0, 
+                name: 1, 
+                email_address: 1, 
+                office_data: {
+                    "address": {
+                         $concat: [
+                            "$offices.address1", ", ","$offices.address2", ", ","$offices.zip_code", ", ",
+                            "$offices.city", ", ","$offices.state_code", ", ","$offices.country_code"
+                         ]
+                    }
+                }
+            }
+        }             
+    ])
+
+
+// Customer has many accounts. JOIN accounts with transactions 
+db.customers.aggregate([
+	{ $unwind: "$accounts" },
+	{ $project: { "_id": 0, "acc_id": "$accounts"} },
+  { 
+    $lookup: {
+        from: "transactions",
+        localField: "acc_id",
+        foreignField: "acount_id",
+        as: "account_transactions"
+    }
+  },
+  {
+    $match: { 
+        account_transactions: {
+            $gte: {$size: 0} 
+        } 
+    }
+  }
+])
+
+---
+
+db.accounts.aggregate([
+    { $limit: 100 },
+    { 
+        "$lookup": {
+            "from": "transactions",
+            "localField": "accounts.account_id",
+            "foreignField": "transactions.acount_id",
+            "as": "account_transactions"
+        }
+    },
+    { 
+        $match: {
+            account_transactions: { $ne: [] } 
+        }
+    }
+]);
+
+-------
+
+
+{ "$addFields": {
+    "permissions": {
+      "$cond": {
+        "if": {
+          "$ne": [ { "$type": "$permissions" }, "array" ]
+        },
+        "then": [],
+        "else": "$permissions"
+      }
+    }
+  }},
+  
+  
+  db.accounts.aggregate([
+    { 
+        "$lookup": {
+            from: "transactions",
+            let: {
+                //acc_id: "$accounts.account_id",
+                txn_acc_id: "$transactions.account_id"
+            },
+            "pipeline": [
+                {
+                    $match: {
+                      "$expr": { "$in": ["$accounts.account_id", "$$txn_acc_id"] }        
+                    }
+                }
+            ],
+            // "localField": "accounts.account_id",
+            // "foreignField": "transactions.acount_id",
+            "as": "acc_txn"
+        }
+    }
+]);
+
+------------------------------------------------------------------------------------------------
+
+$bucket***
+
+$group --> $mergeObjects, $addToSet, $replaceRoot
+
+$dateFromParts
+
+$arrayElemAt - element at specific position => $arrayElemAt: [ "$favorites", 0 ]
+
+$switch, $cond - conditional expressions, used with project
+
+------------------------------------------------------------------------------------------------
+
+Q. Find total sales and all items sold - month and year wise 
+
+db.getCollection('sales').aggregate([
+    { 
+        $match: {
+            saleDate: {$gte: new ISODate("2017-01-01")} 
+        } 
+    },
+    { $sort: { saleDate: -1 } },
+    {
+      $group: {
+            _id: {
+                mm: { $month: "$saleDate" },
+                yy: { $year: "$saleDate" }
+            },
+            total_sales: { $sum: 1 },
+			itemsSold: { $addToSet: "$items" } // accumulator to compute the list of unique items old 
+      }
+    }    
+]);
+
+Q. Find all acquisitions (return default null values if not present)
+
+db.getCollection('companies').aggregate([
+    {
+        $match: {
+            founded_year: { $gt: 2009},
+            number_of_employees: { $ne: null },
+            // acquisition: { $ne: null }
+        }
+    },
+    {
+        $replaceRoot: { 
+            newRoot: {
+                $mergeObjects: [
+                    {
+                        price_amount : null,
+                        price_currency_code : null,
+                        "term_code" : null,
+                        "source_url" : null,
+                        "source_description" : null,
+                        "acquired_year" : null,
+                        "acquired_month": null,
+                        "acquired_day" : null,
+                        "acquiring_company" : {
+                            "name" : null,
+                            "permalink" : null
+                        }
+                    },
+                    "$acquisition"
+                ]
+            } 
+        } 
+    }
+]);
+
+
+Q. $facet example 
+
+db.getCollection('trips').aggregate([
+    {
+        $facet: {
+            'first3': [
+                { $limit: 3 }
+            ],
+            'next3': [
+                { $skip: 3 }, 
+                { $limit: 3 }
+            ]
+        }
+    }
+])
