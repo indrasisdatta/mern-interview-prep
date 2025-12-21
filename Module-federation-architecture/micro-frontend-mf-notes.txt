@@ -1,0 +1,91 @@
+MICRO FRONTEND (MODULE FEDERATION) – LIMITATIONS & REMEDIES
+
+1) Shared State Management
+
+    Problem:
+        Global Redux across micro frontends is hard to manage
+        Causes tight coupling between apps
+
+    Remedies: Keep state local to each micro frontend
+    Communicate using:
+        Custom browser events
+        RxJS event bus
+        URL state or backend as source of truth
+
+2) CSS Conflicts
+
+    Problem: Styles can leak between micro frontends
+
+    Remedies:
+        CSS Modules
+        Scoped CSS / BEM
+        Shadow DOM (when suitable)
+        Shared design system or design tokens
+
+3) CI/CD Complexity
+
+    Problem:
+        Each micro frontend needs its own pipeline
+        Deployment coordination becomes complex
+
+    Remedies:
+        Independent CI/CD per micro frontend
+        Backward-compatible contracts
+        Clear ownership per team
+
+4) Initial Load Performance
+
+    Problem:
+        Multiple remote entry files
+        Network request waterfall
+
+    Remedies:
+        Lazy load micro frontends
+        Preload critical remotes
+        Use CDN caching
+        Share common dependencies carefully
+
+5) Version Compatibility
+
+    Problem:
+        React or shared library version mismatch
+        Breaking changes at runtime
+
+    Remedies:
+        Strict versioning rules
+        Semantic versioning
+        Minimize shared dependencies
+
+6) Debugging Complexity
+
+    Problem:
+        Errors span across multiple apps
+        Harder stack traces and source maps
+
+    Remedies:
+        Enable source maps
+        Centralized logging and monitoring
+        Error boundaries per micro frontend
+
+7) Runtime Failures
+
+    Problem:
+        Remote app unavailable
+        Bad deployment breaks host at runtime
+
+    Remedies:
+        Graceful fallbacks
+        Feature flags
+        Timeout and retry logic
+
+8) Over-Engineering Risk
+    Problem: Too much complexity for small teams or apps
+
+    Remedy: Use micro frontends only when:
+        Multiple teams are involved
+        Independent deployments are required
+        Product is large and long-lived
+
+SUMMARY:
+Micro frontends scale teams and deployments but increase architectural
+and operational complexity. Use them only when scale demands it.
