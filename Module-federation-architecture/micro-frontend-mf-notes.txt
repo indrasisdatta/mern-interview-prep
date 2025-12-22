@@ -128,6 +128,39 @@ and operational complexity. Use them only when scale demands it.
 =================
 
 What if a remote MF goes down? 
+ - Error boundaries for each MF to handle runtime errors
+    <ErrorBoundary fallback={<Fallback />}>
+        <RemoteMF />
+    </ErrorBoundary>
+
+ - Dynamic import handles load failure - handles unreachable remoteEntry.js
+    import("checkoutApp/Checkout").catch(() => showFallback());
+
+ - Version pinning 
+    - Every time a remote app is built, it's uploaded to CDN path: /checkout/v1.3.3/remoteEntry.js
+    - Host uses env var CHECKOUT_MF_URL = /checkout/v1.3.3/remoteEntry.js
+    - Host uses env var to detect remote URL
+        // webpack.config.js (host)
+        remotes: {
+            checkoutApp: `checkoutApp@${process.env.CHECKOUT_MF_URL}`
+        }
+    - Once tested, host env can be updated to new version. In case of errors, rollback to previous version.
+
 How to implement code splitting and lazy loading in MFA? 
-Security
+
 Testing 
+ - Unit testing at component level 
+ - Integration testing using MSW in host app 
+
+Security 
+ - Runtime integration loads JS from different domains, so mention Content Security Policy (CSP) to prevent XSS 
+   // nginx 
+   add_header Content-Security-Policy "script-src 'self' https://checkout-mfe.example.com https://auth-mfe.example.com;";
+
+ - CORS allow the shell domain 
+ - Authentication & authorization handled by host (using HttpOnly cookie). Remotes consumes token via shared service. 
+    // host exposes
+    getAccessToken: () => store.getState().auth.accessToken
+
+ - Version pinning to avoid unexpected/malicious remote updates 
+
