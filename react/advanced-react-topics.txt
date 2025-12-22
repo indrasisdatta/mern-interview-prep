@@ -232,6 +232,18 @@ React <= v15 - The reconciliation process was a synchronous, recursive process. 
 
 React >= 16 - Fiber is a complete rewrite of the core reconciliation algorithm. It breaks the work into small units (Fibers) that can be scheduled, paused, and prioritized. This enables the new features: Concurrent Mode and prioritized/async updates.
 
+React 18 onwards we had the shift from synchronous to concurrent rendering. 
+Fiber was introduced in 16 itself but it still supported synchronous rendering to maintain backwards compatibility.
+
+                  Stack Reconciler (Old)    Fiber Reconciler (New) 
+Work style           Recursive               Incremental 
+Interruptible?       No                      Yes 
+Prioritization?      No                      Yes 
+
+   Incremental rendering - splits the big task of rendering into small units of work. Prevents jank by yielding control back to browser every few ms. 
+
+   Concurrent rendering - allows React to prepare a new UI in the background while the old one stays interactive. 
+
 Diffing - algo used by old React to compare old and new virtual DOM differences
 
 Virtual DOM - JS objects representing UI for comparing changes (till React 15)
@@ -254,5 +266,38 @@ onChange = () => setState('123') // SyncLane (highest priority)
 setTimeout // default lane (normal priority)
 startTransition // TransitionLane (lower priority)
 
+=========
+
+My understanding on Fiber architecture: 
+
+   In old React version (before 16), they used Stack Reconciler where rendering process was recursive.
+
+   React 16 onwards, Fiber was introduced. It was only till React 18 that all Fiber features were unlocked - concurrent rendering, incremental rendering, automatic batching updates, prioritizing state updates. React 16 and 17 still supported synchronous rendering (not concurrent) to maintain backwards compatibility.
+
+Key terms:
+   - Incremental rendering: break up large rendering process into small units of work, so that the control is back to the browser every few milliseconds
+
+   - Concurrent rendering: allows React to prepare new UI in the background while keeping old UI interactive
+
+   - Prioritizing updates: Use Lanes to check priorities e.g. SyncLane for onClick and onChange handler has highest priority, TransitionLane for startTransition has lowest priority
+
+Fiber maintains 2 trees: current tree and WIP tree.
+
+Render phase:
+ - It traverses each node in the WIP tree, runs beginWork and completeWork and maintains an effect list (LinkedList).  
+ - React uses Depth first searh (DFS) LinkedList traversal rather than recursion 
+ - beginWork() called as React goes down the tree. It determines if component needs update and tags it for changes. 
+ - completeWork() called as React bubbles back up the tree. It creates real DOM nodes (but doesn't mount them yet) and handles the Effect list. 
+
+Effect list - instead of searching the entire WIP tree again during the commit phase, React maintains a liner linked list of only the nodes that have effects (changes like insert/update/delete). This makes commit phase fast. 
+
+Commit phase: 
+   - Executes the changes in the effect list to the real DOM 
+   - Swap - changes the root pointer from old current tree to newly finished WIP tree. So WIP tree now becomes current tree. 
+
+
+Two phases:
+   Render phase - calculate differences, rendering can be paused/cancelled
+   Commit phase - changes are applied to the real DOM
 
 

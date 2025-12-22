@@ -1,3 +1,38 @@
+Micro-Frontend: 
+- App is split into independent modules and deployed separately 
+  (e.g. Search, Booking, Payment made in different technologies)
+- Host application loads the layout, navbar, routing 
+- Remote applications (SearchApp, BookingApp) are exposed via bundles via Module Federation
+- Host dynamically loads remote apps at runtime based on the URL 
+
+MF Architecture patterns:
+1) Build time integration - child app is published as npm packege and host app imports it (similar to any other dependency).
+    // remote app does npm publish 
+    export const CheckoutButton = () => {
+    return <button>Pay Now</button>;
+    };
+
+    // host app imports
+    import { CheckoutButton } from '@my-org/checkout';
+
+2) Run time integration 
+    - loads MF bundles dynamically at runtime
+    - uses Webpack Module Federation
+
+3) Server-side composition 
+    - the shell server fetches HTML fragments from MFs 
+    - assembles into a single response 
+    - sends it to the browser.
+
+4) Edge-side composition
+    - the edge CDN (near the user loation) fetches HTML fragments from MFs 
+    - assembles into a single response 
+    - sends it to the browser.
+
+Communication among remote apps? 
+Common libs? Where to keep (in host?) and how to reuse?
+
+
 MICRO FRONTEND (MODULE FEDERATION) – LIMITATIONS & REMEDIES
 
 1) Shared State Management
@@ -89,3 +124,10 @@ MICRO FRONTEND (MODULE FEDERATION) – LIMITATIONS & REMEDIES
 SUMMARY:
 Micro frontends scale teams and deployments but increase architectural
 and operational complexity. Use them only when scale demands it.
+
+=================
+
+What if a remote MF goes down? 
+How to implement code splitting and lazy loading in MFA? 
+Security
+Testing 
