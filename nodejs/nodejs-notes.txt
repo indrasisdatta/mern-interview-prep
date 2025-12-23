@@ -28,3 +28,14 @@ Call stack -> process.nextTick() -> promise microtasks -> event loop phases
 
 https://www.linkedin.com/pulse/mastering-event-loop-tricky-node-interview-questions-aayush-patniya-lbobf
 
+
+The Workflow Lifecycle
+1) Code Input: You run your script. V8 parses the code and puts functions on the Call Stack.
+2) Async Offloading: If the code calls an async function (e.g., fs.readFile), Libuv takes over. It sends the task to the Worker Pool or the OS kernel.
+3) The Wait: The Main Thread is now free to keep running other code. It does not wait for the file to finish reading.
+4) Completion: Once the Worker Pool finishes the task, it pushes the callback function into the Event Queue.
+5) The Event Loop: This is a continuous loop. It checks: "Is the Call Stack empty?" If yes, it takes the first task from the Event Queue and pushes it onto the Call Stack to be executed.
+
+Call stack 
+Event queue/Callback queue 
+Microtask queue

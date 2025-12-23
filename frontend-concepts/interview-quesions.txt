@@ -232,6 +232,23 @@ What would be your strategy for designing the frontend of a messenger app that i
 
 
 
+==================
+
+var is hoisted and initialized to undefined
+
+let/const are hoisted but not initialized. variable enters Temporal dead zone.
 
 
+Promise:
+    Eager → starts executing on creation
+    Single value → resolve or reject once
+    No native cancellable
 
+Observable:
+    Lazy → starts on subscribe()
+    Multiple values over time (next)
+    Cancellable via unsubscribe()
+
+How to make an object read only?
+  - Object.freeze() - shallow. Write custom recursive fn for deep 
+  - Proxy - deep

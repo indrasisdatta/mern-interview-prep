@@ -97,12 +97,12 @@ Promise
 // First resolved/rejected promise  
 Promise
 	.race([promise1, promise2, promise3, promise4])
-  .then(data => {
-  	console.log('Success 3: ', data);
-  })
-  .catch(e => {
-  	console.log('Error 3: ', e);
-  })
+    .then(data => {
+      	console.log('Success 3: ', data);
+          })
+            .catch(e => {
+              	console.log('Error 3: ', e);
+                  })
 
 // First resolved/rejected promise  
 Promise

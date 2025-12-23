@@ -25,4 +25,22 @@ proxyObj.age = "a";
 console.log('Age: ', proxyObj.age);
 
 
+/* Read only object */
+const myObj = {
+  id: 12,
+  name: "My obj",
+  elements: ['E1', 'E2']
+};
 
+const proxyObj = new Proxy(obj, {
+  set() {
+    throw new Error("Restricted add, update");
+  },
+  deleteProperty() {
+    throw new Error("Restricted delete");
+  }
+});
+console.log(proxyObj.name);
+proxyObj.name = "Updated";
+proxyObj.elements.push('E3');
+delete proxyObj.name;

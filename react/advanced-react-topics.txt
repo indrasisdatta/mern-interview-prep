@@ -70,16 +70,19 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    f) useLayoutEffect (fired synchronously after DOM mutation)
    g) useEffect (runs asynchronously once browser paints DOM changes to screen)
 
-   React has 3 phases - Trigger, Render and Commit. 
-   1. Trigger phase: re-render based on state/props/context/forceUpdate or initial render 
-   2. Render phase: 
-      - calculate virtual DOM 
-      - Call useInsertionEffect       
-   3. Commit phase: 
-      - DOM mutation (update real DOM)
-      - call useLayoutEffect (runs synchronously)
-      - paint real DOM in UI 
-      - call useEffect (after paint, side effects)
+   React Execution Timeline
+   1) Render Phase: React calculates the Virtual DOM (no browser changes yet).
+   2) Commit Phase (Sub-beat 1): useInsertionEffect
+      When: Before DOM nodes are moved/inserted into the real browser DOM.
+      Purpose: Injecting dynamic CSS (like CSS-in-JS libraries). By doing it here, the browser doesn't have to recalculate styles multiple times during the actual DOM mutation.
+   3) Real DOM Update: React updates the actual browser elements.
+   4) Commit Phase (Sub-beat 2): useLayoutEffect
+      When: Synchronously after the DOM is updated, but before the browser paints the screen.
+      Purpose: Measuring layout (getting element width/height) or making a change that must happen before the user sees anything (to avoid flickering).
+   5) Browser Paint: The user actually sees the pixels on the screen.
+   6) After Paint: useEffect
+      When: Asynchronously after the paint.
+      Purpose: Most side effects (API calls, subscriptions, setting up event listeners). It doesn't block the UI.
 
    Other hooks
     useState v/s useReducer - useReducer is better choice when multiple vars need to be managed 
