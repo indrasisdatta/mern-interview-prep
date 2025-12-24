@@ -1,0 +1,46 @@
+OWASP Top 10 (2021) Security risks:
+https://www.cloudflare.com/learning/security/threats/owasp-top-10/
+ - Access & auth 
+    - Broken access control (users can access unauthorized resources. Remedies: Authorization header)
+    - Identification and Authentication failures (attackers obtain data from a data breach and try a script with username/password combinatins. Remedies: 2FA, rate limiting)
+- Data & code safety 
+    - Cryptographic failures (not protecting sensitive data like financial info and password. Remedies - hash password in DB)
+    - Injection (SQL injection - prepared statement, XSS - sanitize input, DOMPurify) 
+    - Software and data integrity failures (insecure deserialization, untrusted 3rd party updates leading to DDos attacks and remote code execution attacks. Remedies - Check CI/CD have strong access controls )
+- Design & config 
+    - Insecure design (Flaws in architecture/business logic, not proper input validation eg. user-specific promo codes can be accessed by all)
+    - Security misconfiguration (showing overly descriptive errors, leaving defaut passwords eg. admin/admin, keeping unnecessary ports open, leaving S3 cloud public. Remedies - show generic error message)
+- Dependencies & ops 
+    - Vulnerable and outdated components (using libraries with known vulnerabilities. Remedies - audit libs from time to time and update patches) 
+    - Security logging and monitoring failures (data breaches are not detected)
+- Server-side Request Forgery (server making unauthorized internal/external requests)
+ E.g. 169.254.169.254 is used by cloud providers for metadata service. Attackers can call it to obtain AWS secret access keys. 
+ http://169.254.169.254/latest/meta-data/iam/security-credentials/admin-role
+ Remedies: Block internal IP, Use VPC and Security Groups to make sure web server can't access internal metadata service or private DB, Use IMDSv2 which requires Session token header.
+_______________________________________________________________________________
+
+Security measures:
+
+1. Authentication and authorization
+2. Don't store any sensitive data in localStorage/cookies
+3. Form validation 
+4. Captcha to prevent brute force attack
+5. Audit npm packages
+    npm audit / npm audit fix  (Check vunerabilities)
+    npm outdated
+
+CSRF in cookies
+ - HttpOnly, Secure, SameSite=Lax
+ - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
+ - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
+
+For local development - use npm install and commit package.json and package.lock.json files to git For dev/stg/prod - Jenkins build uses npm ci (clean install) so that the exact versions mentioned in package.lock.json are installed and no new package can be installed
+
+Supply chain attacks can't be flagged immediately (by npm audit/SonarCube) as attackers publish a new version and it's not a known vulnerability yet.
+
+How to prevent?
+ - Lock versions in package.lock.json 
+ - Use npm ci (clean install) in Jenkins build 
+ - Use private/internal npm registry (JFrog/AWS Code artifact)
+ - Use tools like SonarQube, npm audit 
+ - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 
