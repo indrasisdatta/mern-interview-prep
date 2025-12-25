@@ -312,6 +312,19 @@ Custom JS scripts (based on project):
 2) Debounce, throttle 
 3) Infinite scroll using Intersection Observer 
 
+==========================================================================
+
+How to handle a Dashboard that receives 1,000 WebSocket updates per second without freezing the UI?
+
+ Use requestAnimationFrame based throttle. Browser is limited to 60 Frames per sec, so we can capture the latest data and trigger DOM update within requestAnimationFrame callback, ensuring the main thread stays responsive and we never attempt to render more than the browser is capable of displaying in a single frame. 
+ Refer to requestAnimationFrameThrottle.js
+
+ setTimeout() can't be used as it goes to Task Queue. 
+ Rendering pipeline has more priority than Macrotask queue. 
+ If main thread is busy, by the time setTimeout callback is executed, the browser paint step may already have started, thus causing a janky experience (instead of 16 ms, it updates at 25 ms or misses a frame entirely)
+
+==========================================================================
+
 Additional FE system design:
 - Hotel booking system 
 - File upload 

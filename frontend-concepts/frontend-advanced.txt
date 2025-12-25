@@ -156,3 +156,24 @@ Step 3: Interactivity (The Response Phase)
 Changing width:	Layout → Paint → Composite	(High performance cost)
 Changing color:	Paint → Composite	(Medium)
 Changing transform:	Composite Only	(Fastest)
+
+requestAnimationFrame - schedules work right before browser repaint, making animations smoother than timers. 
+Used for - animations, drag & drop, smooth scrolling. 
+Synchs with browser rendering pipeline and automatically pauses in background tabs.
+setTimeout() => can run out of synch with the paint and keeps running even when tab is changed. 
+At least 60 FPS -> 60 frames in 1000 ms, 1 frame in 1000/60 = 16.7ms 
+Browser has to render 1 frame in 16ms.
+Within 16 ms, browser has to run JS, layout, paint, composite. 
+requestAnimationFrame runs once per frame but if JS takes longer time, the frame is dropped. 
+
+Best practices to avoid Reflow, Repaint: 
+ - Prefer transform & opacity (GPU-accelerated)
+ - Use requestAnimationFrame for animations
+ - batch DOM changes (instead of calling appendChild 10 times, use DocumentFragment to build it in memory and append once) 
+ - Use content-visibility: auto for long list or hidden section 
+   (Skip the rendering and layout work when it's off-screen)
+   If an element is below the fold, and has the content-visibility: auto; rule, the browser does not consider any of its contents. Hence, rendering for that element is skipped. 
+
+
+
+
