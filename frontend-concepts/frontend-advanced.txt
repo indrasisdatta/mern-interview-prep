@@ -174,6 +174,19 @@ Best practices to avoid Reflow, Repaint:
    (Skip the rendering and layout work when it's off-screen)
    If an element is below the fold, and has the content-visibility: auto; rule, the browser does not consider any of its contents. Hence, rendering for that element is skipped. 
 
+How to prevent JS memory leaks?
+ - clearTimeout and clearInterval 
+ - remove event listeners 
+ - avoig global vars 
+ - in closure inner function, don't reference a very large outer array as it can't be garbage collected 
+ - use WeakSet, WeakMap for cache or metadata tied to objects
 
+WeakSet/WeakMap - key as object, allows garbage collection, not iterable  
+Set/Map - string, number, key as object, GC not allowed, Iterable
 
-
+const map = new WeakMap();
+let obj = {id: 1};
+map.set(obj, 'obj val');
+obj = {};
+// After sometime 
+console.log(map); // Returns for Map but {} for WeakMap

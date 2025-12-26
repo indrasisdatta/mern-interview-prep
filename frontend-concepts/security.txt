@@ -19,6 +19,47 @@ https://www.cloudflare.com/learning/security/threats/owasp-top-10/
  Remedies: Block internal IP, Use VPC and Security Groups to make sure web server can't access internal metadata service or private DB, Use IMDSv2 which requires Session token header.
 _______________________________________________________________________________
 
+Cross site scripting (XSS) : XSS is when an attacker can run their own JS code by tricking the website that it's their own code.
+    - Reflected XSS e.g. opens new link ?search=<script>alert(1)</script>
+    - Stored XSS e.g. comment input <script> submitted and saved in DB. When other people views profile, the script gets executed to get their info
+    - DOM-based XSS e.g. JS takes untrusted input from URL param and writes to DOM without proper sanitization  innerHTML X use textContent 
+    Remedies: 
+    - Use DOMPurify while using dangerouslSetInnerHTML in React
+    - Use HTTP header or meta tag http-equiv Content Security Policy to mention trusted domains for assets (use nginx or NodeJS for header)
+    - Validate user input to sanitize 
+    - Use HttpOnly cookie so that document.cookies don't work on client side 
+    Content-Security-Policy: script-src 'self' https://cdn.com
+
+CSRF : browser can't distinguish between a legitimate user action and a forged request. 
+    - User is logged into their bank account website http://mybank.com
+    - User receives phising email and opens a URL to attacker's website
+    - Attacker's website contains form action as http://mybank.com and img src as http://mybank.com so the bank website uses logged in user's cookie
+    - Browser automatically includes session cookies 
+    - Bank thinks the request is from user
+    Remedies:
+    CSRF in cookies
+    - HttpOnly, Secure, SameSite=Lax
+    - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
+    - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
+
+NOTE: Cookies are scoped by domain, not by where it originated.
+
+Click Jacking:
+ - The attacker's website loads amazon.com/settings inside a hidden, transparent iframe that is already sitting on the page.
+ - The attacker uses CSS to place the invisible "Delete Account" button directly on top of their own visible "Download Movie" button.
+ - When the user clicks "Download Movie," they are actually physically clicking the invisible Amazon button because it has a higher z-index.
+ - Since the browser sees a valid click on a valid (but invisible) Amazon button from a logged-in user, it performs the action.
+    
+Remedies: nginx.conf - Prevent iframe from embedding on a different site 
+X-Frame-Options: Deny
+Content-Security-Policy: frame-ancestors 'self' 
+
+
+CORS Cross Origin Request Sharing 
+Note: Simple requests (no preflight): GET, HEAD, POST (only with simple headers + Content-Type = text/plain, form-urlencoded, multipart/form-data)
+
+_______________________________________________________________________________
+
 Security measures:
 
 1. Authentication and authorization
@@ -29,10 +70,6 @@ Security measures:
     npm audit / npm audit fix  (Check vunerabilities)
     npm outdated
 
-CSRF in cookies
- - HttpOnly, Secure, SameSite=Lax
- - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
- - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
 
 For local development - use npm install and commit package.json and package.lock.json files to git For dev/stg/prod - Jenkins build uses npm ci (clean install) so that the exact versions mentioned in package.lock.json are installed and no new package can be installed
 
