@@ -1,4 +1,110 @@
-1. What is Record type?
+Types v/s Interface 
+ - Interface supports declaration merging whereas Types don't.
+
+The rule of thumb is:
+ - Use an interface when you want declaration-merging, compatibility with classes (implements, extends), or for public library types.
+ - Use a type alias when you need union/discriminated types, mapped/conditional types, or more "functional" type definitions.
+
+Interfaces are best for defining object structures that can grow.
+Types are best for combining and choosing between different shapes.
+
+// Types
+type Status = "loading" | "success" | "error";
+type ApiResponse<T> =
+  | { status: "success"; data: T }
+  | { status: "error"; message: string };
+
+// Both are supported
+{ status: "error", message: "Something went wrong" }
+{ status: "success", data: { id: 1, name: "John" } }
+
+_________________________________________________________________________
+
+any v/s unknown v/s never
+ - any disables type safety, allows object access, assignment etc. 
+ - unknown forces runtime check 
+ - never is used when there should not be a value 
+
+/* Using unknown */
+function checkLength(value : unknown) {
+  console.log(value.length) // Error
+  // Fix 
+  if (typeof value === 'string') {
+    console.log(value.length) // 6
+  }
+}
+checkLength('hello')
+
+/* Using never */
+function timeout = (ms: number): Promise<never>  => {
+  return new Promise((_, reject) => 
+    setTimeout(
+      reject(new Error("Timeout elapsed))
+    , ms)
+  )
+}
+
+_________________________________________________________________________
+
+Generics 
+
+function toArray<T>(input: T): T[] {
+  return [input];
+}
+toArray<number>(12); // [12]
+toArra<string>("Hello"); ["Hello"]
+
+Utility types - Partial<T>, Pick<T, K>, Omit<T, K>, Record<K, T>
+
+Work on object types:
+  Partial<T> – makes all props optional
+  Required<T> – makes all props required
+  Readonly<T> – prevents mutation
+  Pick<T, K> – select specific keys
+  Omit<T, K> – remove specific keys
+  Record<K, V> – map keys to a value type
+
+Work on union types:
+  Exclude<T, U> – remove members from a union
+  Extract<T, U> – keep common members
+
+Example:
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "user";
+  isActive: boolean;
+};
+
+Object utility types:
+
+  // Forms/patch updates - Used when updating only changed fields.
+  type UpdateUserPayload = Partial<User>;
+
+  // after validation/backend guarantees, Used after you ensure all fields exist.
+  type ValidatedUser = Required<User>;
+
+  // State from server/redux, prevents accidental mutation
+  type ReadonlyUser = Readonly<User>;
+
+  // UI components need limited data, avoid over-fetching
+  type UserCardProps = Pick<User, "id" | "name">;
+
+  // Removes sensitive fields
+  type PublicUser = Omit<User, "email">;
+
+Union utility types:
+
+  // Permission filtering 
+  type NonAdminUser = Exclude<User['role'], "admin">; 
+
+  // Feature specific logic 
+  type AdminRole = Extract<User['role'], 'admin'>;
+
+_________________________________________________________________________
+
+Record type?
  => Used to create type-safe object.
     type Environment = "dev" | "stg" | "prod"
     type Config = {
@@ -12,3 +118,11 @@
       prod: {url:'dev.url', isEnabled: false}
     }
 
+
+Advanced Type Manipulation 
+  Conditional Types: Syntax like T extends U ? X : Y. This is a favorite for senior-level roles.
+  The infer keyword: Used within conditional types to "extract" a type (e.g., extracting the return type of a function).
+  Mapped Types: Creating new types based on old ones (e.g., making all properties readonly).
+  Template Literal Types: Creating types by concatenating strings (e.g., type Direction = 'top' | 'bottom'; type Position = ${Direction}-left` | `${Direction}-right``).
+
+https://www.typescriptlang.org/docs/handbook/2/types-from-types.html

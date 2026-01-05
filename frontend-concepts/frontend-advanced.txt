@@ -174,6 +174,19 @@ Best practices to avoid Reflow, Repaint:
    (Skip the rendering and layout work when it's off-screen)
    If an element is below the fold, and has the content-visibility: auto; rule, the browser does not consider any of its contents. Hence, rendering for that element is skipped. 
 
+Layout Thrashing: browser is forced to repeatedly recalculate layout (reflow) due to repeatedly mixing DOM reads and writes 
+
+// Layout thrashing 
+refs.forEach(ref => {
+   const offset = ref.current.offsetWidth;
+   ref.current.style.width = offset + 20 + 'px';
+});
+// Prevent - batch read then write
+const offsets = refs.map(ref => ref.current.offsetWidth); 
+refs.forEach((ref, i) => {
+   ref.current.style.width = offsets[i] + 20 + 'px';
+}
+
 How to prevent JS memory leaks?
  - clearTimeout and clearInterval 
  - remove event listeners 
