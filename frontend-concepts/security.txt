@@ -21,8 +21,13 @@ _______________________________________________________________________________
 
 Cross site scripting (XSS) : XSS is when an attacker can run their own JS code by tricking the website that it's their own code.
     - Reflected XSS e.g. opens new link ?search=<script>alert(1)</script>
-    - Stored XSS e.g. comment input <script> submitted and saved in DB. When other people views profile, the script gets executed to get their info
+        server-side issue - search is sent as API payload
+    - Stored (Persistent) XSS e.g. comment input <script> submitted and saved in DB. When other people views profile, the script gets executed to get their info
     - DOM-based XSS e.g. JS takes untrusted input from URL param and writes to DOM without proper sanitization  innerHTML X use textContent 
+        URL: site.com?query=<img src="" onerror="alert(document.cookies)" />
+        const url = URLSearchParams(window.location.search)
+        HTML: innerHTML = url.get('name)
+
     Remedies: 
     - Use DOMPurify while using dangerouslSetInnerHTML in React
     - Use HTTP header or meta tag http-equiv Content Security Policy to mention trusted domains for assets (use nginx or NodeJS for header)
@@ -41,8 +46,24 @@ CSRF : browser can't distinguish between a legitimate user action and a forged r
     - HttpOnly, Secure, SameSite=Lax
     - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
     - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
-
 NOTE: Cookies are scoped by domain, not by where it originated.
+
+HSTS (HTTP Strict Transport Security)
+ - protect against man in the middle attacks 
+ - if http url is entered, it does 301 redirect for the first time to https 
+ - browser remembers that for next 1 year (set in max-age), use https URL
+ // nginx 
+ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+CSRF protection:
+ - Use Samesite=Lax cookies 
+ - Check Origin (more reliable as can't be changed) & Referrer headers
+ - For SPA - double submit pattern or synchronizer token 
+ - Reauthentication for critical operations 
+
+Synchronizer token example: 
+ - During initial page load, API call is made to get CSRF token (stored in session)
+ - Client side stores the csrf in redux and sends it as X-CSRF-TOKEN request header
 
 Click Jacking:
  - The attacker's website loads amazon.com/settings inside a hidden, transparent iframe that is already sitting on the page.
@@ -57,6 +78,8 @@ Content-Security-Policy: frame-ancestors 'self'
 
 CORS Cross Origin Request Sharing 
 Note: Simple requests (no preflight): GET, HEAD, POST (only with simple headers + Content-Type = text/plain, form-urlencoded, multipart/form-data)
+
+Regular Expression DoS (ReDOS) attack - exploits the complexity of Regex operations to cause denial of service.  
 
 _______________________________________________________________________________
 
