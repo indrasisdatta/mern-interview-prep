@@ -303,4 +303,47 @@ Two phases:
    Render phase - calculate differences, rendering can be paused/cancelled
    Commit phase - changes are applied to the real DOM
 
+=============================
 
+🔹 Set 1 – React 18/19 Concurrency & Scheduling Internals
+
+1️⃣ Difference between legacy sync rendering vs concurrent rendering in React 18/19.
+2️⃣ How the Fiber scheduler pauses, resumes, and abandons partial work.
+3️⃣ What are lanes and how do they control priority of UI updates?
+4️⃣ Why interruptible rendering is core to UX smoothness.
+5️⃣ Why React runs useEffect twice in Strict Mode (dev only).
+6️⃣ When to use useTransition to stop UI blockage.
+7️⃣ useTransition vs startTransition with priority distinction.
+8️⃣ How useDeferredValue avoids list & search lag.
+9️⃣ What changed with Suspense in React 18 streaming pipeline.
+🔟 Why hydration mismatch happens even if server HTML = client render.
+
+⸻
+
+🔹 Set 2 – React 19 Hydration Model, Streams & Modern UI Delivery
+
+1️⃣ How Progressive Hydration differs from full hydration in React 19.
+2️⃣ What is Selective Hydration and why it hydrates only interaction-touched UI.
+3️⃣ Explain React Flight (server → client payload streaming).
+4️⃣ What causes client waterfalls with mixed RSC & client components.
+5️⃣ What is lazy hydration and how it boosts INP/LCP.
+6️⃣ React 19’s partial serialization strategy in hydration.
+7️⃣ Full vs Progressive vs Selective hydration — when to choose each.
+8️⃣ Why streaming helps UI render the shell first, details later.
+9️⃣ How Suspense boundaries isolate slow UI to avoid blocking.
+🔟 Role of Offscreen Rendering in React 19 for background updates.
+
+⸻
+
+🔹 Set 3 – State, Rendering Boundaries & Re-Render Control
+
+1️⃣ When state colocation beats lifting state (render scope control).
+2️⃣ Why heavy Context leads to re-render storms & how to isolate with selectors.
+3️⃣ Automatic Batching across events, promises & fetches in React 18.
+4️⃣ Controlled vs Uncontrolled components from a render cost perspective.
+5️⃣ Why referential stability (useRef, memo) matters for lists & grids.
+6️⃣ Signals vs stores vs context — why subscriptions reduce re-render floods.
+7️⃣ How RSC boundaries eliminate client JS cost.
+8️⃣ Why props look the same but still cause re-render (identity vs equality).
+9️⃣ When to avoid lifting and rely on server-cached state instead.
+🔟 React 19 preparing ground for partial UI compilation & offscreen hydration.
