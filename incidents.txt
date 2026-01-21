@@ -29,3 +29,4 @@ Mistakes:
 - parsed user inputs too generously 
 - let untrusted fields reach RSC server logic 
 
+https://betterstack.com/community/guides/scaling-nodejs/react-server-security-vulnerabilities/

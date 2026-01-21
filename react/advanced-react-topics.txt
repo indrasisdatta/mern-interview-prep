@@ -70,6 +70,12 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
    f) useLayoutEffect (fired synchronously after DOM mutation)
    g) useEffect (runs asynchronously once browser paints DOM changes to screen)
 
+   useDeferredValue, useTransition - controls UI rendering priority (interruptible by React - can pause, resume, discard renders)
+      E.g. typing feels instant while UI updates are deferred 
+
+   Debounce/throttle - control API call frequency, resize/scroll handlers 
+      
+
    React Execution Timeline
    1) Render Phase: React calculates the Virtual DOM (no browser changes yet).
    2) Commit Phase (Sub-beat 1): useInsertionEffect
@@ -308,23 +314,59 @@ Two phases:
 🔹 Set 1 – React 18/19 Concurrency & Scheduling Internals
 
 1️⃣ Difference between legacy sync rendering vs concurrent rendering in React 18/19.
+   Legacy rendering is a "blocking" process that can't be stopped once it starts; Concurrent rendering is "interruptible," allowing React to pause a long render to handle a user click.
+
 2️⃣ How the Fiber scheduler pauses, resumes, and abandons partial work.
+   The Fiber scheduler checks the remaining time in the current frame; it pauses if it runs out of time, resumes in the next frame, or abandons the work if a higher-priority update makes the current WIP tree stale.
+
 3️⃣ What are lanes and how do they control priority of UI updates?
+   Lanes are 32-bit integers representing different "urgency" levels (like Sync, Input, or Transition); they allow React to sort and filter updates so the most critical UI changes (typing) happen first.
+
 4️⃣ Why interruptible rendering is core to UX smoothness.
+   It prevents "Main Thread jank" by ensuring the browser stays responsive to user inputs even while React is calculating a heavy, complex UI update in the background.
+
 5️⃣ Why React runs useEffect twice in Strict Mode (dev only).
+   It intentionally mounts components twice to help developers find "impure" side effects that would break Concurrent features like "discard and restart."
+
 6️⃣ When to use useTransition to stop UI blockage.
+   Use it when you are updating state that causes a heavy UI change (like switching a tab with a big chart) and you want to keep the current UI interactive while the new one loads.
+
 7️⃣ useTransition vs startTransition with priority distinction.
+   Both mark work as low-priority, but useTransition provides a isPending boolean to show a loading spinner, whereas startTransition is for when you don't need that pending state.
+
 8️⃣ How useDeferredValue avoids list & search lag.
+   It keeps the input field fast by letting the "search result list" lag slightly behind the "typing state," allowing the list to render at a lower priority than the keystrokes.
+
 9️⃣ What changed with Suspense in React 18 streaming pipeline.
+   In React 18/19, Suspense allows the server to send the HTML in "chunks" (streaming), so the user sees the shell of the page immediately while slow data-heavy sections load in later.
+
 🔟 Why hydration mismatch happens even if server HTML = client render.
+   It occurs when the initial HTML from the server doesn't match the first render on the client, often caused by using non-deterministic data like new Date(), Math.random(), or browser-only globals (like window).
 
 ⸻
 
 🔹 Set 2 – React 19 Hydration Model, Streams & Modern UI Delivery
+https://github.com/reactwg/react-18/discussions/37
 
 1️⃣ How Progressive Hydration differs from full hydration in React 19.
+   Full Hydration blocks the entire page from being interactive until the entire JavaScript bundle is downloaded and the entire tree is hydrated. Progressive Hydration:
+      - Page is split using Suspense boundaries
+      - React hydrates boundaries incrementally
+      - Hydration order is usually top-down / natural order
+
 2️⃣ What is Selective Hydration and why it hydrates only interaction-touched UI.
+   When you wrap a component in <Suspense>, React treats that section as a separate "boundary." Instead of waiting for every single boundary to be ready, React starts hydrating whichever parts have their code and data available first
+   Event Replay:
+   The "Idle" Strategy: By default, React tries to hydrate the tree in the order it appears in the DOM.
+   The Interruption: If a user clicks a button or interacts with a piece of UI that is still "static HTML" (not yet hydrated), React realizes that this is the highest priority task for the user.
+   The Pivot: React will pause the hydration it was currently doing in the background and jump immediately to the component the user touched.
+   The Record & Replay: Because the JavaScript hasn't finished attaching event listeners yet, the browser can't "run" the click. React captures that click event, hydrates that specific component immediately, and then "replays" the click event as if the component had been interactive all along.
+
 3️⃣ Explain React Flight (server → client payload streaming).
+   Using React Flight, server sends serialized description of React component tree instead of sending the entire HTML
+   Browser deserializes and renders it 
+   No hydration is needed
+
 4️⃣ What causes client waterfalls with mixed RSC & client components.
 5️⃣ What is lazy hydration and how it boosts INP/LCP.
 6️⃣ React 19’s partial serialization strategy in hydration.

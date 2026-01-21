@@ -149,10 +149,7 @@ export const ProtectedRoute = ({ allowedRoles, children }) => {
 
     return children;
 };
-    if (!allowedRoles.includes(user.role)) return <AccessDenied /> 
 
-    return children;
-}
 We store the user role inside the JWT payload, not inside cookies.
 JWT is signed, so even though the client can read the role, it cannot modify it without breaking the signature.
 Refresh token is stored in HttpOnly secure cookies, but role and user info never go into cookies.
