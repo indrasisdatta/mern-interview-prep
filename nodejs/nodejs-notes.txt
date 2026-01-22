@@ -39,3 +39,5 @@ The Workflow Lifecycle
 Call stack 
 Event queue/Callback queue 
 Microtask queue
+
+Worker thread v/s child process.fork 
