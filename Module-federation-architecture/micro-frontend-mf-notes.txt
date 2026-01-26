@@ -164,3 +164,26 @@ Security
 
  - Version pinning to avoid unexpected/malicious remote updates 
 
+______________________________________________
+
+Q1. How to handle child app A in React 16 and host and child app B in React 18?
+Ans. Use ModuleFederation maxVersions or singleton: false for isolation 
+     Use web components to sandbox the legacy VDOM 
+
+Q2. How does App A communicate with App B without state pollution? 
+Ans. i) Lift state up to host and expose as shared services  
+    ii) Use CustomEvent bus or RxJS for decoupled communication, ensuring MF don't directly mutate each other's state 
+    - Custom event is fire and forget (if B loads 2 secs late, the message is lost)
+     - RxJS uses Observables BehaviorSubject (for 1 message), ReplaySubject (for multiple) so that messages aren't lost 
+
+    // Custom event in App A - update the count 
+    const cartEvent = new CustomEvent('UPDATE_CART', { detail: { qty: 1, price: 100 } });
+    window.dispatchEvent(cartEvent);
+    // Custom event in App B - show updated count
+    window.addEventListender('UPDATE_CART', (e) => setCount(e.detail.count));
+
+Q3. Preventing style collissions across different MF 
+Ans. i) Use CSS modules or Shadow DOM 
+    ii) Shared Design System using CSS vars and common components 
+        Expose it as a shared singleton via Module Federation so that browser fetches it only once 
+

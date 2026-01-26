@@ -149,3 +149,31 @@ Micro-Frontend:
 
 Communication among remote apps? 
 Common libs? Where to keep (in host?) and how to reuse?
+
+==============================
+
+How would you handle a scenario where your API is getting 10,000 requests per second?
+ - In UI use debounce/throttle (e.g. for autosuggest, onscroll event)
+ - In UI use caching mechanism like react-query 
+ - Use load balancer in server
+ - Use PM2 (cluster mode) to use all CPU cores on a single machine or Kubernetes/ASG to spin new containers as traffic spikes
+ - Rate limiting (Token bucket algorithm) at the API gateway to block unnecessary traffic early  
+ - Offload CPU intensive tasks (e.g. fs, crypto modules) to worker thread 
+ - Use background queue (SQS, Kafka) to handle async tasks (e.g. send email). Another service can read from the queue and send email 
+ - Server side caching e.g. Redis 
+
+=======================
+
+RDBMS - when to choose over MongoDB?
+ - For complex relationships and joins (MongoDB $lookup is not as efficient)
+ - Strong ACID guarantees e.g. financial data, inventory, payment, invoice (MongoDB 4 added multi-document transactions but it has performance overhead)
+ - Fixed and predictable schema 
+ - Heavy aggregations - group by, having
+ - Stored procedures and functions, cursor, trigger 
+
+MongoDB - when to choose? 
+ - When schema is not fixed (e.g. reading logs from different indexes)
+ - Has native support for Horizontal scaling via sharding to distribute data across different servers 
+ - rapid development, frequent schema changes 
+ - high write throughput (RDBMS write takes more time as it checks FK, locks rows/tables, updates indexes)
+ - read heavy use case with denormalized data (ideal for dashbord, profile, feeds)

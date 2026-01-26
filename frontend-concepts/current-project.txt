@@ -216,8 +216,8 @@ src/
  │    └── CustomerIssueAnalyzer/
  │
  ├── components/
- │    ├── common/        ← reusable components (Button, Loader, Modal, Table)
- │    └── charts/        ← optional: reusable chart components
+ │    ├── common/   ← reusable components (Button, Loader, Modal, Table)
+ │    └── charts/   ← optional: reusable chart components
  │
  ├── hooks/
  │    ├── useAuth.ts
@@ -317,7 +317,6 @@ How to handle a Dashboard that receives 1,000 WebSocket updates per second witho
  Refer to requestAnimationFrameThrottle.js
 
  setTimeout() can't be used as it goes to Task Queue. 
- Rendering pipeline has more priority than Macrotask queue. 
  If main thread is busy, by the time setTimeout callback is executed, the browser paint step may already have started, thus causing a janky experience (instead of 16 ms, it updates at 25 ms or misses a frame entirely)
 
 ==========================================================================
