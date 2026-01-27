@@ -18,6 +18,28 @@ Ans: Create a ThemeContext and provider and wrap App component with it.
 
      There are different ways to apply dark/light mode styles.
 
+     Modern Approach: CSS variables 
+      // index.scss
+      :root {
+        --bg-primary: #ffffff;
+        --border-primary: #000000;
+      }
+      [data-theme="dark"] {
+        --bg-primary: #000000;
+        --border-primary: #ffffff;
+      }
+      // mixins.scss
+      @mixin primaryButton {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-primary);
+        transition: background-color 0.3s ease; 
+      }
+      // custom.scss
+      .btn {
+        @include primaryButton;
+        border-radius: 5px;
+      }      
+
      Approach 1: Using CSS class
      1. Create dark-theme.css and light-theme.css
      2. Assign class to <body> whenever theme value is updated.

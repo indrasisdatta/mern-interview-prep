@@ -1,0 +1,62 @@
+React: npm install @apollo/client and graphql 
+
+    ApolloClient
+    - useQuery (fetch and cache data from GraphQL server)
+    - useMutation (write data create/update/delete)
+    - useSubscription (long lasting connections and real time updates - receive live data pushed by server)
+
+    const client = new ApolloClient({
+        uri: PROCESS.ENV.API_BASE_URL,
+        cache: new InMemoryCache()
+    });
+
+    <ApolloProvider client={client}>
+        <App />
+    </ApolloProvider>
+
+NodeJS: npm install apollo-server-express
+
+    ApolloServer 
+    - typeDefs (define schema, specify query, mutation types and fields)
+    - resolvers (actual business logic functions)
+
+    const server = new ApolloServer ({
+        typeDefs,
+        resolvers
+    })
+    const typeDefs = `#graphql 
+        type User { id: ID!, name: String! }
+        type Product { id: ID!, name: String!, price: Float! }
+        type Query { 
+            users: [User], 
+            products: [Product],
+            product(pid: ID!): Product
+        }
+        type Mutation {
+            createProduct(title: String!, price: Float!): Product
+        }
+    `
+    const resolvers = {
+        Query: {
+            users: () => fetchUsersFromDB(),
+            products: () => fetchProductsFromDB()
+        }
+    }
+
+    API All products: POST /graphql { "query": "query { products { title price } }" }
+    API single product: POST /graphql { "query": "query { product (pid:123) { title price } }" }
+    API mutation: POST /graphql 
+    {
+        "query": "mutation { createProduct(title: \"Test product\", price: 100) { id title price } }"
+    }
+
+====================
+
+FILE UPLOAD:
+
+1) REST API 
+   - uses multipart/form-data 
+   - client streams the binary file 
+   - Server middleware like multer parses and saves it 
+   - Fle saved or forwarded in S3 
+
