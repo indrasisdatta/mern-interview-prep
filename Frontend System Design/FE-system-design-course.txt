@@ -84,9 +84,16 @@ https://web.dev/learn/performance/resource-hints
  - preload (Load resource right now needed immediately eg. fonts, main js)
  - prefetch (Load resource in background eg. next page, other route assets)
  - preconnect (DNS resolution, open TCP, TLS handshake eg. CDN, fonts)
- - dns-prefetch (DNS resolution eg. )
+ - dns-prefetch (DNS resolution)
  - pre-render (Load and render an entire page in a hidden tab anticipating users will visit. Very powerful but heavy.)
  - module-preload (Preload ES modules and dependencies before execution)
+
+Scenarios:
+1) Your homepage loads a hero image from a CDN (cdn.images.com) that is the LCP element -> preload (load immediately)
+2) Your app will likely navigate to /dashboard next and that page has a heavy JS chunk -> pre-fetch (future navigation)
+3) Your site uses Google Fonts from fonts.gstatic.com which is needed on first paint -> preconnect (DNS resolution, TCP connection, HTTPS handshake)
+4) Your site sometimes loads a third-party chat widget after user interaction -> dns-prefetch (Only resolve domain)
+5) Your main JS bundle blocks rendering and is required for page to work -> preload
 
 Normally, the browser calculates layout + paint for everything on the page, even elements far below the fold.
 .card {

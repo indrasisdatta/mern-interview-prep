@@ -203,3 +203,7 @@ map.set(obj, 'obj val');
 obj = {};
 // After sometime 
 console.log(map); // Returns for Map but {} for WeakMap
+
+Scroll v/s IntersectionObserver
+ - Window scroll events fire many times per second, and when handlers read layout properties they can trigger repeated layout reflows, leading to high CPU usage and janky UI.
+ - IntersectionObserver runs within the browser's rendering pipeline and batches visibility checks with normal layout work, so callbacks fire only when elements cross visibility thresholds instead of continuously

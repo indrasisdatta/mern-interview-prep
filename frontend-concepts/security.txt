@@ -38,7 +38,7 @@ Cross site scripting (XSS) : XSS is when an attacker can run their own JS code b
 CSRF : browser can't distinguish between a legitimate user action and a forged request. 
     - User is logged into their bank account website http://mybank.com
     - User receives phising email and opens a URL to attacker's website
-    - Attacker's website contains form action as http://mybank.com and img src as http://mybank.com so the bank website uses logged in user's cookie
+    - Attacker's website contains form action as http://mybank.com and document.submit() so the bank website uses logged in user's cookie
     - Browser automatically includes session cookies 
     - Bank thinks the request is from user
     Remedies:

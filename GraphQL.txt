@@ -58,5 +58,18 @@ FILE UPLOAD:
    - uses multipart/form-data 
    - client streams the binary file 
    - Server middleware like multer parses and saves it 
-   - Fle saved or forwarded in S3 
+   - File saved or forwarded in S3 
+
+2) GraphQL
+    - client sends multipart/form-data via apollo client upload link
+    - Apollo server middleware parses the request
+    - Resolver receive the file as a stream to process and save it 
+
+S3 upload flow:
+- Frontend requests for pre-signed URL 
+    Payload: {"fileName": "img.png","size": 1000,"type": "image/png"})
+- API sends pre-signed URL (with conditions like content type image/png, max size 5MB. S3 validates these during PUT)
+- Frontend uploads file directly to S3 pre-signed URL (PUT request)
+- Frontend sends metadata to API 
+
 
