@@ -252,3 +252,6 @@ Observable:
 How to make an object read only?
   - Object.freeze() - shallow. Write custom recursive fn for deep 
   - Proxy - deep
+
+==================
+

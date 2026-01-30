@@ -32,6 +32,11 @@ MF Architecture patterns:
 Communication among remote apps? 
 Common libs? Where to keep (in host?) and how to reuse?
 
+Module federation 
+ - introduced in Webpack 5 plugin (now supported in RSPack, Vite etc)
+ - allows multiple frontend apps to share and load code from each other at run time (when opened in browser)
+ - Refer Module-federation.jpg
+
 
 MICRO FRONTEND (MODULE FEDERATION) – LIMITATIONS & REMEDIES
 
@@ -186,4 +191,44 @@ Q3. Preventing style collissions across different MF
 Ans. i) Use CSS modules or Shadow DOM 
     ii) Shared Design System using CSS vars and common components 
         Expose it as a shared singleton via Module Federation so that browser fetches it only once 
+
+Q4. Your app has Checkout, Profile, and Search owned by different teams. How would you split them?
+A: Each domain would be a standalone micro-frontend owning its routing, state, and business logic.
+The host (shell) app would manage layout and authentication and dynamically load each micro-frontend using Module Federation.
+Instead of exposing individual components, each micro-frontend would expose a root entry module (for example CheckoutApp) to keep boundaries clean and reduce coupling.
+This allows teams to develop and deploy independently.
+
+Q5: Two micro-frontends use different React versions. How would you handle shared dependencies?
+In production systems, React should be shared as a singleton dependency across all micro-frontends with version constraints.
+All teams align on compatible React versions to avoid loading multiple runtimes, which can break hooks, context, and increase bundle size.
+If different versions are unavoidable, the apps should be isolated (for example via iframe) instead of sharing runtime dependencies.
+
+Q6. A shared Header component is used across 5 apps. How would you design this?
+If the Header changes frequently or contains runtime logic, it can be exposed as a shared micro-frontend and consumed via Module Federation.
+If it is mostly a stable UI component, a shared component library (design system) is usually better to avoid runtime coupling and reduce failure points.
+
+Q7. One micro-frontend is slowing initial load. How would you optimize?
+- Load Micro frontend at route level using dynamic imports and Module Federation, so only required domains load initially 
+- Split large remotes into smaller chunks 
+- Use prefetching during idle time 
+- Avoid sharing heavy unnecessary dependencies 
+
+Q8. How do teams deploy independently without breaking others?
+- Each MF to have it's own CI/CD pipeline and deployment cycle 
+- Host app to have graceful fallback UI if remote app fails to load 
+To avoid runtime breakage:
+- Exposed modules should follow semantic versioning 
+- Changes are backwards compatible 
+- Runtime version pinning/feature flags can be used 
+
+Q9. How do you avoid loading duplicate dependencies?
+Common libs like React, ReactDOM are configured as shared singleton dependencies in Module Federation with strict version requirements. 
+
+Only common UI - use shared library/design system 
+Business logic + UI - use micro frontend app 
+npm publish follows semantic versioning 
+v1.0.0  → initial release
+v1.0.1  → bug fix
+v1.1.0  → backward-compatible feature
+v2.0.0  → breaking change
 
