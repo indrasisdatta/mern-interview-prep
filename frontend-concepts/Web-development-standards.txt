@@ -1,0 +1,45 @@
+1. Accessibility Standards
+WCAG
+
+WAI-ARIA (Accessible Rich Internet Applications): A technical specification that adds attributes to HTML to make web content and applications more accessible to people with disabilities, especially where JavaScript is used.
+
+ATAG (Authoring Tool Accessibility Guidelines): Standards for the software used to create web content (like CMS tools) to ensure they produce accessible code.
+
+UAAG (User Agent Accessibility Guidelines): Standards for browsers and media players to ensure they work with assistive technologies.
+
+2. Core Web Standards (The Foundation)
+WHATWG HTML Living Standard: The current, evolving standard for HTML that replaces versioned releases (like HTML5).
+
+ECMAScript (ES): The official standard for JavaScript (e.g., ES2024). It defines the language features and syntax.
+
+W3C CSS Standards: While CSS doesn't have a single "version," it is organized into Modules (like Grid, Flexbox, and Selectors) that follow W3C recommendations.
+
+3. Performance Standards
+Core Web Vitals (CWV): Google’s standardized metrics for measuring user experience:
+
+LCP (Largest Contentful Paint): Loading performance.
+
+INP (Interaction to Next Paint): Responsiveness.
+
+CLS (Cumulative Layout Shift): Visual stability.
+
+Performance Budgets: An industry best practice of setting limits for file sizes (JS, CSS, Images) to ensure fast load times.
+
+4. Security & Privacy Standards
+CSP (Content Security Policy): An HTTP header standard used to prevent Cross-Site Scripting (XSS) and data injection attacks.
+
+CORS (Cross-Origin Resource Sharing): A standard that allows servers to specify who can access their resources from a different origin.
+
+GDPR / CCPA: Legal standards for data privacy that frontend developers must implement via consent banners and data handling practices.
+
+5. Design & Responsive Standards
+Mobile-First Design: The standard approach of designing for the smallest screen first and scaling up.
+
+Design Systems: Using standardized components (e.g., Material Design, Carbon) to ensure visual and functional consistency across a product.
+
+6. Technical Best Practices (Industry "Unwritten" Standards)
+Semantic HTML: Using tags like <main>, <article>, and <nav> for their intended meaning rather than just for styling.
+
+PWA (Progressive Web Apps): Standards for making web apps work offline, send push notifications, and feel like native apps.
+
+DRY (Don’t Repeat Yourself): A coding standard focused on reducing repetition in code and logic.
