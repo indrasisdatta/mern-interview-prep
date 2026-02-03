@@ -1,0 +1,18 @@
+Common Frontend design patterns:
+
+1) Singleton: Ensure that a class/object has only one instance and provides a global point of access to it.
+Drawbacks: 
+- hard to test shared instance (need to reset manually before each test)
+- Singleton lives outside React's lifecyle so doesn't re-render when data is changed. 
+Use case: When UI update is not needed e.g. API Client (Axios instance)
+Module-level singleton.
+In ESM module system, the first time a file is imported, the results are cached. Every subsequent import returns the exact same memory reference. 
+
+2) Factory: instead of using new keyword or manually defining which component to load in every file, use a Factory component. 
+- Decoupling 
+- Scalability (add the Factory file only for future addition)
+Also satisfies Liskov's substitution O-C compliant 
+
+3) Observer
+4) Strategy
+5) Adapter
