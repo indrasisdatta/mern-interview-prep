@@ -13,6 +13,27 @@ In ESM module system, the first time a file is imported, the results are cached.
 - Scalability (add the Factory file only for future addition)
 Also satisfies Liskov's substitution O-C compliant 
 
-3) Observer
-4) Strategy
-5) Adapter
+3) Observer: many listeners react to a change in one source. 
+Subject holds the state/data 
+Observer gets notified when data changes 
+In React, State/store is the subject and components are observers.
+Libraries like RxJS or react-observable are also valid examples. 
+
+4) Strategy: enables selecting an algorithm at runtime. Instead of big if/else or switch, encapsulate each behavior in its own function and choose dynamically. 
+
+5) Adapter - transform incoming data from API layer to a structure that components can use effectively 
+- Adapter pattern is implemented as a lightweight mapping function alongside API services like Axios 
+- For small to medium apps, Adapters often live in the same service file 
+
+6) Facade - provides a simple interface over complex logic
+- composes multiple custom hooks and business logic  
+
+7) Decorator - add behavior without modifying original function/component. 
+E.g. HOC, function wrappers (logging, permissions, styling)
+
+8) Proxy - control access or add logic before real object - interact with the Proxy object instead of the main object directly
+E.g. Axios interceptor (proxy like behavior)
+Cache, validation layer 
+
+
+
