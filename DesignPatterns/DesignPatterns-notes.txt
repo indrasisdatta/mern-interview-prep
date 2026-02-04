@@ -35,5 +35,73 @@ E.g. HOC, function wrappers (logging, permissions, styling)
 E.g. Axios interceptor (proxy like behavior)
 Cache, validation layer 
 
+=====================================
 
+React Design Patterns:
 
+1) Hooks: 
+ - enable logic reuse through functional composition 
+ - Improves readabiity (no nested wrapper like HOC)
+ - works natually with Suspense and use()
+Composition example - 3 hooks useAuth, useTheme, useData used in a single component (3 level nested HOC becomes complex and props may conflict)
+In React 19, hooks are useful 90% of the time.
+HOC - useful for cases like Error Boundaries, Auth Guards, Feature Flags. 
+
+2) Compound components: Break a large component into multiple sub-components that are closely related. 
+E.g. Modal - ModalHeader, ModalBody, ModalFooter are related to the Modal but they don't exist independently.
+Use case: Tabs, Accordion, Modal (In Material UI)
+Note: 
+- Sub-components should be related to the main component 
+- Don't import sub-component and try to implement indepedently 
+
+<Tabs>
+  <Tabs.List />
+  <Tabs.Panel />
+</Tabs>
+
+Parent (Tabs)
+ - Creates the context
+ - Holds shared state (active tab, handlers, etc.)
+ - Wraps children with <TabsContext.Provider>
+
+Sub-components (Tabs.List, Tabs.Panel, etc.)
+ - Call useContext(TabsContext)
+ - Read/update shared state
+ 
+3) Container/Presentational:
+ - Container component (logic): Fetches data, Handles state, Business logic
+ - Presentational component (UI): Receives props, Just renders UI, No business logic
+Modern approach: custom hooks + UI component 
+Use cases: User list/table/card, Dashboard (charts UI + data logic)
+
+Old: UserContainer.jsx, UserList.jsx 
+Modern approach for small components: useUsersData.jsx, UserList.jsx (call custom hook in this file)
+
+4) HOC pattern: 
+HOC function - takes a function as argument and returns a function (map, filter, reduce)
+HOC issue in legacy React code - JS doesn't inherit static properties automatically.
+class UserPage extends React.Component {
+  static fetchData() {
+    // used for SSR or routing
+  }
+}
+export default withAuth(UserPage);
+
+UserPage.fetchData ❌ undefined
+
+Fix using: 
+import hoistNonReactStatics from "hoist-non-react-statics";
+hoistNonReactStatics(HOC, WrappedComponent);
+
+5) Render props: value of prop expects a function which returns JSX 
+Drawbacks: 
+- nested structure makes JSX messy
+- new function created in every render 
+Use case: Form libaries like Formik (old version)
+
+6) Slot pattern: if there's no shared states between child components, then instead of using compound components, we can use slot. 
+<Card 
+  header={<h4>Card Heading</h4>}
+  content={<p>Card content displaying descriptionb</p>}
+  footer={<p>Card footer</p>}
+/>
