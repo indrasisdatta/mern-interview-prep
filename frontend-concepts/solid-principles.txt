@@ -1,20 +1,24 @@
 SOLID principles in React JS:
 
-1. Single Responsibility: instead of having 1 large component, create separate components for different features.
+1. Single Responsibility: A component should have 1 reason to chage. instead of having 1 large component, create separate components for different features.
    Eg. Products listing -> Search, Grid, Main (to include both)
    <ProductSearch />
    <ProductGrid />
    
-2. Open closed: classes should be open for extension but closed for modification. 
+2. Open closed: classes should be open for extension but closed for modification. Component should be extensible using props and composition. 
    Eg. Button component - should have the ability to add icons etc using children.
    <Button> <i class="fa fa-lock"> Disable </Button>
+   Each time something is added, we shouldn't have to modify Button
     
-3. Liskcov's substitution: objects of superclass should be replaceable with objects of subclass.
+3. Liskcov's substitution: objects of superclass should be replaceable with objects of subclass. 
    Eg. Form component with different input fields textarea, input, checkbox. 
    Each field component should implement the same contract value and onChange.
    
 4. Interface segregation: should not be forced to depend on interface methods that are not used. Break into multiple interfaces instead.
+A component shouldn't depend on prop it doesn't use.
    Eg. create separate components specific to functionality.   
+   Good -> <Avatar src={user.avatarUrl} /> 
+   Bad  -> <Avatar image={user.imgUrl} name={user.name} onClick={...} />
 
 5. Dependency inversion: higher level modules should not depend on lower level modules, both should depend on abstractions. 
    Classes depends on interfaces or abstract classes rather than concrete implementations. 

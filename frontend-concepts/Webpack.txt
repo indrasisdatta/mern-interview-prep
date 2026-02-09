@@ -1,0 +1,42 @@
+WEBPACK
+Browser can't: 
+ - load hundreds of JS files efficiently
+ - understand JSX, TS, CSS imports 
+ - optimize unused code 
+Webpack packages everything into a few optimized files that the browser can load fast 
+
+Based on an entry file src/index.js it follows every import and creates a dependency graph. Result: main.js, vendoor.js, chunk-21244.js 
+
+Loaders - how Webpack understands a file. Without loaders, webpack can only understand plain JS.
+ - babel-loader (Converts JSX, TSX to browser safe JS)
+ - css-loader (understands CSS imports)
+ - file-loader (handles image, font, SVG imports)
+ - style-loader (injects CSS into <style> tag)
+
+Plugins - what extra work can webpack do while bundling 
+ - HtmlWebpackPlugin (injects bundled JS into html)
+ - TerserPlugin (Minifies JS)
+ - DefinePlugin (env vars)
+
+Webpack Tree shaking - removing unused code from the prod build. It relies on static structure of ES6 modules.
+Tree shaking is not possible for:
+- Common JS modules using require and module.exports are dynamic and not statically analyzable by Webpack.
+- Dynamic imports import(Data).then(...)
+- Importing/exporting entire modules 
+  import * as utils from './utils';
+
+Dependency graph: Starts from the entry point and when a module imports another module, a dependency is formed.
+Webpack recursively follows this dependencies from the entry point to build the entire graph.
+
+Webpack bundle optimization:
+   https://blog.openreplay.com/optimizing-the-build-process-with-webpack/#:~:text=Optimizing%20the%20build%20size%20involves,results%20in%20more%20performant%20websites.
+   - tree shaking (remove unused modules from app)
+   - babel-minify-webpack-plugin, TerserPlugin (removes whitespaces, comments, line breaks without affecting functions)
+   - compression-webpack-plugin (reduces final build size using GZip compression algorithm)
+   - bundle analyzer (debug and analyze bundle files)
+
+HtmlWebpackPlugin - injects bundled JS into HTML 
+
+1) Webpack v/s babel 
+2) Webpack v/s Vite 
+3) Is code splitting, lazy loading a webpack process or React? 
