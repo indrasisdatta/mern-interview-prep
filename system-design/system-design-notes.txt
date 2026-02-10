@@ -204,6 +204,59 @@ Non-critical tasks - send email (handle asyncronously)
 Message Queue (Amazon SQS, Kafka) <- Consumer 
 (Consumer pulls messsages. Set up rate limiter and concurrency control)
 
+SQS -> Lambda -> Email Service: A Lambda function is configured as an event source for the SQS queue. Whenever a message is pushed to SQS, AWS automatically invokes the Lambda function with a batch of messages.
+
+await users.insertOne(user);
+
+await sqs.sendMessage({
+  QueueUrl,
+  MessageBody: JSON.stringify({
+    event: "USER_SIGNED_UP",
+    userId,
+    email
+  }),
+  MessageDeduplicationId: userId, // FIFO queue
+  MessageGroupId: "signup"
+});
+
+Failure handling:
+1) If database save fails, the API returns an error and nothing is written
+2) If SQS publish fails, the event remains in PENDING state and is retried later
+3) If the email service is down, the message is retried automatically by SQS
+4) If the worker crashes, the message becomes visible again after the visibility timeout
+5) If failures keep repeating, the message is sent to a Dead Letter Queue (DLQ)
+6) If a message is delivered more than once, FIFO queues and deduplication prevent duplicate emails
+
+Outbox pattern: https://medium.com/design-microservices-architecture-with-patterns/outbox-pattern-for-microservices-architectures-1b8648dfaa27
+
+Atomicity with business writes - 
+// Sign up: Either both are saved or none are 
+session.startTransaction();
+await users.insertOne(user, { session });
+await outbox.insertOne({
+  eventType: "USER_SIGNED_UP",
+  payload: { userId, email },
+  status: "PENDING"
+}, { session });
+await session.commitTransaction();
+
+// Outbox processor - background job 
+const events = await outbox.find({ status: "PENDING" });
+for (const event of events) {
+  try {
+    await sqs.sendMessage(event.payload);
+    await outbox.updateOne(
+      { _id: event._id },
+      { $set: { status: "SENT" } }
+    );
+  } catch (err) {
+    // leave as PENDING → retry later
+  }
+}
+Note: Change Streams are great for analytics and replication, but they are not transactional guarantees. Outbox pattern ensures atomicity between business data and events.
+
+------------------------------------
+
 Scenario: User purchases a course and gets email notification on successful payment.
 => Problems
     1. Slow response time 
