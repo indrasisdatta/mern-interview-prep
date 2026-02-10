@@ -41,3 +41,28 @@ Event queue/Callback queue
 Microtask queue
 
 Worker thread v/s child process.fork 
+
+=====================================
+
+EXCEL FILE UPLOAD PROCESS 
+
+1) Browser sends multipart/form-data. Node's built-in body-parser cannot handle this, so we need a library like multer 
+ - intercepts the request, parses the file and puts it in req.file 
+ - MemoryStorage for small file, Disk for large file 
+2) Basic chck - if file exists and MIME is valid 
+     if (!req.file) return res.status(400).send('No file found')
+     req.file.mimetype 
+3) Reading the buffer - for MemoryStorage, file is already in buffer in req.file.buffer. For disk, use fs module to read. 
+4) XLSX library - convert buffer to readble format 
+
+const fileBuffer = fs.readFile(filepath);
+const workbook = XLSX.read(fileBuffer, {type: 'buffer'});
+const firstSheet = workbook.SheetNames[0];
+const XLXZ.utils.sheet_to_json(firstSheet);
+
+Streaming approach: 
+ - Memory efficient (if 10 users upload 100MB each using Buffer, server will need 1GB RAM. Streaming holds one chunk in memory at a time)
+ - Start validation as soon as the first row arrives. No need to wait for the entire file to load to validate if columns are valid 
+ - Backpressure handling: in-built feature of streams to prevent internal buffer from overflowing 
+ - Use ExcelJS WorkbookReader to pipe the file stream directly into the parser 
+

@@ -68,6 +68,8 @@ Uncanny valley - inspite the page is render and looks normal, it's not interacti
  Island architecture - similar to Partial hydration. Divide the page into independent interactive static components that can be rendered and updated separately. 
 https://www.patterns.dev/vanilla/islands-architecture/
 
+
+
 Import on interaction - Different ways to load resources: 
 - lazy (route based)
 - lazy (on interaction) - load when user clicks the UI eg. YouTube video 

@@ -255,3 +255,165 @@ How to make an object read only?
 
 ==================
 
+Source map:
+
+We need source maps in production to turn ugly, minified stack traces (like error at a.js:1:452) into readable code. 
+Making them public is a security risk. The goal is to make them accessible to our tools but invisible to the public.
+
+ - Source maps are enabled in dev, disabled/hidden in prod 
+ - Webpack controls generation, nginx/CDN controls access 
+
+    devtool: 'source-map' is default -> Adds a comment at the bottom of your JS file: //# sourceMappingURL=main.js.map. The browser sees this and automatically downloads the map if DevTools is open.
+
+    devtool: 'source-map'  // full source map (not recommended publicly)
+    devtool: 'hidden-source-map'  // generates .map file but removes the comment
+    devtool: 'nosources-source-map' // stack traces without source code
+
+
+
+Best practice:
+ - hidden-source-map (browser doesn't download .map)
+ - Restrict .map via Nginx or CDN
+ - Upload maps to error monitoring tools
+
+// nginx.conf - IP based to allow for internal users 
+location ~ \.map$ {
+    allow 10.0.0.0/8;        # office VPN
+    allow 127.0.0.1;         # localhost
+    deny all;
+}
+
+// nginx.conf - header based 
+location ~ \.map$ {
+    if ($http_x_debug != "true") {
+        return 403;
+    }
+}
+
+
+
+When you build a React application for production, your modern, readable JavaScript gets transforme to something like this:
+
+!function(e){var t={};function n(r){if(t[r])return t[r].exports;var o=t[r]={i:r,l:!1,exports:{}};return e[r].call(o.exports,o,o.exports,n),o.l=!0,o.exports}n.m=e,n.c=t, /* thousands more characters... */
+
+This transformation is excellent for performance but creates a debugging nightmare. How do you trace an error back to your original code when the line numbers and function names no longer match?
+
+That's where source maps come in. These are special JSON files (ending in .map) that create a mapping between your minified code and original source files. When properly configured, they allow browsers' DevTools to show your original source code during debugging, making error messages comprehensible and bug-fixing possible.
+
+When they're deployed to production and publicly accessible, you're giving away:
+Your entire original source code, including comments and file structure
+Proprietary business logic that may give competitors insights
+Hardcoded API keys, JWT secrets, and authentication tokens
+Internal API endpoints that should remain private
+
+How attackers can use your Source Maps:
+- Finding Exposed Source Maps from Dev tools Source tab 
+- Rebuilding your source code using libs like source-map-unpacker 
+- Finding Your Secrets // grep -r "API_KEY" ./unpacked-source
+
+Securing Your Source Maps: 
+ - Enable only for development: devtool: 'eval-source-map'
+ - Use Hidden Source Maps for production (Balanced approach)
+   devtool: 'hidden-source-map'
+ - Generate source maps during your build process, upload them directly to Sentry and then delete them before deploying your application
+
+React 16-18 Classic SSR with Hydration:
+React components are executed twice - once on the server to generate HTML and once on the client to recreate Virtual DOM and hydrate the existing HTML by attaching event handlers. 
+
+Issue with old approach: heavy components still cost CPU on client, large hydration cost (uncanny valley problem)
+
+React 19 introduced React Flight protocol for server components 
+- Browser receives a serialized React tree (Not HTML, not JS)
+- A special Flight payload 
+- Client stitches it together with client components 
+
+React server components sends 2 formats - HTML for immediate UI display which users can see and Flight payload which React client uses for hydration. 
+
+=============
+
+Video trailer listing in Node + React 
+
+ - Node should serve metadata and video URLs 
+ - actual video should be served from a CDN (HLS format)
+ - browser <video> handles buffering and autoplay efficiently
+
+API Response:
+ [{
+    "id": "t1",
+    "title": "Movie One",
+    "thumbnail": "https://cdn.app.com/thumbs/movie1.jpg",
+    "trailerUrl": "https://cdn.app.com/trailers/movie1.mp4"
+  }]
+
+HTTP range requests - when a user clicks or seeks, browser requests only that part, so video starts instantly. S3 supports this range request natively. CloudFront forwards and caches this range request. 
+    Range: bytes 500000 - 900000
+
+Global low latency - CloudFront serves from edge location 
+
+Massive parallel streaming - CloudFront is built for millions of concurent streams 
+
+Pay for what you use - S3 is cheap storage, CloudFront - pay per GB transferred 
+
+Built in caching: 
+Req 1: S3 -> Cloudfront -> user 
+Req 2: Cloudfront -> user 
+
+Security without backend logic: S3 signed URL, signed cookies, token expiry.
+
+HLS/adaptive streaming support: CloudFront works perfectly with .m3u8 .ts segments. Browser auto-switches 480p - 720p - 1080p
+
+MPEG-DASH - not supported in Safari
+HLS - supported natively in Safari. Chrome, Firefox etc. needs hls.js.
+
+For HLS: use two file formats: 
+ .m3u8 - text based playlist file which tells the video player which video segments to load in what order and what quality (bitrate)
+ .ts (MPEG transport stream) - small video chunks 2-10 secs. Browser/player downloads them one by one to allow fast start, seeking, adaptive bitrate switching 
+
+/video/
+  ├── master.m3u8
+  ├── 360p/
+  │    ├── playlist.m3u8
+  │    ├── segment1.ts
+  │    └── segment2.ts
+  ├── 720p/
+  │    ├── playlist.m3u8
+  │    ├── segment1.ts
+  │    └── segment2.ts
+
+<video src="https://cdn.example.com/master.m3u8" controls />
+
+Node library supporting FFMPEG - converts to m3u8 and ts files 
+
+// Frontend 
+
+function TrailerCard({ trailer }) {
+  const videoRef = useRef(null);
+
+  const playTrailer = () => {
+    videoRef.current.play();
+  };
+
+  const onHover = () => {
+    videoRef.current.currentTime = 0;
+    videoRef.current.play();
+  };
+
+  const onLeave = () => {
+    videoRef.current.pause();
+    videoRef.current.currentTime = 0;
+  }; 
+
+  return (
+    <div onClick={playTrailer}>
+      <video
+        ref={videoRef}
+        src={trailer.trailerUrl}
+        poster={trailer.thumbnail}
+        preload="none" // no bandwidth wasted
+        muted
+        playsInline // autoplay on click
+      />
+      <h4>{trailer.title}</h4>
+    </div>
+  );
+}

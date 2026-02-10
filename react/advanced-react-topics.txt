@@ -389,3 +389,16 @@ https://github.com/reactwg/react-18/discussions/37
 8️⃣ Why props look the same but still cause re-render (identity vs equality).
 9️⃣ When to avoid lifting and rely on server-cached state instead.
 🔟 React 19 preparing ground for partial UI compilation & offscreen hydration.
+
+
+React 16-18 Classic SSR with Hydration:
+React components are executed twice - once on the server to generate HTML and once on the client to recreate Virtual DOM and hydrate the existing HTML by attaching event handlers. 
+
+Issue with old approach: heavy components still cost CPU on client, large hydration cost (uncanny valley problem)
+
+React 19 introduced React Flight protocol for server components 
+- Browser receives a serialized React tree (Not HTML, not JS)
+- A special Flight payload 
+- Client stitches it together with client components 
+
+React server components sends 2 formats - HTML for immediate UI display which users can see and Flight payload which React client uses for hydration. 
