@@ -66,3 +66,186 @@ Streaming approach:
  - Backpressure handling: in-built feature of streams to prevent internal buffer from overflowing 
  - Use ExcelJS WorkbookReader to pipe the file stream directly into the parser 
 
+====================
+
+Node.js Single threaded?
+- JavaScript execution is single-threaded but Node internally uses multiple threads via LibUV and the OS. 
+- Synchronous code runs on the main thread, while asynchronous operations like I/O are delegated to the OS or libuv thread pool 
+- When these operations complete, their callbacks are queued and executed by the event loop allowing NodeJS to handle multiple requests efficiently 
+
+LibUV handles - fs, setTimeout, DNS, crypto 
+OS Kernel handles - network sockets, HTTP requests 
+
+===========================
+
+How to handle CPU-heavy tasks?
+ - Offload compute-intensive work to Worker Threads, child processes or external worker services using Queues (SQS, Kafka).
+
+Is it CPU-heavy JS? → YES → Worker Thread
+Need separate runtime / binary? → YES → Child Process
+Need strong isolation? → YES → Child Process
+Need shared memory + speed?  → YES → Worker Thread
+
+Worker thread share the same process and are lightweight but for untrusted or crash-prone workloads, child process provide better fault tolerance. 
+Worker Thread use case: image processing, code using crypto/fs 
+Child process use case: running git commands, python commands, user submitted code
+
+Child process:
+ - fork: best for background workers (IPC messaging)
+ - spawn: streaming large output eg. launch ll command and return streams (memory efficient)
+ - exec: uses a shell and buffers output so not convenient for large outputs. Can be used to run shell commands returning small outputs 
+ - execFile: doesn't use shell, buffers output 
+
+spawn and execFile avoid the shell and are safer for user input 
+exec is prone to shell-injection attack
+
+Cluster improves throughput, while Worker Threads improve latency for CPU-bound work.
+
+------------------------------------------------
+
+Streams and when to use?
+
+Stream let us process data chunk by chunk instead of loading the entire data in memory. Streams handle back pressure automatically preventing memory overflow (when consumer is slow, producer pauses).
+fs.readFile("file.txt"); // High memory, slow for large files 
+fs.createReadStream("file.txt") // Low memory, faster
+
+     Readable  fs.createReadStream("file.txt")
+     Writable  fs.createWriteStream("file.txt")
+     Duplex    TCP socket 
+     Transform Read -> modify -> write (zlib library)
+
+Use cases: File upload uses streams S3, multer, Video streaming
+
+// Compression 
+fs.createReadStream("usersData.txt")
+  .pipe(zlib.createZip())
+  .pipe(fs.createWriteStream("usersData.txt.gz))
+
+pipe() is preferred because it automatically manages backpressure, reduces boilerplate code, and ensures efficient memory usage. Manual read/write requires explicit flow control and is error-prone, especially under high throughput.
+
+--------------------------------------------------
+
+How to prevent memory leaks in Node?
+ - Remove event listeners 
+ - Clear timers and intervals 
+ - Avoid global caches growing indefinitely 
+   (Use TTL, WeakMap, LRU cache) 
+ - Make sure closures don't reference large objects 
+   (nullify references when no longer used) 
+ - Stream large data (fs.createReadStream)
+ - Unresolved promises can cause memory leaks 
+
+--------------------------------------------------
+
+Scaling Node app:
+     Keep API layer thin    
+     Push heavy work to async workers (offloading CPU intensive work )
+     Use cluster to utilize all cores
+     Use queue for backpressure
+     Cache aggressively (Redis, CDN)
+     Design for horizontal scaling - use Load balancer to distribute the traffic
+     DB best practices - indexing, connecting pooling, read replicas
+     Use streaming for large payloads 
+     Apply rate limiting and circuit breakers
+     Graceful shutdown (SIGTERM, close DB)
+     Observability (Metrics, health checks, logs)
+     Avoid memory leaks 
+
+--------------------------------------------------
+
+How would you implement rate limiting?
+
+API Rate limiting strategies:
+1. Token Bucket - allows for burst traffic by saving tokens 
+   Eg. video streaming, large uploads
+   Scenario: Ecommerce app launches a sale. Normally it receives 100 req/sec but during sales, it receives 1000/sec.
+   Allow a short burst of up to 500 req/sec (using saved tokens).
+   Once the burst capacity is exhausted, new req are queued or rate-limited.
+2. Leaky Bucket - rate limiting for APIs where requests are served at a steady, fixed rate regarless of traffic spikes (Excess requests are dropped).
+   Scenario. set up API to handle 100 req per sec.
+   If 150 requests are made, the remaining 50 are dropped.
+
+Approaches:
+1) express-rate-limit: memory based, suitable for small apps only (no multi instance)
+2) io-redis: shared across instances, atomic, fast, scalable 
+
+System design blog: https://www.eraser.io/decision-node/api-rate-limiting-strategies-token-bucket-vs-leaky-bucket
+
+---------------------------------------------------------------
+
+How would you design global error handling?
+
+// Express global error middleware:
+app.use((err, req, res, next) => {
+     logger.error(err);
+     res.status(err.status || 500).json(
+          message: err.message || "Error caught"
+     )
+})
+
+// Process level handler (last safety net)
+process.on("uncaughtException", async (err) => {
+  logger.error(err);
+
+  await server.close(); // stop new requests, Graceful shutdown 
+  await db.close();
+
+  process.exit(1);
+});
+
+-----------------------------------------------------------------
+
+How to handle unhandled promise rejections?
+
+// 1. Wrapper function for routes 
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req,res,next)).catch(next)
+app.get('/user', asyncHandler(async (req, res) => {
+     const data = await service();
+     res.json(data);
+}))
+
+// 2. Process level handler 
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error({
+    message: "UNHANDLED REJECTION 💥",
+    reason: reason.stack || reason,
+  });
+
+  // 1. Trigger Graceful Shutdown
+  // Stop accepting new connections via the server
+  server.close(async () => {
+    logger.info("Closed out remaining connections.");
+
+    try {
+      // 2. Close Database & Redis connections
+      await mongoose.connection.close();
+      await redisClient.quit();
+      
+      logger.info("DB/Cache connections closed.");
+      
+      // 3. Finally, exit
+      process.exit(1);
+    } catch (err) {
+      logger.error("Error during shutdown:", err);
+      process.exit(1);
+    }
+  });
+
+  // 4. Force exit after a timeout (if server.close hangs)
+  setTimeout(() => {
+    process.exit(1);
+  }, 5000); 
+});
+
+-----------------------------------------------------------------
+
+How to detect memory leak in Node app? 
+
+ - Monitoring tools like PM2, Prometheus, Grafana notifies about memory usage.
+ - Heap snapshot: use for diagnosis (finding the objects)
+    - Take Snapshot A (Baseline): Capture memory right after the app starts and stabilizes.
+    - Trigger the Leak: Perform the action you suspect causes the leak (e.g., call a specific API 1000 times).
+    - Take Snapshot B: Capture memory again.
+    - Comparison View: In Chrome DevTools (Memory Tab), load both files and select "Comparison".
+
+-----------------------------------------------------------------

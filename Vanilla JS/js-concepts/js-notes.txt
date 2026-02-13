@@ -67,3 +67,97 @@ Number([]); // 0
 Number([1]); // 1 returns the number irrespective of how nested it is
 Number({}); // NaN
 
+
+Closure: closure is created when outer function remembers and can access the variable from outer function (due to Lexical scope) even after the outer func has finishe executing. 
+- Data encapsulation 
+- function factories 
+- maintain state between calls 
+
+Real use case:
+- Debounce / Throttle functions
+- API logger 
+
+React Stale closure issue: occurs when component re-renders but it still uses closure with old state variables. Since dep arr is [], the useEffect callback is registered only during initial render and the callback uses the initial state value.
+
+// Keeps printing 1
+useEffect(() => {
+   let interval = setInterval(() => {
+      setData(data + 1);
+   }, 1000);
+   return () => clearInterval(interval);   
+}, []);
+
+Fix: 
+1) setData(prev => prev + 1) 
+2) [data] in-efficient as interval is registered on every render 
+
+
+
+Memory leak happens when something is still referenced, so Garbage collecter can't free it. Closures can accidentally keep references alive. 
+
+// Memory Graph: Global -> fn -> closure scope -> bigData 
+// Even if inner() doesn't use bigData, it's still reachable through closure scope
+function outer() {
+  const bigData = new Array(1_000_000).fill("data");
+
+  return function inner() {
+    console.log("hello");
+  };
+}
+let fn = outer();
+
+fn = null; // FIX: Clear fn once done
+
+Generators v/s Async await:
+- Return Type: Generators return an Iterable/Iterator object (which you can loop over); async functions always return a Promise.
+- Control Flow: Generators provide manual execution—the function "pauses" at yield and only resumes when the caller triggers .next(). 
+  async/await provides automatic execution—the engine manages the pausing/resuming logic once the awaited Promise settles.
+- Primary Purpose: Generators are designed for custom iteration and lazy evaluation (generating infinite sequences or memory-efficient data processing);   
+  async/await is specialized for linearizing asynchronous logic (making API calls read like synchronous code).
+
+Prototypal Inheritance 
+ - The Prototype Chain: Every object has an internal link, denoted as [[Prototype]]. When you access a property, the engine performs a recursive lookup: it checks the object, then its prototype, then the prototype's prototype, until it reaches Object.prototype and finally null.
+
+ - Memory Efficiency: Instead of every instance of a 'User' having its own copy of a save() method, they all point to a single save function on the User.prototype.
+
+ .prototype: This is a property of a Constructor Function. It is the "blueprint" or the object that will become the [[Prototype]] of all instances created with the new keyword.
+
+__proto__ (or Object.getPrototypeOf): This is the actual link on the instance. It points to the prototype object it inherited from.
+
+Defining a method in a class is identical to attaching it to the function's .prototype property.
+
+Object.create(null) -> doesn't have any prototype 
+const obj = {} -> has Object prototype 
+
+   function User(name, age) {
+      this.name = name;
+      this.age = age;
+   }
+   // Instead of creating __proto__ display for each instance, single method is shared across all instances
+   User.prototype.display = function() {
+      console.log(`${this.name} is ${this.age} years old`)
+   }
+   const userA = new User('UserA', 20);
+   const userB = new User('UserB', 20);
+
+Hoisting:
+var is hoisted (declared at the top of the scope) and initialized to undefined 
+let/const are also hoisted but not initialized.
+That's why we get ReferenceError cannot use variable before initialization
+
+Temporal Dead Zone - start of the block where the variable is hoisted until the line where the variable is declared. Accessing the variable during this time gives ReferenceError. 
+
+console.log('Hoisting let')
+{
+   // let a is already declared here due to hoisting, but not initialized yet 
+   // So error is about initialization, not declaration
+   console.log('Hoisting 1...');
+   console.log(a); // ReferenceError cannot access a before initialization
+   console.log('Hoisting 2...');
+   let a;
+}
+
+let a // declaration 
+a = 2 // initialization 
+
+let a = 2 // declaration + initialization together 

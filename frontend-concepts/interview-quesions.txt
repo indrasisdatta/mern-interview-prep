@@ -1,7 +1,7 @@
 1) JSON.stringify v/s structuredClone 
  structuredClone advantages:
  - structuredClone can handle circular references 
- - Date, Map, Set are preserved 
+ - Date, Map, Set, Object prototype chain are preserved 
  - faster for complex objects 
  Use JSON.stringify for simple JSON compatible data (API payload, response)
 
