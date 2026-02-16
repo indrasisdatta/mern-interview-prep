@@ -77,6 +77,23 @@
         {"$project": {"sku": "$_id", "totalQty": 1, "_id": 0}}    
     ])
 
+
+/* Total order amount of Returned items in Jan 2024 */
+db.orders.aggregate([
+    {
+        $match: {
+            status: "Returned", 
+            orderDate: { $gte: ISODate("2024-01-01"), $lt: ISODate("2024-02-01") },
+//            $expr: {
+//                $eq: [ {$month: "$orderDate"}, 1 ],
+//                $eq: [ {$year: "$orderDate"}, 2024 ] 
+//           }
+        }
+    },
+    {$group: {_id: null, total: {$sum: "$totalAmount"}}}
+]);
+
+
 ====================================================================
 
 Indexing:
@@ -170,3 +187,15 @@ db.getCollection("transactions").find({
 })
 .sort({bucket_end_date: 1})
 .limit(10)
+
+=================================================================
+
+$match
+$group
+$lookup
+$project  $addFields
+$sort
+$limit
+$unwind
+
+$facet 

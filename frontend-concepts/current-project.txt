@@ -311,6 +311,25 @@ Custom JS scripts (based on project):
 
 ==========================================================================
 
+Dashboard - WebSockets
+
+We used WebSockets in our dashboard to enable real-time ticket updates between support staff and the business operations team.
+When Ops approved/rejected or commented on a ticket, the update was pushed instantly to connected support users.
+
+Flow:
+
+1) React client establishes WebSocket connection after login
+2) Backend publishes ticket events (status change/comment)
+3) Client listens via socket.on('ticket_update')
+4) Instead of updating UI directly, we trigger a lightweight flag and refetch data to keep consistency with backend
+5) We throttled high-frequency events using requestAnimationFrame to prevent excessive re-renders
+
+Performance issue faced: when we received too many socket events, it caused multiple Reat re-renders. To mitigate this, we batched update using requestAnimationFrame based throttle so multiple socket events within a frame triggered only one UI update.
+
+Room based subscriptions so users only received updates for relevant tickets.
+
+==========================================================================
+
 How to handle a Dashboard that receives 1,000 WebSocket updates per second without freezing the UI?
 
  Use requestAnimationFrame based throttle. Browser is limited to 60 Frames per sec, so we can capture the latest data and trigger DOM update within requestAnimationFrame callback, ensuring the main thread stays responsive and we never attempt to render more than the browser is capable of displaying in a single frame. 

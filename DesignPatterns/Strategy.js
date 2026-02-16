@@ -20,4 +20,5 @@ const getStatus = (isLoading, isError, data) => {
   if (!data || data.length === 0) return 'empty';
   return 'success';
 };
+const status = getStatus(isLoading, isError, userData);
 return {RenderStrategy[status](userData)}

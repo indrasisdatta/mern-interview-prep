@@ -75,6 +75,9 @@ https://www.tapascript.io/books/react-hooks-cheatsheet
 
    Debounce/throttle - control API call frequency, resize/scroll handlers 
       
+   useTransition (State Control): You use this when you have access to the state-setting function (like setResult). You are essentially telling React: "Hey, when I call this function, don't rush the UI update."
+
+   useDeferredValue (Value Control): You use this when you only have the value (usually passed down as a prop) and don't have control over the original setState call.
 
    React Execution Timeline
    1) Render Phase: React calculates the Virtual DOM (no browser changes yet).
@@ -365,7 +368,7 @@ https://github.com/reactwg/react-18/discussions/37
 3️⃣ Explain React Flight (server → client payload streaming).
    Using React Flight, server sends serialized description of React component tree instead of sending the entire HTML
    Browser deserializes and renders it 
-   No hydration is needed
+   No hydration is needed in server components, only client components.
 
 4️⃣ What causes client waterfalls with mixed RSC & client components.
 5️⃣ What is lazy hydration and how it boosts INP/LCP.
@@ -391,7 +394,7 @@ https://github.com/reactwg/react-18/discussions/37
 🔟 React 19 preparing ground for partial UI compilation & offscreen hydration.
 
 
-React 16-18 Classic SSR with Hydration:
+React < 18 Classic SSR with Hydration:
 React components are executed twice - once on the server to generate HTML and once on the client to recreate Virtual DOM and hydrate the existing HTML by attaching event handlers. 
 
 Issue with old approach: heavy components still cost CPU on client, large hydration cost (uncanny valley problem)
@@ -402,3 +405,15 @@ React 19 introduced React Flight protocol for server components
 - Client stitches it together with client components 
 
 React server components sends 2 formats - HTML for immediate UI display which users can see and Flight payload which React client uses for hydration. 
+
+Hydration process:
+1) The server runs your components and fetches data.
+2) It sends a fast HTML preview so the user sees the page immediately.
+3) It also sends a Flight Payload, which is like a map of the whole UI.
+4) This map marks which parts are "static" and which parts need "interactivity."
+5) The browser shows the HTML, but buttons and inputs don't work yet.
+6) Static Server Components stay as they are; they never need JavaScript on the client.
+7) The browser downloads small JavaScript bundles only for the Client Components.
+8) React 18 uses Selective Hydration to prioritize the parts the user clicks on first.
+9) React "hydrates" these parts by attaching event listeners like onClick to the HTML.
+10) The page becomes fully interactive without needing to re-render the entire tree.
