@@ -3,7 +3,7 @@ WEB OPTIMIZATION
 	Loading time includes:
 	 - TTFB (Time to first byte) 
 	 - FCP (First contentful paint)
-	 - LCP (Last contentful paint)
+	 - LCP (Largest contentful paint)
 	 - TTI (Time to interactive) 
 	 
 	How to improve TTFB? (Goal: Process server request fast and deliver to client fast)

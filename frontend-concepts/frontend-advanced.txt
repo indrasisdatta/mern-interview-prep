@@ -154,6 +154,8 @@ At least 60 FPS -> 60 frames in 1000 ms, 1 frame in 1000/60 = 16.7ms
 Browser has to render 1 frame in 16ms.
 Within 16 ms, browser has to run JS, layout, paint, composite. 
 requestAnimationFrame runs once per frame but if JS takes longer time, the frame is dropped. 
+requestAnimationFrame (rAF) is frame-based — it runs once before the browser’s next repaint and automatically aligns with the device’s refresh rate (≈16.6ms at 60Hz, ≈8.3ms at 120Hz).
+Because rAF is synchronized with the browser rendering pipeline, it is better suited for animations and visual updates.
 
 Best practices to avoid Reflow, Repaint: 
  - Prefer transform & opacity (GPU-accelerated)
@@ -192,7 +194,3 @@ map.set(obj, 'obj val');
 obj = {};
 // After sometime 
 console.log(map); // Returns for Map but {} for WeakMap
-
-Scroll v/s IntersectionObserver
- - Window scroll events fire many times per second, and when handlers read layout properties they can trigger repeated layout reflows, leading to high CPU usage and janky UI.
- - IntersectionObserver runs within the browser's rendering pipeline and batches visibility checks with normal layout work, so callbacks fire only when elements cross visibility thresholds instead of continuously

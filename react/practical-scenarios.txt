@@ -156,6 +156,10 @@ Scroll v/s IntersectionObserver:
 Use scroll for continuous scroll-based effects (like progress bars or parallax).
 Use IntersectionObserver for event-based actions (like lazy loading or infinite scroll).
 
+ - Window scroll events fire many times per second, and when handlers read layout properties they can trigger repeated layout reflows, leading to high CPU usage and janky UI.
+ - IntersectionObserver runs within the browser's rendering pipeline and batches visibility checks with normal layout work, so callbacks fire only when elements cross visibility thresholds instead of continuously
+
+
 8. How to handle efficient file upload to S3 in a React app?
 Ans: 
 i) React app requests a pre-signed URL from backend  

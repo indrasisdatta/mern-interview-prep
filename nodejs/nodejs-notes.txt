@@ -58,7 +58,7 @@ EXCEL FILE UPLOAD PROCESS
 const fileBuffer = fs.readFile(filepath);
 const workbook = XLSX.read(fileBuffer, {type: 'buffer'});
 const firstSheet = workbook.SheetNames[0];
-const XLXZ.utils.sheet_to_json(firstSheet);
+const XLXS.utils.sheet_to_json(firstSheet);
 
 Streaming approach: 
  - Memory efficient (if 10 users upload 100MB each using Buffer, server will need 1GB RAM. Streaming holds one chunk in memory at a time)
