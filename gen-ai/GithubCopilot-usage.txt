@@ -1,0 +1,15 @@
+.github/
+   - copilot-instructions.md
+   - react-components.prompt.md 
+   - code-review.prompt.md 
+   - skills  (Agent skills)
+
+
+Agent Skills 
+ - 3 types of skill contents, 3 levels of loading 
+ - Level 1: Metadata (always loaded. Knows this skill exists and when to use it)
+ - Level 2: Instructions (SKILL.md loaded when triggered)
+ - Level 3: Resources and Code (scripts folder)
+
+When you request something that matches the skill description, Claude reads Skill.md from the filesystem via bash. Only then the content enters the context window. 
+
