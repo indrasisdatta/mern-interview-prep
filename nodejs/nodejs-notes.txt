@@ -42,7 +42,38 @@ Microtask queue
 
 Worker thread v/s child process.fork 
 
-=====================================
+==========================================================================
+
+Types of Middlewares in Node.js: 
+https://dev.to/khushindpatel/types-of-middleware-the-different-flavors-171a
+
+1) Application-level Middleware: runs across the entire express application, handling common logic for all incoming requests. 
+  app.use(rateLimiter)
+
+2) Router level middleware: Applied to individual routes 
+    // Single API
+    app.get('/get-orders', authenticate, getOrders)
+
+    // Router level i.e all APIs within /users
+    const userRouter = express.Router();
+    userRouter.use(authenticate);
+    userRouter.post('/dashboard', getDashboard);
+    userRouter.post('/profile', getProfile);
+    userRouter.post('/settings', updateSettings);
+
+    app.use("/users", userRouter);
+
+3) Error handling middleware: should always have 4 args
+    app.use((err, req, res, next) => {
+      logger.error('Error occurred!', err);
+      return res.status(500).json({ message: 'API error' });
+    });
+
+4) Built-in middlewares:
+    app.use(express.static('public')) // Serves static files from public
+    app.use(express.json()) // Parses JSON payloads in incoming requests
+
+==========================================================================
 
 EXCEL FILE UPLOAD PROCESS 
 
@@ -169,7 +200,35 @@ Approaches:
 1) express-rate-limit: memory based, suitable for small apps only (no multi instance)
 2) io-redis: shared across instances, atomic, fast, scalable 
 
+Express rate limiter is fine for single instance but fails for multiple instances:
+  Server A → 100 requests allowed
+  Server B → 100 requests allowed
+  Server C → 100 requests allowed
+  User effectively gets 300 requests ❌
+  When K8s pods restart - memory resets, counter resets 
+
+Redis has shared counter across all server instances
+
 System design blog: https://www.eraser.io/decision-node/api-rate-limiting-strategies-token-bucket-vs-leaky-bucket
+
+import {rateLimit} from 'express-rate-limit';
+
+// Max 5 requests are allowed in 60 secs 
+// Automatically adds crucial HTTP response response headers 
+// X-RateLimit-Limit, X-RateLimit-Remaining
+const rateLimiter = rateLimit({
+  windowMs: 60*1000, 
+  limit:  5, 
+  message: "Too many requests", 
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Used in all routes 
+app.use(rateLimiter);
+
+// Route specific middleware
+app.post("/dashboard", rateLimiter, authenticate, authorize, getDashboardData);
 
 ---------------------------------------------------------------
 

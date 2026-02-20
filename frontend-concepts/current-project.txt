@@ -352,3 +352,41 @@ TODO:
 1. Infinite scroll FSD
 2. Redux toolkit workflow 
 3. Current project HLD/LLD 
+
+==========================================================================
+
+NodeJS Authentication and Authorization Middlewares 
+
+// route.js
+app.post(
+    '/profile', 
+    authenticate, 
+    authorize(['admin', 'support', 'ops']), 
+    getUserProfile
+);
+
+// authenticate.js 
+export const authenticate = (req, res, next) => {
+    const token = req.header('Authorization');
+    if (!token) return res.status(401).json({ message: 'Invalid request' });
+    try {
+        const user = jwt.verify(token, SECRET);
+        req.user = user;
+        next();
+    } catch (e) {
+        return res.status(401).json({ message: 'Invalid user' });
+    }
+}
+
+// authorize.js
+export const authorize = (requiredPermissions) => {
+    return (req, res, next) => {
+        const userClaims = req.user.claims;
+        if (!requiredPermissions.every(p => userClaims.includes(p))) {
+            return res.status(403).json({ message: 'Unauthorized access' });
+        next();
+    }
+}
+
+
+https://dev.to/rabindratamang/how-to-implement-role-based-access-control-rbac-in-nodejs-applications-1ed2

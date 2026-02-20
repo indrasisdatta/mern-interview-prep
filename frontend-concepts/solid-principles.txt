@@ -35,3 +35,23 @@ DRY Principles:
    Utilities: Move data formatting (like formatCurrency) into a central utils folder instead of re-writing the math in every component.
 
    Services: As you mentioned, a separate Service layer ensures that if an API endpoint changes, you only update it in one file, not every component that calls it.
+
+=======================================================================
+
+SOLID Principles in NodeJS:
+
+1. Single Responsibility: app.post() shouldn't have all logic in one place. Split it into validator, service, controller 
+
+2. Open/Close: Use the Strategy pattern for adding Google auth in an existing local auth flow. Plug in a new strategy without touching the login class code. 
+
+3. Liskov's substitution: Database class has 2 sub-classes MongoDB and PostgreSQL. Follow the same contract - connect() using same params and return type 
+
+4. Interface Segregation: Don't force a class or function to depend on methods it doesn't use.
+Instead of having a single UserService with 50 different methods, split it into smaller interfaces. 
+
+5. Dependency Inversion: UserService directly imports Sendgrid to send email. 
+Have a separate EmailService instead and inject it.
+
+
+Passport.js example 
+

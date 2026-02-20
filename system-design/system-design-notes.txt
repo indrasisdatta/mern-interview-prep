@@ -136,6 +136,17 @@ Caching Types
  - Session caching 
  - API response caching
 
+Browser cache: 
+ - caching handled by browsers using HTTP headers  
+ - Static assets (JS, CSS, images)
+ - Configured with Cache-Control, ETag, Last-Modified, Expires
+ - Hard to invalidate 
+
+Redis:
+ - In memory data-store used by backend for dynamic DB data 
+ - Read-heavy queries, session storage, rate limiting 
+ - Computed/aggregated data, feature flags
+
 Message Queue - addresses a no. of challenges:
  - asyncronous communication 
  - decoupling (decouples apps from each other, making them independent)
@@ -253,7 +264,7 @@ for (const event of events) {
     // leave as PENDING → retry later
   }
 }
-Note: Change Streams are great for analytics and replication, but they are not transactional guarantees. Outbox pattern ensures atomicity between business data and events.
+Note: MongoDB Change Streams are great for analytics and replication, but they are not transactional guarantees. Outbox pattern ensures atomicity between business data and events.
 
 ------------------------------------
 
@@ -273,7 +284,7 @@ Scenario: User purchases a course and gets email notification on successful paym
 
    Save data in Redis hosted in Aiven.
 
-=========================================================================================================================
+=====================================================================
 
 PROBLEM STATEMENT 2: 
 2a: In an image sharing platform, implement a search feature where we can search by name, username and it returns a page with all images posted by the user
@@ -350,7 +361,24 @@ How to check the scalalibility of app?
 
 AWS Microservice whitepaper: https://docs.aws.amazon.com/pdfs/whitepapers/latest/microservices-on-aws/microservices-on-aws.pdf
 
-=========================
+===========================================================================
+
+Circuit Breaker Pattern:
+   https://dev.to/wallacefreitas/circuit-breaker-pattern-in-nodejs-and-typescript-enhancing-resilience-and-stability-bfi
+
+   https://selvaganesh93.medium.com/adding-circuit-breakers-to-nodejs-apis-8c980d3e96c4
+
+   CLOSED — Resource has not been tried yet or has been tried and is available
+   OPEN — Resource was tried and was unavailable breaker trips
+   HALF-OPEN — Wait threshold met resources was tried again
+
+===========================================================================
+
+Idempotency: An operation is considered idempotent if applying it multiple times has the same effect as applying it once. In a REST API, that means performing multiple HTTP requests should have the same outcome (not output) as that of a single HTTP request.
+
+Add an Idempotency-Key header with a unique value for each new request
+
+===========================================================================
 
 Some real world examples of DSA in System design:
 
