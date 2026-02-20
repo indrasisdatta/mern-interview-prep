@@ -175,6 +175,45 @@ Max BSON document size = 16MB, so use reference if collection keeps growing
  - Sharding for horizontal scaling big datasets 
  - Caching (Redis)
 
+9) How to design many to many relationship?
+    https://www.mongodb.com/company/blog/building-with-patterns-the-subset-pattern
+
+    Customer → Orders,  User → Posts, Product → Reviews, Chat → Messages
+
+    MongoDB subset pattern: 
+     - embed recent orders in Customer for fast reads  
+     - store full order history in a separate Orders collection to avoid unbounded document growth
+
+    Customer collection:
+        {
+            _id: "cust1",
+            name: "John",
+            recentOrders: [
+                { orderId: "o101", amount: 200 },
+                { orderId: "o102", amount: 150 }
+            ],
+            hasMoreOrders: true
+        }
+    Orders collection: { _id: "o101",customerId: "cust1", amount: 200, items: [...] }
+
+    const orderSummary = { orderId: "o101", amount: 200, status: "PLACED",createdAt: new Date() };
+
+    For write - use multi-document transaction 
+        session.startTransaction();
+        await Orders.insertOne(orders, {session});
+        await Customers.updateOne(
+            {_id: custId},
+            {
+                $push: { 
+                    recentOrders: {
+                        $each: [orderSummary], $slice: 5
+                    }
+                },
+                $inc: { totalOrderValue: orderSummary.amount }
+            },
+            {session}
+        )
+
 ===============================================================
 
 Cursor based pagination - handling duplicate timestamps 

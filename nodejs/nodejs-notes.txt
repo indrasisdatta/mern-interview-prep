@@ -249,3 +249,14 @@ How to detect memory leak in Node app?
     - Comparison View: In Chrome DevTools (Memory Tab), load both files and select "Comparison".
 
 -----------------------------------------------------------------
+
+Debugging Heap Snapshots
+
+Local:
+  1) node --inspect app.js OR Run VS Code Debugger (By configuting launch.json)
+     node --inspect .\dist\src\server.js
+  2) chrome://inspect  
+     Open dedicated Dev Tools for Node -> Memory tab -> heap snapshot
+  3) Fire the APIs that you're suspecting (use load test etc.)
+  4) Take heap snapshot again 
+  5) Select "Comparison" dropdown and compare the two heaps. Check for "Size Delta".  

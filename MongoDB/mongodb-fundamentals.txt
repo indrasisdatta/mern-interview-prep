@@ -13,7 +13,7 @@ Build a GraphQL Server with Node.js and MongoDB: https://www.youtube.com/watch?v
 
 MongoDB Compass connect: mongodb://localhost:27017
 
-show dbs                          - Show all existing DB list
+show dbs                          - Show all existing DB listz
 use angular5crud              - Use this DB
 db.getName()                   - Current DB name
 db.getCollectionNames()   - All collection names

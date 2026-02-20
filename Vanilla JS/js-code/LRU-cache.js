@@ -1,48 +1,43 @@
 /**
- * Create a Utility class for a LRU
- * It should store only the least recently used values (recently stored and accessed)
- * If max size is reached, old values should be removed
+ * LRU cache implementation 
+ * Keep - recently used i.e added/retrieved keys 
+ * Remove - oldest used (added/retrieved)
+ *   Get - Delete old, set latest key 
+ *   Set - 
+ * 
  */
-const LRUUtil = (MAX_CACHE_SIZE) => {
-  const mapData = new Map();
-  const getData = (k) => {
-      // Data doesn't exist
-      if (!mapData.has(k)) {
-        return null;
-      }
-      // First delete key, then re-insert same key 
-      // (to maintain insertion order as per recently used)
-      const val = mapData.get(k);
-      mapData.delete(k) && mapData.set(k, val);
-      return val;
-  }
-  const setData = (k, v) => {
-      let delKey = null;
-      // Key already exists, so remove old occurrence
-      if (mapData.has(k)) {
-          delKey = k;
-      }
-      // Max size reached, remove oldest key
-      else if (mapData.size >= MAX_CACHE_SIZE) {
-          const firstKey = mapData.keys().next()?.value;
-          delKey = firstKey;
-      }
-      // Delete map data
-      delKey && mapData.delete(delKey);
-      // Insert new data
-      mapData.set(k, v);
-  }
-  const lruData = () => {
-      return mapData.entries();
-  }
+const LRUCache = (MAX_SIZE) => {
+  const cacheMap = new Map();
+  
   return {
-      getData,
-      setData,
-      lruData
+    getData(key) {
+      // Key doesn't exist, return immediately
+      if (!cacheMap.has(key)) return null;
+
+      // Delete prev entry and set to maintain insert order
+      let val = cacheMap.get(key);
+      cacheMap.delete(key) && cacheMap.set(key, val);
+      return val;
+    },
+    setData(key, value) {
+      // Delete old occurence
+      if (cacheMap.has(key)) {
+        cacheMap.delete(key);
+      } 
+      // Limit reached - delete the first element
+      else if (cacheMap.size === MAX_SIZE) {
+        let firstKey = cacheMap.keys().next()?.value;
+        cacheMap.delete(firstKey);
+      }
+      return cacheMap.set(key, value);
+    },
+    lruData() {
+      return [...cacheMap.entries()];
+    }
   }
 }
 
-const lruData = LRUUtil(3);
+const lruData = LRUCache(3);
 lruData.setData('2', '2 value');
 lruData.setData('3', '3 value');
 lruData.setData('1', '1 value');
@@ -58,4 +53,3 @@ lruData.setData('5', '5 value');
 
 // Expected - 2 => '2 updated value', 1 => '1 value', 5 => '5 value'
 console.log('2. LRU data: ', lruData.lruData());
-
