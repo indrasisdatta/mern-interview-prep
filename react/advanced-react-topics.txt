@@ -417,3 +417,29 @@ Hydration process:
 8) React 18 uses Selective Hydration to prioritize the parts the user clicks on first.
 9) React "hydrates" these parts by attaching event listeners like onClick to the HTML.
 10) The page becomes fully interactive without needing to re-render the entire tree.
+
+
+export const GlobalProviders = ({ children }: { children: React.ReactNode }) => (
+  <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <BrowserRouter>
+          {children}
+        </BrowserRouter>
+      </QueryClientProvider>
+    </Provider>
+  </Provider>
+);
+
+// main.tsx 
+createRoot(document.getElementById("root")).render(
+  <GlobalProviders>
+    <App />
+  </GlobalProviders>
+);
+
+
+server-only package prevents server code from accidentally being imported into a client component
+
+   
+
