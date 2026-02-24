@@ -34,6 +34,18 @@ For straightforward projects - npm
 For faster install and better security - yarn
 For optimal performance and disk space efficiency - pnpm
 
+npm:
+ - slower install
+ - disk usage is high as it duplicates dependencies 
+yarn 3 (Berry):
+ - faster install compared to npm but uses different file structure 
+    .pnp.cjs 
+ - some build tools, test libs, CI/CD pipelines are compatible with node_modules so needs additional configuration 
+
+pnpm:
+ - fast installation
+ - uses global store and symlinks, so disk space is reduced 
+
 __________________________________________________________________
 
 1. What is PWA?

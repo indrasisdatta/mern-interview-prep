@@ -1,3 +1,5 @@
+// Reference: https://medium.com/@shubhankarmisra.bit/implementing-streaming-in-react-with-rendertopipeablestream-550864bee044
+
 // Express server 
 import express from "express";
 import { renderToPipeableStream  } from "react-dom/server";

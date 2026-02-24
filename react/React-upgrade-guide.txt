@@ -69,3 +69,33 @@ npm install does these checks:
 --force ignores 1, 2, 3
 
 
+1) Check ecosystem compatibility and run: npm outdated    
+   It shows (Current   Wanted   Latest) - version visibility checker 
+
+   Before migrating to latest React, identify dependencies like old router-dom, old testing library, old UI libraries 
+   react-router-dom: 5.x // Version 6 works best with React 19, so this is revealed early.
+   After React upgrade, npm may throw peer dependencies error. If we upgrade the dependencies first, fewer conflicts will occur. 
+
+2) Install latest React: npm install react@latest react-dom@latest
+
+3) Run codemod to replace legacy APIs 
+   (Handles forwardRef, lifecycle renames, etc.)
+    npx codemod react-migration/recipe/19
+
+4) Fix TypeScript errors 
+
+5) Run unit and integration tests (More await is needed in test files)
+
+6) Perform production smoke testing for critical flows 
+
+// Old test - sync
+render(<Component />);
+expect(screen.getByText("Loaded")).toBeInTheDocument();
+
+// After concurrent rendering 
+render(<Component />);
+expect(await screen.findByText("Loaded")).toBeInTheDocument();
+// OR 
+await waitFor(() => {
+  expect(screen.getByText("Loaded")).toBeInTheDocument();
+});

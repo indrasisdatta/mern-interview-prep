@@ -81,7 +81,10 @@ Script = HTML parsing + (parsing paused) JS download + JS execution + Resume HTM
 script async = HTML parsing and JS download parallelly + (parsing paused) JS execution + Resume HTML parsing (order is not maintained, the one downloaded first is executed first)
 script defer = HTML parsing full and JS download parallelly + JS execution (maintains order)
 
-==================
+Defer - for your app code (Needs DOM to be ready, order matters)
+Async - for third party script 
+
+======================================================
 
 https://prepfully.com/interview-questions/agoda/frontend-engineer?page=1
 

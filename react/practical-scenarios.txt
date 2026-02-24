@@ -77,13 +77,18 @@ Ans: Axios provides "onUploadProgress" and "onDownloadProgress" options
 const config = {
     headers: {'content-type': 'multipart/form-data',
     onUploadProgress: function (event) {
-        setProgress(Math.round(event.loaded / event.total * 100));
+        if (event.total) {
+          setProgress(Math.round(event.loaded / event.total * 100));
+        }
     },
     onDownloadProgress: function (event) {
         // Do whatever you want with the native progress event
     },
 }
 axios.post(url, formData, config).then(...).catch(...);
+
+It internally listens to the browser's XMLHttpRequest upload events 
+It tracks total bytes send and total bytes to send
 ________________________________________________________________________
 
 5. Real-Time Data with Polling
