@@ -107,3 +107,31 @@ io.to(room).emit("ticket_update", {
   ticketId,
   status,
 });
+
+// Server middleware
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    const user = verifyJWT(token);
+
+    socket.user = user; // attach user
+    next();
+  } catch (err) {
+    next(new Error("Unauthorized"));
+  }
+});
+
+
+WebSocket connections are stateful and must remain bound to the same server instance. 
+- This can be achieved using load balancer stickiness (ALB stickiness)
+  ALB sets cookie AWSALB=.... 
+- At scale the preferred approach is to use a shared pub/sub layer like Redis so that any server instance can communicate with any connected client, enabling true horizontal scalability.
+
+// track token expiry for sockets 
+setTimeout(async () => {
+  const res = await refreshTokenAPI();
+  accessToken = res.data.accessToken;
+
+  socket.auth.token = accessToken;
+  socket.disconnect().connect();
+}, timeUntilExpiry - buffer);

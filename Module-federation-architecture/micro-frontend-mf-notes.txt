@@ -191,6 +191,12 @@ Q3. Preventing style collissions across different MF
 Ans. i) Use CSS modules or Shadow DOM 
     ii) Shared Design System using CSS vars and common components 
         Expose it as a shared singleton via Module Federation so that browser fetches it only once 
+    iii) Tailwind prefixes (each remote should use a unique Tailwind prefix to prevent style collisions.)
+    // tailwind.config.js
+    module.exports = {
+        prefix: 'host-',
+    }
+    <div class="ra-flex ra-p-4">
 
 Q4. Your app has Checkout, Profile, and Search owned by different teams. How would you split them?
 A: Each domain would be a standalone micro-frontend owning its routing, state, and business logic.

@@ -72,4 +72,9 @@ S3 upload flow:
 - Frontend uploads file directly to S3 pre-signed URL (PUT request)
 - Frontend sends metadata to API 
 
+For image processing (resizing), use S3 Object Lambda or an Event-Driven Architecture where S3 triggers a Lambda asynchronously, so the user doesn't wait for the process to finish.
+ - S3 fires an event (e.g., ObjectCreated)
+ - Lambda is triggered automatically
+ - Lambda processes the file
 
+To further reduce costs, use S3 Lifecycle Policies (moving old images to Glacier) or CloudFront for caching frequently accessed images
