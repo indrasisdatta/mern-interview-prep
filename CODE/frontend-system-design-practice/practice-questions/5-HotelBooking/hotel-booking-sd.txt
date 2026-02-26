@@ -1,0 +1,93 @@
+FUNCTIONAL REQUIREMENTS:
+1) Search hotels: 
+- Date range 
+- Location
+- Rooms
+- No. of person
+(on submit)
+
+2) Display large result set with infinite scroll, pagination
+3) Have additional filters - price range, ratings, amenities (on click)
+3) Clicking opens hotel details page with photos, rooms and policies
+4) Booking flow: Select room -> Guest info -> Payment 
+5) Login, sign up, profile
+6) Internationalization
+
+
+NON-FUNCTIONAL REQUIREMENTS:
+1) Accessibility 
+2) Responsive 
+3) Internationalization 
+4) SEO support 
+5) Testing 
+
+ARCHITECTURE:
+1) Rendering - SSR, ISR
+2) State management - react-query, redux-toolkit
+3) Styling - design system (Material UI, ShadCN), Tailwind CSS 
+4) Bundling (Webpack)
+5) Image optimization (CDN, avif/webp)
+6) Authentication & authorization
+
+DATA: 
+
+interface SearchParams {
+    checkin: string;
+    checkout: string;
+    city: string;
+    guests: number;
+    rooms: number;
+    filters: Fiters 
+}
+
+interface Filters {
+    price?: [number, number],
+    rating?: number[],
+    amenities: string[]
+}
+
+interface Hotel {
+    id: string;
+    name: string;
+    location: {lat: number, lng: number};
+    rooms: Room[],
+    images: string[],
+    minPrice: number
+}
+
+interface Room {
+    id: string;
+    roomNo: string;
+    price: number;
+    occupancy: string;
+    images: string[]
+}
+
+INTEGRATION
+
+POST /api/search 
+{
+    checkin: "",
+    checkout: "",
+    city: "",
+    guests: 2
+    rooms: 1,
+    filters: {
+        price: [1000, 2000],
+        rating: [4, 5],
+        amenities: ['car-parking']
+    }
+}
+
+GET /api/hotel/:id 
+
+PERFORMANCE OPTIMIZATION:
+
+1) Lazy loading routes, code splitting 
+2) Bundler for tree shaking
+3) Image optimization using CDN and avif/webp formats 
+4) Debounce, throttling in search
+5) Infinite scroll, virtualization
+6) Monitoring - Sentry, Google Analytics 
+7) Lighthouse for core web vitals scores 
+8) Testing - JEST, RTL for unit testing, MSW for integration testing 

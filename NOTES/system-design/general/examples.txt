@@ -1,0 +1,107 @@
+LIVE STREAMING APPLICATION
+
+RTMP (highly quality video)
+WebRTC (loses some data but useful for live streaming)
+
+How to convert raw data (8K) and serve to customers (480p, 720p)?
+Transformation service to convert to different resolutions 
+
+h.264 
+
+Map reduce design pattern 
+Break raw video into segments of 10 sec and send it to multiple servers 
+  S1, S2, S3 
+
+MPEG - DASH (depending on the bandwidth, video quality is adjusted)
+Cache last 10 sec video in DB
+
+User actions:
+- Play video at timestamp x
+- Pause video (buffer next 10 sec from last seek point)
+- After logout and login, resume from earlier viewed timestamp 
+
+Dynamic Adaptive Streaming over HTTP (DASH) also known as MPEG-DASH 
+ - adaptive bitrate streaming technique 
+ - enable high quality streaming of media content delivered over the internet 
+ - delivered from conventional HTTP server 
+
+(Exponential backoff at TCP)
+
+Class and sequence diagram: 
+https://excalidraw.com/#json=geYPBQk8_7PJcit8RavZG,dMy9aYwXnOvAVtu2CBjuDA
+
+
+Key takeaways:
+1. What are some of the ways to perform live streaming?
+    Legacy: Low-latency but hard to scale.
+    Modern: Low-latency and adaptable for real-time needs.
+    HTTP-Based: Scalable but with higher latency, ideal for mass audiences.
+
+    HTTP based protocol:
+      HLS (HTTP Live streaming - can't maintain latency)
+      MPEG-DASH (Dynamic Adaptive streaming over HTTP - HTTP based - not compatible with Apple devices)
+    Modern protocol:
+      WebRTC (Delivers video streams with real time latency - Peer to peer streaming)
+      SRT (Secure Reliable Transport - low latency, top-notch security)
+    Legacy protocol:
+      RTMP (for ingest i.e streaming from broadcaster to server eg. Facebook live)
+      RTSP
+
+    Summary of Protocols by Use Case:
+    HLS/DASH: Scalable video-on-demand and live streaming (e.g., YouTube, Netflix).
+    RTMP: Live stream ingestion (e.g., Twitch, Facebook Live).
+    WebRTC: Real-time low-latency communication (e.g., Zoom, WhatsApp).
+    RTSP: Surveillance and point-to-point live feeds (e.g., Nest, Ring).
+
+    Internal working:
+    Raw video files that cameras capture are very large & impossible to stream over the internet. 
+    Video encoders - works as middleman to convert these massive files to streamable digital files.
+    In broadcasting, encoded files are sent to a CDN. From there they are sent to viewer's devices where they are decoded and converted back to video files for viewing.
+
+    Compressing and decompressing are done through video codecs:
+    MP3, H.264, H.265
+
+    Video transcoding - makes multi bitrate and adaptive bitrate streaming possible. 
+    - Multi bitrate: Multiple renditions or versions of 1 video in different quality 
+    - Adaptive bitrate: automatically choose the appropriate rendition based on the user's internet speed 
+__________________________________________________________________________________________________________________
+
+2. What is Map Reduce design pattern?
+
+
+==============================
+
+How does Facebook live scale? (Thundering herd problem)
+
+Thudering herd - multiple process or threads are waiting for a resource to be availale. When it's available, they all rush to acquire it at the same time.
+This leads to sudden spike in demand causing high latency, poor network and server crash. 
+Common solutions:
+ - Edge Caching (store frequently accessed data on edge server closer to end user rather than central server)
+ - Load balancing 
+ - Queue 
+ - Throttling (Eg. exponential backoff with jitter)
+ - Connectin pooling 
+
+User request -> Edge cache -> Origin server -> Streaming server 
+
+Streaming server: handles broadcaster's live stream ingestion 
+Origin server: processes, stores and distributes the stream to edge cache 
+Edge cache: serves content to viewers
+
+Person A (Broadcaster):
+ - camera/mobile captures the video and streams it real time to the streaming server  
+ - streaming server ingests the raw live video using a protocol called RTMP
+ - forwards the stream to the origin server for further processing (eg. transcoding, packaging, distribution) 
+
+Person B, C, D (viewer):
+ - request the stream from edge cache 
+ - if edge cache doesn't have the content, it goes to the origin server
+
+FB uses Request collescing - when 10 simultaenous req for the same data are made to the edge cache, they all are added to the request queue and only 1 goes through to the origin server.
+Same arch is followed in origin server i.e 1 req goes to the live streaming server.
+
+Request collescing using Nginx - set 
+proxy_cache_lock = on
+proxy_cache_lock_timeout = 10
+
+
