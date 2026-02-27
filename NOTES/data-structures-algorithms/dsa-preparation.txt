@@ -1,0 +1,53 @@
+PHASE 1 (Core - MUST master) These cover 70% of interviews.
+    Do only these first:
+    Hashing
+    Sliding Window
+    Two Pointers
+    Stack & Queue
+    Binary Search
+
+    From your list, that's:
+    49, 347, 128, 1
+    3, 209, 567
+    15, 11, 26
+    20, 155, 150
+    33, 34, 875
+
+    Do not move on until you can solve these without hints.
+
+PHASE 2 (Frontend-Specific Strength)
+    This is where your profile shines.
+    Trees & Recursion
+    Intervals
+    Greedy
+
+    These are very common in: Agoda, Flipkart, Swiggy, Razorpay, Atlassian FE roles
+
+PHASE 3 (Senior / System DS)
+    Only after Phase 1 + 2 feel comfortable.
+    LRU Cache
+    Graphs
+    DP (only basics)
+__________________________________________________________________
+
+✅ Right way (what you should do)
+
+For each problem, write 3 things:
+    Pattern
+    Invariant
+    Failure case you missed
+
+Example (Remove K duplicates):
+    Pattern: Stack (group compression)
+    Invariant: Stack top = unresolved group
+    Missed: Need to repeat chars when rebuilding string
+
+This is how you convert attempts → skill.
+
+For each problem:
+1) Write the pattern name
+2) Write the invariant (1–2 lines)
+3) Dry-run 1 example on paper
+4) Code
+5) Write 1 mistake / edge case learned
+

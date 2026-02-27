@@ -1,0 +1,53 @@
+1. Accessibility Standards
+
+    https://equidox.co/blog/the-four-pillars-of-web-content-accessibility-guidelines-wcag/
+
+    WCAG - Web Content Accessibility Guidelines 
+    - Percievable : if content cannot be seen, it must be able to be heard or felt (alt text, captions, color contrast)
+    - Operable: must be able to interact (keyboard navigation, no trap focus)
+    - Understandable: content shouldn't be difficult to read, forms should be clear and easy to fill (e.g. readable text)  
+    - Robust: work across assistive technologies (cross-browser, proper HTML ARIA compatible) 
+    WCAG Compliance Level: WCAG 2.2 AA 
+
+    Tools: 
+    • SonarLint (IDE)   • eslint-plugin-jsx-a11y (lint)  • SonarQube
+    • axe DevTools / Lighthouse (manual scan)  • axe-core in CI tests
+
+    WAI-ARIA (Accessible Rich Internet Applications): A technical specification that adds attributes to HTML to make web content and applications more accessible to people with disabilities, especially where JavaScript is used.
+    - Roles: what an element is or what it does (E.g. <header>, <nav>, <footer>)
+    - Properties: Give extra meaning (e.g. aria-required, aria-labelledby)
+    - States: current conditions (e.g. aria-expanded, aria-disabled)
+
+    ATAG (Authoring Tool Accessibility Guidelines): ATAG ensures that authoring tools like WordPress are themselves accessible and also generate accessible HTML by default - enforcing semantic markup and encouraging alt text E.g. CMS (Wordpress), Editors, WYSIWYG
+
+    UAAG (User Agent Accessibility Guidelines): Standards for browsers and media players to ensure they work with assistive technologies. E.g. keyboard access with tab key.
+
+2. Core Web Standards (The Foundation)
+    - WHATWG HTML Living Standard: The current, evolving standard for HTML that replaces versioned releases (like HTML5).
+    - ECMAScript (ES): The official standard for JavaScript (e.g., ES2024). It defines the language features and syntax.
+    - W3C CSS Standards: While CSS doesn't have a single "version," it is organized into Modules (like Grid, Flexbox, and Selectors) that follow W3C recommendations.
+
+3. Performance Standards
+Core Web Vitals (CWV): Google’s standardized metrics for measuring user experience:
+    LCP (Largest Contentful Paint): Loading performance.
+    INP (Interaction to Next Paint): Responsiveness.
+    CLS (Cumulative Layout Shift): Visual stability.
+
+    Performance Budgets: An industry best practice of setting limits for file sizes (JS, CSS, Images) to ensure fast load times.
+
+4. Security & Privacy Standards
+    - CSP (Content Security Policy): An HTTP header standard used to prevent Cross-Site Scripting (XSS) and data injection attacks.
+    - CORS (Cross-Origin Resource Sharing): A standard that allows servers to specify who can access their resources from a different origin.
+    - GDPR / CCPA: Legal standards for data privacy that frontend developers must implement via consent banners and data handling practices.
+        GDPR → EU privacy law
+        CCPA → California privacy law
+        PDPA → Data protection laws in Asia
+        Frontend common patterns for ALL
+        - Cookie banner + preferences
+        - Lazy-load tracking scripts after consent
+        - Consent state stored (cookie/localStorage)
+        - Privacy-friendly forms
+
+5. Design & Responsive Standards
+    - Mobile-First Design: The standard approach of designing for the smallest screen first and scaling up.
+    - Design Systems: Using standardized components (e.g., Material Design, Carbon) to ensure visual and functional consistency across a product.

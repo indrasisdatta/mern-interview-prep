@@ -1,0 +1,106 @@
+OWASP Top 10 (2021) Security risks:
+https://www.cloudflare.com/learning/security/threats/owasp-top-10/
+ - Access & auth 
+    - Broken access control (users can access unauthorized resources. Remedies: Authorization header)
+    - Identification and Authentication failures (attackers obtain data from a data breach and try a script with username/password combinatins. Remedies: 2FA, rate limiting)
+- Data & code safety 
+    - Cryptographic failures (not protecting sensitive data like financial info and password. Remedies - hash password in DB)
+    - Injection (SQL injection - prepared statement, XSS - sanitize input, DOMPurify) 
+    - Software and data integrity failures (insecure deserialization, untrusted 3rd party updates leading to DDos attacks and remote code execution attacks. Remedies - Check CI/CD have strong access controls )
+- Design & config 
+    - Insecure design (Flaws in architecture/business logic, not proper input validation eg. user-specific promo codes can be accessed by all)
+    - Security misconfiguration (showing overly descriptive errors, leaving defaut passwords eg. admin/admin, keeping unnecessary ports open, leaving S3 cloud public. Remedies - show generic error message)
+- Dependencies & ops 
+    - Vulnerable and outdated components (using libraries with known vulnerabilities. Remedies - audit libs from time to time and update patches) 
+    - Security logging and monitoring failures (data breaches are not detected)
+- Server-side Request Forgery (server making unauthorized internal/external requests)
+ E.g. 169.254.169.254 is used by cloud providers for metadata service. Attackers can call it to obtain AWS secret access keys. 
+ http://169.254.169.254/latest/meta-data/iam/security-credentials/admin-role
+ Remedies: Block internal IP, Use VPC and Security Groups to make sure web server can't access internal metadata service or private DB, Use IMDSv2 which requires Session token header.
+_______________________________________________________________________________
+
+Cross site scripting (XSS) : XSS is when an attacker can run their own JS code by tricking the website that it's their own code.
+    - Reflected XSS e.g. opens new link ?search=<script>alert(1)</script>
+        server-side issue - search is sent as API payload
+    - Stored (Persistent) XSS e.g. comment input <script> submitted and saved in DB. When other people views profile, the script gets executed to get their info
+    - DOM-based XSS e.g. JS takes untrusted input from URL param and writes to DOM without proper sanitization  innerHTML X use textContent 
+        URL: site.com?query=<img src="" onerror="alert(document.cookies)" />
+        const url = URLSearchParams(window.location.search)
+        HTML: innerHTML = url.get('name)
+
+    Remedies: 
+    - Use DOMPurify while using dangerouslSetInnerHTML in React
+    - Use HTTP header or meta tag http-equiv Content Security Policy to mention trusted domains for assets (use nginx or NodeJS for header)
+    - Validate user input to sanitize 
+    - Use HttpOnly cookie so that document.cookies don't work on client side 
+    Content-Security-Policy: script-src 'self' https://cdn.com
+
+CSRF : browser can't distinguish between a legitimate user action and a forged request. 
+    - User is logged into their bank account website http://mybank.com
+    - User receives phising email and opens a URL to attacker's website
+    - Attacker's website contains form action as http://mybank.com and document.submit() so the bank website uses logged in user's cookie
+    - Browser automatically includes session cookies 
+    - Bank thinks the request is from user
+    Remedies:
+    CSRF in cookies
+    - HttpOnly, Secure, SameSite=Lax
+    - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
+    - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
+NOTE: Cookies are scoped by domain, not by where it originated.
+
+HSTS (HTTP Strict Transport Security)
+ - protect against man in the middle attacks 
+ - if http url is entered, it does 301 redirect for the first time to https 
+ - browser remembers that for next 1 year (set in max-age), use https URL
+ // nginx 
+ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+CSRF protection:
+ - Use Samesite=Lax cookies 
+ - Check Origin (more reliable as can't be changed) & Referrer headers
+ - For SPA - double submit pattern or synchronizer token 
+ - Reauthentication for critical operations 
+
+Synchronizer token example: 
+ - During initial page load, API call is made to get CSRF token (stored in session)
+ - Client side stores the csrf in redux and sends it as X-CSRF-TOKEN request header
+
+Click Jacking:
+ - The attacker's website loads amazon.com/settings inside a hidden, transparent iframe that is already sitting on the page.
+ - The attacker uses CSS to place the invisible "Delete Account" button directly on top of their own visible "Download Movie" button.
+ - When the user clicks "Download Movie," they are actually physically clicking the invisible Amazon button because it has a higher z-index.
+ - Since the browser sees a valid click on a valid (but invisible) Amazon button from a logged-in user, it performs the action.
+    
+Remedies: nginx.conf - Prevent iframe from embedding on a different site 
+X-Frame-Options: Deny
+Content-Security-Policy: frame-ancestors 'self' 
+
+
+CORS Cross Origin Request Sharing 
+Note: Simple requests (no preflight): GET, HEAD, POST (only with simple headers + Content-Type = text/plain, form-urlencoded, multipart/form-data)
+
+Regular Expression DoS (ReDOS) attack - exploits the complexity of Regex operations to cause denial of service.  
+
+_______________________________________________________________________________
+
+Security measures:
+
+1. Authentication and authorization
+2. Don't store any sensitive data in localStorage/cookies
+3. Form validation 
+4. Captcha to prevent brute force attack
+5. Audit npm packages
+    npm audit / npm audit fix  (Check vunerabilities)
+    npm outdated
+
+
+For local development - use npm install and commit package.json and package.lock.json files to git For dev/stg/prod - Jenkins build uses npm ci (clean install) so that the exact versions mentioned in package.lock.json are installed and no new package can be installed
+
+Supply chain attacks can't be flagged immediately (by npm audit/SonarCube) as attackers publish a new version and it's not a known vulnerability yet.
+
+How to prevent?
+ - Lock versions in package.lock.json 
+ - Use npm ci (clean install) in Jenkins build 
+ - Use private/internal npm registry (JFrog/AWS Code artifact)
+ - Use tools like SonarQube, npm audit 
+ - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 

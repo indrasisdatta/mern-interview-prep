@@ -1,0 +1,134 @@
+ML Terms:
+
+GPT (Generate Pretrained Transformer)
+BERT (Bidirectional Encoder Representation for Transformers)
+GAN (Generative Adversarial Network) - models used to generate synthetic data such as images, videos or sounds that resemble the training data. Helpful for data augmentation.
+RNN (Recurrent Neural Network) - sequential data like time series or text, speech recognition 
+ResNet (Residual Network) - Deep Convolutional Neural Network (CNN) used for image recognition, object detection, facial recognition 
+SVM (Support Vector Machine)
+WaveNet 
+
+Reinforcement Learning
+
+Retrieval Augmented Generation (RAG) 
+  - technique to retrieve data outside a foundation model & augments the prompts by adding relevant retrieved data as context 
+  - this helps gen AI based digital assistants to provide tailored response, by augmenting enterprise data source to FM 
+  - admin can configure Amazon Q to respond strictly from enterprise docs or allow external knowledge if not available in the doc 
+
+Gen AI for images from text - Diffusion models (eg. Stable diffusion)
+Training is done by forward diffusion process (image to noise)
+Generating: reverse diffusion process o/p "Cat with a computer" 
+
+Bias:
+ - diff or error b/w predicted and actual value (occurs due to wrong choice of ML process)
+ - High bias (considered as underfitting)
+ - To reduce bias use a more complex model or increase the no. of features 
+
+Variance:
+ - amount by which the performance of a predictive model changes when it's trained on different subsets of datasets 
+
+Ideal case - low bias and low variance 
+
+Confusion matrix - actual v/s predicted value 
+ - reduce no. of false positives and false negatives 
+ - Metrics: Precision, recall, F1, accuracy 
+
+Regression Metrics: MAE, MAPE, RMSE, R square
+
+Inferencing - predictions on new data 
+
+Hyperparameters:
+ - Learning rate 
+ - Batch size 
+ - No. of epochs 
+
+========================================================================
+
+Amazon Bedrock ( build GenAI apps on AWS)
+ - makes a copy of the FM, available only to us, which we can further fine tune with our own data 
+
+Amazon Titan - High performing FM from AWS
+
+Instruction based fine-tuning uses labeled examples that are prompt-response pairs
+Fine tuning is a specific kind of Transfer Learning 
+
+Bedrock RAG 
+ - Search for relevant info in Knowledge Base (backed by Vector DB)
+ - Retrieval text - Knowledge base returns relevant information 
+ - Augmented Prompt (Query + Retrieval Text) passed to FM
+ - FM generates response 
+
+RAG Vector DB - OpenSearch Service (serverless), Aurora, MongoDB 
+S3 docs are chunked and fed to Embedding Models -> generates Vectors and placed in Vector DB 
+
+RAG Data Sources - S3, Confluence, Sharepoint, Salesforce, Web pages  
+
+Tokenization - converting raw text into sequence of tokens 
+
+Context Window (first factor to look at when considering a model)
+ - no. of tokens an LLM can consider while generating text 
+ - Large context window means more info 
+ - Large context window requires more memory and processing power 
+
+Guardrails 
+ - filter harmful and undesirable content 
+ - remove PII 
+
+Agents
+ - configured to perform certain pre-defined action groups 
+ - Leverage RAG to retrieve info when needed 
+
+Provisioned throughput 
+ - purchase model units for a certain time (6 months)
+ - throughput is max no. of input/output tokens per minute 
+
+Prompt = Instructions + Context + Input Data + Output indicator 
+
+Prompt performance optimization: 
+ - Temperature: creativity of the model's output 
+ - Top P: higher means consider a broad range of diverse words 
+ - Top K: limits the no. of probable words 
+ - Length: max length of the answer 
+
+Amazon Q Business:
+ - faster integrations with enterprise systems and data repositories
+ - alignment with existing user access controls for enterprise data
+ - reduces the time spent on coding to create a generative AI-powered digital assistant
+ - built on Amazon bedrock (but FM can't be changed)
+ - Authenticated through IAM identity center 
+
+Amazon Q Developer 
+ - Real time code suggestions (similar to Github Copilot)
+
+AWS Managed AI Services:
+Comprehend - Named Entity recognition 
+Polly - Lixcons, SSML, Voice engine, speech mark 
+Rekognition 
+- custom labels (find your logo in social media posts)
+- integrated with Amazon Augmented AI (AAI) for human review 
+Lex 
+ - integration with lambda function, comprehend and Kendra 
+ - Eg: chatbot converts speech-to-text and recognizes customers' intentions
+Personalize, Recipes (for recommendation)  
+Kendra - document search service to extract answer from within documents 
+Mechanical Turk - crowdsourcing marketplace to perform simple human task (distributed workforce)
+Augmented AI (human oversight of machine learning predictions on production)
+Comprehend Medical
+ - detects and returns useful info in unstructured clinical text (physician notes, medical tests etc)
+ - Uses NLP to detect Protected Health Information (PHI) using DetectPHI API
+ - Store docs in S3 and analyze realtime with Kinesis Data Firehose 
+ - Use Transcribe to convert patient narratives into text that can be analyzed by Comprehend Medical 
+
+AWS hardware for AI (GPU based EC2 instances)
+ - AWS Trainium (50% cost reduction when training a model)
+ - AWS Inferentia (4x throughput, 70% cost reduction)
+
+Amazon Sagemaker 
+ - Fully managed service to build ML models 
+ - Deployment: Real time inference, serverless inference, asynchronous inference, batch transform
+
+Sagemaker pipelines:
+ Processing, training, tuning, auto ML, model, ClarifyCheck, QualityCheck 
+Sagemaker Canvas (no code)
+ 
+

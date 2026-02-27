@@ -1,0 +1,84 @@
+WEBPACK
+Browser can't: 
+ - load hundreds of JS files efficiently
+ - understand JSX, TS, CSS imports 
+ - optimize unused code 
+Webpack packages everything into a few optimized files that the browser can load fast 
+
+Based on an entry file src/index.js it follows every import and creates a dependency graph. Result: main.js, vendoor.js, chunk-21244.js 
+
+Loaders - how Webpack understands a file. Without loaders, webpack can only understand plain JS.
+ - babel-loader (Converts JSX, TSX to browser safe JS)
+ - css-loader (understands CSS imports)
+ - file-loader (handles image, font, SVG imports)
+ - style-loader (injects CSS into <style> tag)
+
+Plugins - what extra work can webpack do while bundling 
+ - HtmlWebpackPlugin (injects bundled JS into html)
+ - TerserPlugin (Minifies JS)
+ - DefinePlugin (env vars)
+
+Webpack Tree shaking - removing unused code from the prod build. It relies on static structure of ES6 modules.
+Tree shaking is not possible for:
+- Common JS modules using require and module.exports are dynamic and not statically analyzable by Webpack.
+- Dynamic imports import(Data).then(...)
+- Importing/exporting entire modules 
+  import * as utils from './utils';
+
+Dependency graph: Starts from the entry point and when a module imports another module, a dependency is formed.
+Webpack recursively follows this dependencies from the entry point to build the entire graph.
+
+Webpack bundle optimization:
+   https://blog.openreplay.com/optimizing-the-build-process-with-webpack/#:~:text=Optimizing%20the%20build%20size%20involves,results%20in%20more%20performant%20websites.
+   - tree shaking (remove unused modules from app)
+   - babel-minify-webpack-plugin, TerserPlugin (removes whitespaces, comments, line breaks without affecting functions)
+   - compression-webpack-plugin (reduces final build size using GZip compression algorithm)
+   - bundle analyzer (debug and analyze bundle files)
+
+1) Webpack v/s babel 
+    - Babel converts JSX to JS and modern JS (ES6+) to ES5 so that all browsers can understand
+    - Babel can be run without Webpack 
+      npx babel src --out-dir dist 
+    - Webpack needs a transpiler like Babel, TypeScript compiler, or SWC to convert TSX to JavaScript.  
+2) Webpack v/s Vite 
+   - webpack dev mode is slow as it bundles everything first, then servers the app. Vite dev mode is faster as it uses native ES modules in browser, no bundling at the start, loads files on demand, uses esbuild (written in Go). 
+   - Prod - webpack uses webpack-bundler, Vite uses rollup 
+   - Webpack has low HMR, vite has fast HMR
+   - In Webpack, we have to configure splitChunks manually to keep duplicate shared dependencies code into vendor.js but Vite does this automatically.
+(Earlier browsers couldn't understand ES Modules import/export syntax so we needed Webpack to create the build upfront even in dev mode and HMR. Vite uses ESM to load files on demand.)
+
+Vite: 
+ - Dev mode: only pre-bundles the dependencies using esbuild and not the entire app. 
+ - Prod mode: Uses Rollup to create build, better tree-shaking with smaller bundle size. Faster builds as esbuild is used for transpilation and Parcel does bundling and optimization 
+
+Vite optimizes for modern development
+    Dev: no bundling, native ESM, esbuild for deps
+    Prod: Rollup for optimal tree-shaking and smaller bundles
+
+Webpack is better suited for complex enterprise use cases
+    Microfrontends via Module Federation
+    Deep legacy browser support
+    Highly customizable build pipelines
+
+For new, modern React apps → Vite
+For large-scale, legacy-heavy, or microfrontend apps → Webpack
+
+3) Is code splitting, lazy loading a webpack process or React? 
+
+Webpack only lazy loads when we use dynamic import(); config just optimizes the
+
+Lazy imports are used for both lazy loading and code splitting 
+
+If the same libs are imported in multiple chunk files, by default there are duplicate code.
+Using splitChunks, webpack analyzes all chunks, extracts shared dependencies and puts it into a common chunk vendor.js.
+
+optimization: {
+  splitChunks: {
+    chunks: 'all'
+  }
+}
+
+Dynamic import → creates chunks
+Lazy loading → browser loads chunk later
+splitChunks → removes duplication
+
