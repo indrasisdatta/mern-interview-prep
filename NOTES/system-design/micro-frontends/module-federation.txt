@@ -250,3 +250,6 @@ Remedies:
 • At build time, maintain shared types in @common/contracts and ensure backward compatibility.
 • Run TypeScript checks in the remote CI (tsc --noEmit) to catch contract drift before deployment.
 • At runtime, apply Zod validation at micro-frontend boundaries to guard against unexpected shape changes.
+
+window.dispatchEvent(new CustomEvent('ADD_CART', {detail: {item: 2}}))
+window.addEventListener('ADD_CART', (e) => e.detail.count)

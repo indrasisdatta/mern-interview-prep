@@ -55,3 +55,6 @@ Have a separate EmailService instead and inject it.
 
 Passport.js example 
 
+
+Atomic 
+KISS 

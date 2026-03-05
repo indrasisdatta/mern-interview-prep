@@ -1,0 +1,81 @@
+
+1) Explain Angular architecture and how it works 
+    - Components (fundamental building block)
+        - Typescript class which handles the logic and data (from service)
+        - HTML template defines the UI 
+        - CSS styles
+       Angular uses data binding to coordinate between the class and template. 
+       - Property binding [value] data flows from TS to HTML 
+       - Event binding (click) data flows from HTML to TS
+    - Modules 
+       - at least 1 root module - AppModule and different feature modules
+       - during lazy loading, the feature modules are loaded based on the route 
+    - Services & Dependency injection  
+       - HTTP calls 
+       - Shared data 
+    - Directives (instructions to DOM for structual and attributes *ngIf *ngFor)
+    - Pipes (transform data for display eg. date format)
+    - Engine (How it works)
+       - Ivy compiler Angular transforms your HTML and ts into highly optimized JavaScript before the browser even sees it. This is called Ahead-of-Time (AOT) Compilation. This makes the initial load much faster and catches errors during the build process rather than at runtime
+       - Change detection (uses Zone.js for async events like setTimeout) 
+    
+2) Give an example of a custom directive with real use case 
+    - image fallback directive (no image exists, show a placeholder image)
+    - Instead of adding an (error) handler to every single <img> tag in your app, you create a reusable directive.
+    // Refer to custom-directive.js
+    @HostListener('error')
+    loadFallback() {
+        const element: HTMLImageElement = this.eRef.nativeElement;
+        element.src = this.appImageFallback;
+    }
+
+3) Authentication and authorization 
+
+4) Add dynamic validation in Reactive form 
+
+5) Create form using JSON data - dynamic form 
+
+6) Use cases of interceptor (Header, mock, error handling)
+
+7) Steps to upgrade Angular project 
+
+8) Libraries used? Material etc. 
+
+9) RxJS operators, switchMap, mergeMap, flatMap, concatMap, exhaustMap
+   of, from, tap 
+
+10) I have 2 api calls, response from api1 should be passed as request to
+api call 2 and then once we have response of api 2 combine response
+of both api and send it to component
+
+11) Life cycle hooks in Angular 
+
+12) What is ng-content?
+
+
+SET 2:
+1. What is change detection and role in Performance Optimization
+=> Default change detection checks the whole tree. 
+   OnPush only checks if the @Input reference changes.
+   // ChangeDetectionStrategy.OnPush
+   Problem: With the default strategy, every time a single stock price updates, Angular re-checks every single row, chart and button in your entire application. This causes major UI lag.
+   Solution: Set your "StockRowComponent" to ChangeDetectionStrategy.OnPush. Now, Angular only re-renders that specific row when the stock object reference actually changes.
+
+2. Difference between Template and Reactive form (when to use which)
+3. How to Secure Angular App (Guards, XSS Protection, Token based API, Encryption)
+4. What is micro front end in angular
+5. Why Test Case plays imp role while development, what framework are there => jasmin karma, jest, Cypress
+6. How to Create Custom Pipe and which you have created
+7. RXJS => Debouncing with btn click, combineWith Operator, Diff between Subject & behavior Sub
+8. What is cold and Hot observable
+9. how to stop an observable based on some condition
+10. Use case of ForkJoin
+11. How to optimize Performance angular app ?
+12. Various ways of component Communication
+13. How to avoid Memory Leaks
+
+Scenario: A project uses Material but now client wants to change to some other library. How to migrate it?
+
+RxJS v/s Signals
+
+
