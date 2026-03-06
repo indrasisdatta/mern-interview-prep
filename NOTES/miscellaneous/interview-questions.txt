@@ -474,3 +474,36 @@ How would you engineer a secure login process using QR codes for mobile device v
 What's your approach to creating a visual progress bar that accurately reflects the status of an API request or data loading process?
 
 What would be your strategy for designing the frontend of a messenger app that includes instant messaging, group discussions, message archiving, and alerts for users?
+
+=======================================================
+
+Angular v/s React - what to choose in a new project?
+
+Team expertise - in React or Angular
+
+Choose Angular:
+ - Large enterprise grade project with multiple teams 
+ - Opinionated framework with in built support for routing, forms, HttpClient 
+   (reduces time spent evaluating and integrating third-party libraries)
+ - Long-term maintainability and consistency across teams is important
+
+Choose React: 
+ - MVP and rapid development 
+ - Need flexibility in choosing libraries and architecture
+ - Need strong SSR and SEO support (chances of moving to Next.js in future if required)
+ - Large development community with many libraries to choose 
+
+The Angular CLI also provides automated migration tools like ng update. In contrast, React applications depend more on third-party libraries, so upgrades may require coordinating compatibility across multiple packages.
+
+React provides a lot of flexibility, which is powerful but requires strong architectural governance. Without clear guidelines, different teams may adopt different libraries or patterns. Angular reduces this risk because it provides a more opinionated architecture out of the box.
+
+Note: In real apps, network calls and bundle size dominate performance, not the framework.
+Historically, Angular bundles were larger compared to React. But modern Angular with standalone components, tree shaking has reduced this gap.
+
+
+Angular process:
+    1) When an event occurs (click, change, timers, HTTP request) , Zone.js notifies Angular that something might have changed. This automatically triggers a Change Detection cycle from the top of the component tree to the bottom 
+    2) Angular compares the value of a property in TS class with old value in memory. if values are different (user.name = "john" v/s "Doe") then Angular immediately updates that specific section of real DOM. By default it checks the entire component tree every time (Dirty checking)
+    3) ChangeDetectionStrategy.onPush -> only check this component if @Input reference changes or an event originated inside it. 
+    
+    Signals in Angular 17+ change this process entirely. Instead of Zone.js guessing which value has changed, Signals tell Angular exactly which value has changed. When a Signal value is updated, Angular knows exactly which component depend on it. 

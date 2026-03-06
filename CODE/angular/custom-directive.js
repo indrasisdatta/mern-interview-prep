@@ -1,3 +1,6 @@
+
+/* Example 1 - Image Fallback */
+
 import { Directive, Input, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
@@ -22,3 +25,18 @@ export class ImageFallbackDirective {
 <img [src]="product.heroImage" 
      appImageFallback="assets/images/product-placeholder.jpg" 
      alt="Product Image">
+
+/* Example 2 - click to copy */
+
+@Directive({ selector: '[appClickCopy]' })
+export class ClickCopyDirective {
+  @Input applyClickCopy: string = '';
+
+  @HostListener('click')
+  performCopy() {
+    navigator.clipboard.writeText(this.applyClickCopy);
+    alert('Copied')
+  }
+}
+
+<button [applyClickCopy]="apiKey">Copy API Key</button>

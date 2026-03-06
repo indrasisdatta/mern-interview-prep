@@ -19,7 +19,14 @@
        - Ivy compiler Angular transforms your HTML and ts into highly optimized JavaScript before the browser even sees it. This is called Ahead-of-Time (AOT) Compilation. This makes the initial load much faster and catches errors during the build process rather than at runtime
        - Change detection (uses Zone.js for async events like setTimeout) 
     
+   Component v/s directive:
+    - Component defines UI with its own template 
+    - Directive modifies behavior of existing DOM elements without adding a new view 
+   Eg. for grid data, we'll use a component. A copy button used in all rows can use a custom directive which provides the copy functionality.
+
 2) Give an example of a custom directive with real use case 
+   Eg. 1: Click to copy 
+   Eg. 2: Image fallback
     - image fallback directive (no image exists, show a placeholder image)
     - Instead of adding an (error) handler to every single <img> tag in your app, you create a reusable directive.
     // Refer to custom-directive.js
@@ -28,25 +35,54 @@
         const element: HTMLImageElement = this.eRef.nativeElement;
         element.src = this.appImageFallback;
     }
+    HostListener - handling browser events click, hover, error etc. 
+    HostBinding - styling, adding classes, disabling elements 
 
-3) Authentication and authorization 
+3) Authentication and authorization     
+      - AuthService with a BehaviorSubject to hold the access token in memory
+      - Implement a functional HttpInterceptorFn to clone outgoing requests, attach the Authorization header and enable withCredentials for httpOnly cookies.
+      - Token Refresh: Use RxJS operators (switchMap, filter, take) within the interceptor to handle 401 errors and "lock" concurrent requests while a single refresh call is in progress.
+      - Route Protection: Apply functional CanActivate guards to the routing configuration to prevent unauthorized navigation before components are even instantiated.
+      Refer to -> authentication-authorization.js 
 
 4) Add dynamic validation in Reactive form 
+    Refer to reactive-dynamic-form.js
 
 5) Create form using JSON data - dynamic form 
 
-6) Use cases of interceptor (Header, mock, error handling)
+6) Steps to upgrade Angular project 
 
-7) Steps to upgrade Angular project 
-
-8) Libraries used? Material etc. 
-
-9) RxJS operators, switchMap, mergeMap, flatMap, concatMap, exhaustMap
+9) RxJS operators, switchMap, mergeMap, concatMap, exhaustMap
    of, from, tap 
+   => Transformation (mapping) operators:
+      - switchMap: cancels previous inner Observable and starts a new one
+      - mergeMap: run all inner observable concurrently, none are cancelled and they finish as they come 
+      - concatMap: wait for current obs to finish before starting the next one 
+      - exhaustMap: ignore next request until the first one is completed (button clicked 5 times - first API runs, 4 are ignored)
+      Creation and utility operators:
+       - of(1,2,3) emits as sequence, good for mock data in service 
+       - from([1,2,3]) converts array/promise/iterable to observable 
+       - tap: executes side effects without changing the data in the stream 
 
 10) I have 2 api calls, response from api1 should be passed as request to
 api call 2 and then once we have response of api 2 combine response
 of both api and send it to component
+
+  => Since API2 depends on the response of API1, we can use switchMap to chain the calls and then use map to combine both responses before returning them to the component.
+
+   getData(): Observable<CombinedData> {
+   return this.api1().pipe(
+      switchMap(res1 => 
+         this.api2(res1.id).pipe(
+         // Use map here to combine the results
+         map(res2 => ({
+            originalData: res1,
+            additionalData: res2
+         }))
+         )
+      )
+   );
+   }
 
 11) Life cycle hooks in Angular 
 
@@ -74,8 +110,12 @@ SET 2:
 12. Various ways of component Communication
 13. How to avoid Memory Leaks
 
-Scenario: A project uses Material but now client wants to change to some other library. How to migrate it?
+Scenario: A project uses Material but now client wants to change to some other library. How to migrate it in Angular?
+ 
 
 RxJS v/s Signals
 
 
+Fine-Grained Reactivity: In Angular 20+, Signals provide local updates. In a Zone.js app, if you click a button, the entire tree is checked. In a Signals-based app, only the component that actually uses that Signal is refreshed.
+
+Signal Components & Inputs: Angular 20+ introduced Signal-based Components and Signal Inputs/Queries. These features make the code more predictable and easier to debug than the old @Input() and @Output() decorators, as the data flow is explicitly tracked by Angular's reactive graph
