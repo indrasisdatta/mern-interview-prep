@@ -52,6 +52,23 @@
 
 6) Steps to upgrade Angular project 
 
+7) Observables v/s Subjects 
+ - Observables are unicast i.e each subscriber gets its own execution and data instance. Subjects are multicast i.e all subscribers share a single execution and receive the exact same value. 
+  E.g. Observable 3 .subscribe to an HTTP observable getProducts() results in 3 API calls 
+  components.
+  E.g. Subject 3 function calls isLoggedIn return the same value 
+ - Observable execution starts only when we do .subscribe. Subject values can be broadcasted even if no listener are listening currently.  
+ Note: Subjects are my go-to for state management, while Observables are best for isolated data streams like API requests.
+
+8) What are the types of Subjects?
+ - Subject (no initial value, emits to only current subscribers and late subscribers miss previous values. Use case: Event broadcasting, Event emitters Clicks, Toasts)
+ - BehaviorSubject (requires initial state e.g. for login state, theme state. Emits the latest value to new subscribers)
+ - ReplaySubject (no initial value, replays previous value to new subscribers, can configure how many values to store Use case: History Chat, Activity Feeds)
+ - AsyncSubject (emits only the last value when the observable completes 
+   Use case: One-time Fetches Config, Permissions)
+
+A BehaviorSubject stores the latest emitted value, so a late subscriber immediately receives the most recent value upon subscription. In contrast, a normal Subject does not store values, so any emissions before subscription are lost.
+
 9) RxJS operators, switchMap, mergeMap, concatMap, exhaustMap
    of, from, tap 
    => Transformation (mapping) operators:
@@ -119,3 +136,183 @@ RxJS v/s Signals
 Fine-Grained Reactivity: In Angular 20+, Signals provide local updates. In a Zone.js app, if you click a button, the entire tree is checked. In a Signals-based app, only the component that actually uses that Signal is refreshed.
 
 Signal Components & Inputs: Angular 20+ introduced Signal-based Components and Signal Inputs/Queries. These features make the code more predictable and easier to debug than the old @Input() and @Output() decorators, as the data flow is explicitly tracked by Angular's reactive graph
+
+================================================================
+
+Angular Lead Interview Questions & Practical Answers
+
+1.  How do you structure a large Angular project? 
+      Answer: For large applications we follow feature-based modular architecture.
+
+      Example structure: 
+      src/app 
+         core/ (singleton services, interceptors, guards) 
+         shared/ (reusable components, pipes, directives) 
+         features/
+            dashboard/ orders/ users/ layout/ 
+            app-routing.module.ts
+
+      Rules: 
+      - CoreModule → global services (auth, interceptors) 
+      - SharedModule → reusable UI components 
+      - Feature modules → business features 
+      - Each feature module is lazy loaded
+
+      Example: 
+         { path: ‘orders’, loadChildren: () =>
+         import(‘./features/orders/orders.module’) .then(m => m.OrdersModule) }
+
+      This keeps the initial bundle small and code maintainable across teams.
+
+2.  How do you optimize Angular performance? 
+      Answer: Key optimizations used in production apps:
+       - OnPush change detection 
+         @Component({ 
+            changeDetection: ChangeDetectionStrategy.OnPush 
+         })
+       - trackBy in ngFor 
+         <div *ngFor=“let user of users; trackBy:trackById”>
+       - Lazy loading modules
+       - Avoid heavy libraries moment.js → dayjs lodash → lodash-es
+       - Bundle analysis to find large dependencies
+         ng build –source-map 
+         npx source-map-explorer dist/main.js
+
+8.  How does Angular Change Detection work? 
+    Answer: Angular runs change detection whenever async events occur:
+      -   HTTP responses
+      -   user events
+      -   timers
+      -   promises
+    This is managed by Zone.js which patches async APIs. In large apps this can cause many checks. 
+    Solution: ChangeDetectionStrategy.OnPush
+    Angular then updates only when: 
+    - @Input changes 
+    - event occurs in component 
+    - observable emits
+
+4.  How do you handle API authentication in Angular? 
+    Answer: Use HTTP Interceptors (Refer authentication-authorization.js)
+
+5.  How do you cancel API requests when user types? 
+    Answer: Use switchMap.
+      this.searchControl.valueChanges.pipe( 
+         debounceTime(300), 
+         switchMap(value => this.api.search(value)) 
+      ).subscribe();
+      switchMap cancels previous HTTP requests automatically.
+
+6.  How do you combine multiple API calls?
+      If APIs are independent: forkJoin({ users: this.api.getUsers(), orders:
+      this.api.getOrders() })
+
+      If API2 depends on API1: this.api.getUser().pipe( switchMap(user =>
+      this.api.getOrders(user.id)) )
+
+7.  How do you share data between components?
+      Parent → Child @Input()
+      Child → Parent @Output() EventEmitter
+      Unrelated components Use service with BehaviorSubject.
+
+8.  How do you manage state in Angular?
+      Small apps: Services + RxJS
+      Large enterprise apps: NgRx
+
+      Used when: - many components share state - complex side effects -
+      predictable state flow required
+
+9.  How do you migrate a UI library like Angular Material?
+      Use wrapper components (Adapter pattern).
+      Example: Inside wrapper, if library changes: Material → PrimeNG
+      Only wrapper implementation changes.
+
+      // Material 
+      <button mat-raised-button [color]="color" (click)="btnClick.emit()">
+         <ng-content></ng-content>
+      </button>
+      // Later switched to PrimeNG
+      <p-button [label]="label" [styleClass]="color" (onClick)="btnClick.emit()">
+         <ng-content></ng-content>
+      </p-button>
+
+      <app-my-button color="primary" (btnClick)="save()">Save Patient</app-my-button>     
+
+10. How do you reduce Angular bundle size?
+      - Lazy load modules
+      - Remove unused dependencies
+      - Replace heavy libraries
+      - Production build ng build –configuration production
+      - Bundle budgets in angular.json
+      - Analyze bundle with source-map-explorer
+
+17. How do you handle global error handling?
+   - HTTP errors: Handled with interceptors.
+      Example: 401 → redirect login 500 → show toast
+   - Runtime errors: Use Angular ErrorHandler.
+      @Injectable() 
+      export class GlobalErrorHandler implements ErrorHandler {
+         handleError(error) { 
+            console.error(error); 
+         } 
+      }
+
+12. How do you scale Angular apps across multiple teams?
+      Enterprise approach: - Feature modules owned by teams - Shared design
+      system - Shared core services - Lazy loading per module
+
+      Example: Team A → Orders module Team B → Users module Team C → Dashboard
+      module
+
+13. Angular vs React — when would you choose Angular?
+      Angular is better when: - large enterprise project - multiple teams -
+      strong architecture required
+      React is better when: - fast MVP - smaller teams - flexible architecture
+
+14. How do you debug performance issues?
+      Steps: 1. Chrome Performance profiler 2. Angular DevTools 3. Identify
+      heavy components 4. Apply: - OnPush - trackBy - lazy loading
+
+      Also check bundle size.
+
+15. How do you ensure frontend code quality as a Lead?
+      Things we enforce: - ESLint rules - strict TypeScript - architecture
+      guidelines - reusable component libraries - code reviews - CI checks
+      (bundle size, lint, tests)
+
+      These practices keep large teams consistent.
+
+       - Code conventions: avoid using large libraries, avoid memory leaks (unsubscribe), lazy load routes, lazy load images, use pagination while loading large dataset
+       - to keep the code formatting and indentation consistent, we use tools like Prettier, ESLint configured with Husky as pre-commit hook. So code review saves time.
+       - Git pre-push has unit test and axe-core configured to make sure the recent feature doesn't break any existing code and passes accessibility check.
+       - PR templates: 
+            This forces developers to check boxes: 
+            [] "Did I unsubscribe from Observables?"
+            [] "Did I add unit tests?" 
+            [] "Did I check for accessibility (ARIA)?"
+       - SonarQube Gates: Use Sonar to enforce Quality Gates. 
+         For example: "If code coverage drops below 80% or if there is 1 new Security Vulnerability, the PR cannot be merged." 
+       - CI runs the unit testing and integration testing, checks bundle budgets. 
+
+      CI steps:
+       - Clean install: npm ci 
+       - Linting and formatting: npm lint 
+       - Unit testing 
+       - Run build to catch compilation errors, circular dependencies or type mismatch 
+       - Static code analysis using SonarQube scan (code smell, security vulnerability)
+
+      CD steps: 
+       - Prod build ng build --configuration=production
+       - /dist folder is zipped and moved to a storage bucket 
+       - Env configuration 
+       - Deploy to server 
+       - Smoke/E2E testing 
+       - Cache busting  
+
+16. Security practices in Angular app 
+     - XSS protection use DOMPurify with allowed tags 
+     - CSRF proection use httpOnly secure cookies and avoid storing confidential data in localStorage and sessionStorage 
+     - Brute force attack prevention use captcha 
+     - Clickjacking protection - use CSP (allow specific domains) and X-Frame-options: DENY to prevent iframe  
+     - HSTS for first time http URL with 301 redirect to https url 
+     - npm audit in CI/CD pipeline 
+     - Authentication and authorization using HttpClient interceptors 

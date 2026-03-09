@@ -161,3 +161,47 @@ let a // declaration
 a = 2 // initialization 
 
 let a = 2 // declaration + initialization together 
+
+
+Phases of JavaScript Event
+ - Capturing Phase (when the event goes down to the element)
+ - Target Phase (when the event reaches the element)
+ - Bubbling Phase (when the event bubbles up from the element)
+
+   <body>
+      <div id="container">
+         <button>Click me!</button>
+      </div>
+      <pre id="output"></pre>
+   </body>
+
+   const output = document.querySelector("#output");
+   function handleClick(e) {
+      output.textContent += `You clicked on a ${e.currentTarget.tagName} element\n`;
+   }
+   const container = document.querySelector("#container");
+   const button = document.querySelector("button");
+   document.body.addEventListener("click", handleClick, { capture: true });
+   container.addEventListener("click", handleClick, { capture: true });
+   button.addEventListener("click", handleClick);
+
+   Steps:
+   1) Capturing phase (top down): body -> #container
+   2) Target phase: event reaches the button 
+   3) Bubbling phase (bottom up): body and container are already exhausted in capturing phase, so nothing is printed 
+
+   
+
+   const output = document.querySelector("#output");
+   function handleClick(e) {
+      output.textContent += `You clicked on a ${e.currentTarget.tagName} element\n`;
+   }
+   const container = document.querySelector("#container");
+   const button = document.querySelector("button");
+   const mainContainer = document.querySelector(".main-container");
+
+   container.addEventListener("click", handleClick, { capture: true });
+   button.addEventListener("click", handleClick);
+   mainContainer.addEventListener("click", handleClick);
+
+   // Prints DIV BUTTON SECTION 
