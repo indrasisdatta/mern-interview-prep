@@ -116,3 +116,61 @@ Tailwind plugin
     Minifier
         ↓
     Bundle
+
+==========================
+
+The Webpack CSS Pipeline
+1. SCSS Compilation: sass-loader takes your .scss files and compiles them down into standard, browser-readable .css.
+
+2. PostCSS Processing (Tailwind & Autoprefixer) 
+    - PostCSS takes the CSS (either pure CSS or what was just compiled from SCSS) and transforms it using plugins.
+    - Tailwind doesn't just "remove unused classes" anymore. Since Tailwind v3 (and further optimized in v4), it uses a Just-In-Time (JIT) engine. It scans your .jsx/.tsx files, looks for class names you actually used, and generates only that CSS on the fly.
+    - Autoprefixer: This plugin reads your generated CSS and adds vendor prefixes (like -webkit- or -moz-) based on your .browserslistrc file so it works on older browsers.
+
+3. CSS Handling in Webpack 
+    It translates your CSS into JavaScript modules (handling url() and @import like JS require() statements).
+    However, there's a slight distinction in how it's outputted:
+    Development (style-loader): It takes the JS-string version of your CSS and injects it into the DOM inside <style> tags. This is great for fast reloads (HMR).
+    Production (MiniCssExtractPlugin): style-loader is not typically used in production. Instead, you swap it out for standard Webpack plugins like MiniCssExtractPlugin.loader, which physically bundles it into a standalone .css file.
+
+4. Tailwind Entry Point (global.scss) 
+    When postcss-loader runs the Tailwind plugin, it looks for those @tailwind directives in your entry file and replaces them with the actual utility styles it generated from scanning your codebase.
+
+The Evaluation Order (Right-to-Left)
+In Webpack, loaders run from right-to-left (or bottom-to-top in an array). To make everything work smoothly, your Webpack config array must look like this:
+
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // 4. Injects CSS into DOM (dev) or extracts to file (prod)
+          isProduction ? MiniCssExtractPlugin.loader : "style-loader",
+          // 3. Translates CSS into CommonJS
+          "css-loader",
+          // 2. Processes Tailwind and Autoprefixer
+          "postcss-loader",
+          // 1. Compiles SCSS to CSS first
+          "sass-loader",
+        ],
+      },
+    ],
+  },
+};
+
+
+
+In a Webpack configuration, if you place postcss-loader after css-loader (reading left-to-right in the array), what is the most likely outcome when using Tailwind CSS?
+ - Build will suceed but Tailwind utility classes won't be applied (since css-loader runs first it ) 
+ Expected order: [style-loader, css-loader, postcss, sass]
+ Wrong order: [ postcss-loader, css-loader]   
+
+Why is style-loader generally avoided in production environments for large-scale applications?
+ - It increases the initial JS bundle size and causes a Flash of Unstyled Content (FOUC).
+
+You notice the production build is slow. You see sass-loader, postcss-loader, and css-loader in the chain. Which architectural change would most likely speed up the build?
+ - Migrate from SCSS to PostCSS only (using nesting plugins) to remove the sass-loader step 
+
+ 

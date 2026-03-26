@@ -41,7 +41,7 @@ Webpack bundle optimization:
       npx babel src --out-dir dist 
     - Webpack needs a transpiler like Babel, TypeScript compiler, or SWC to convert TSX to JavaScript.  
 2) Webpack v/s Vite 
-   - webpack dev mode is slow as it bundles everything first, then servers the app. Vite dev mode is faster as it uses native ES modules in browser, no bundling at the start, loads files on demand, uses esbuild (written in Go). 
+   - webpack dev mode is slow as it bundles everything first, then serves the app. Vite dev mode is faster as it uses native ES modules in browser, no bundling at the start, loads files on demand, uses esbuild (written in Go). 
    - Prod - webpack uses webpack-bundler, Vite uses rollup 
    - Webpack has low HMR, vite has fast HMR
    - In Webpack, we have to configure splitChunks manually to keep duplicate shared dependencies code into vendor.js but Vite does this automatically.
@@ -82,3 +82,108 @@ Dynamic import → creates chunks
 Lazy loading → browser loads chunk later
 splitChunks → removes duplication
 
+-----------------------------------------
+
+Webpack runtime is the bootstrap code that manages module loading, caching and chunk resolution in the browser. 
+It contains module registry, require function and chunk mapping. 
+
+Without 'runtime' : 'single' the runtime is duplicated inside each bundle, leading to poor caching and unnecessary cache invalidation. 
+main.js → has runtime
+admin.js → has runtime again
+
+// Without runtime: 'single' 
+lazy.js → changed
+runtime → changed
+main.js → also changed (because runtime is inside)
+
+// With runtime: 'single', only runtime.js changes frequently. Other bundles stay cached.
+
+-----------------------------------------
+
+Unique ID is generated for each module and chunk in the runtime. By default the ids are assigned incrementally, so if we add/remove a file then entire bundle hash changes (bad for caching).
+'deterministic' means consistent hash based short IDs. 
+
+optimization: {
+  splitChunks: {
+    chunks: 'all'
+  },
+  runtimeChunk: 'single',
+  moduleIds: 'deterministic',
+  chunkIds: 'deterministic'
+}
+
+Scenarios:
+Q1) You have a massive legacy Monorepo with 5,000+ components and heavy use of require.context and complex Webpack aliases. The team wants to move to Vite for speed. What are the top two technical risks you would present to the stakeholders?
+  i) require.context usage involves significant refactoring since Vite doesn't support it. This is rewriting code module loading pattern.
+
+    // Webpack dynamic module discovery (Synchronous)
+    require.context('./components', true, /\,js$/)
+    // Vite replacement (Defaults lazy loading)
+    const modules = import.meta.glob('/components/**/*.js', { eager: true })
+
+  ii) Complex Webpack-specific module resolution (aliases/plugins) may not be compatible, causing widespread import breakages
+    resolve: {
+      alias: {
+        '@components': '/src/components',
+        '@legacy': path.resolve(...)
+      }
+    }
+  
+  iii) CommonJS v/s ESModules - webpack can mix require() and import in the same file and bundle. Vite is ESM first and uses esbuild to pre-bundle dependencies. If there's a legacy file that uses module.exports then Vite will throw errors during dev server start and prod build. 
+
+Q2) You import import { debounce } from 'lodash', but the entire lodash library ends up in your bundle. As a Lead, what are the 3 things you check first to fix this?
+  i) lodash is CommonJS → poor tree-shaking
+  lodash-es is ESM → fully tree-shakable
+  
+  import debounce from 'loadash/debounce';
+  import { debounce } from 'loadash-es';
+
+  ii) Ensure bundle and Babel preserves ES modules {modules: false} so tree-shaking works 
+  // babel.config.js 
+  module.exports = {
+    presets: [
+      // Babel keeps ES modules intact
+      ["@babel/preset-env", { modules: false }]
+    ]
+  }
+
+  iii) Check for Webpack config 
+    // webpack.config.js 
+    mode: 'production',
+    optimization: {
+      usedExports: true, // marks unused code       
+    }
+
+    // package.json
+    // Only .css files have side effects. Everything else is safe to remove if unused.
+    {
+      "sideEffects": [
+        "*.css"
+      ]
+    }
+
+Q3) A user is currently on your site (Version A). They click a button that triggers a React.lazy load for a component. But your CI/CD just finished, and the S3 bucket now only contains Version B chunks.
+The user's browser tries to fetch chunk-vA.js, gets a 404, and the app crashes.
+As a Lead, how do you design your deployment process to prevent this "Chunk Load Error"?
+  i)  Never delete old chunks immediately. Deployment must be backwards-compatible at assets level. Keep 5 previous builds.  
+  
+  ii) index.html no-cache, must-revalidate (browser checks the server every time if new version is available)
+   .js, .css, .png public, max-age=31536000 (cache files with hash for 1 year)
+
+  iii) Handle chunk load error in code 
+   // Example: A wrapper for React.lazy
+    const lazyWithRetry = (componentImport) => 
+      React.lazy(() => 
+        componentImport().catch((error) => {
+          // If the chunk is missing (404), the app probably updated.
+          // Force a page reload to get the latest index.html and manifest.
+          if (error.message.includes("Loading chunk")) {
+            window.location.reload(); 
+          }
+          throw error;
+        })
+      );
+
+  iv) Use atomic deployments to prevent mismatches between HTML and assets. Make sure index.html and chunks are deployed together, otherwise users will get 404. 
+
+  
