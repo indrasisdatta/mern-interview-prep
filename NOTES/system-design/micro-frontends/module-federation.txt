@@ -253,3 +253,12 @@ Remedies:
 
 window.dispatchEvent(new CustomEvent('ADD_CART', {detail: {item: 2}}))
 window.addEventListener('ADD_CART', (e) => e.detail.count)
+
+=======================================
+
+Architecture Scenario:
+    In a Module Federation setup, two teams are using different versions of a heavy library like Ag-Grid or Chart.js. Team A wants to upgrade for a critical feature; Team B cannot upgrade due to breaking changes and lack of bandwidth.
+
+    The Trade-off: Do you force a "singleton" version to save on bundle size (but break Team B), or do you allow multiple versions to load (hurting LCP and memory)? Is there a third architectural way to handle this at the "shell" level?
+
+    => I'd weigh the LCP impact of loading two versions against the risk of a broken UI. If it's a critical path, we use 'Versioned' (Team A gets v2, Team B stays on v1). If it's a non-critical internal tool, we force a 'Singleton' and mandate a 1-week migration window for Team B.

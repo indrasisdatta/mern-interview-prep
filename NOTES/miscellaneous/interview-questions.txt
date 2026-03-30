@@ -475,7 +475,12 @@ What's your approach to creating a visual progress bar that accurately reflects 
 
 What would be your strategy for designing the frontend of a messenger app that includes instant messaging, group discussions, message archiving, and alerts for users?
 
-=======================================================
+SSE connections are long-lived, but most load balancers distribute traffic randomly. That means if a client reconnects, it might hit a different pod — and lose its stream.
+
+The fix?
+Either enable sticky sessions so clients stick to the same pod, or design your system to be stateless, using Redis Pub/Sub to broadcast events across all pods. (Hint: go with the latter if you’re aiming for scale.)
+
+============================================================================
 
 Angular v/s React - what to choose in a new project?
 

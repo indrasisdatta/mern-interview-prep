@@ -187,3 +187,10 @@ As a Lead, how do you design your deployment process to prevent this "Chunk Load
   iv) Use atomic deployments to prevent mismatches between HTML and assets. Make sure index.html and chunks are deployed together, otherwise users will get 404. 
 
   
+==================
+
+Your monolithic codebase takes 15 minutes to build in CI/CD using Webpack. You want to switch to Vite or Turborepack to improve DX, but the project uses several legacy Webpack plugins that don't have direct equivalents in the Rollup/Vite ecosystem.
+
+The Trade-off: You have two weeks of "Sprint Debt" time. Do you spend it rewriting those legacy plugins for a faster build, or do you stick with Webpack and try to optimize it (e.g., persistent caching, multi-threading)? How do you justify the ROI to your Product Manager?
+
+ => Rather than a full rewrite, I’d implement SWC-loader or esbuild-loader inside Webpack first. This gives us 60-70% of Vite’s speed without breaking the legacy plugins. I’d justify the ROI to the PM by showing that a 5-minute reduction in CI time saves the team X hours per week
