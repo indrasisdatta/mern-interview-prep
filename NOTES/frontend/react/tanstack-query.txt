@@ -1,77 +1,170 @@
 PROBLEM 1: Stock Trading Dashboard State flicker
 
-The Scenario: Why the UI "Flickers"
-In high-frequency environments like trading, the race condition happens because multiple network requests are fighting to update the same piece of state. Here is the breakdown:
+    The Scenario: Why the UI "Flickers"
+    In high-frequency environments like trading, the race condition happens because multiple network requests are fighting to update the same piece of state. Here is the breakdown:
 
-The Optimistic Trigger: You click "Buy." The UI immediately updates to show the trade as "Completed" to keep the experience lag-free.
+    The Optimistic Trigger: You click "Buy." The UI immediately updates to show the trade as "Completed" to keep the experience lag-free.
 
-The Slow POST: The actual network request to execute the trade is sent but moves slowly due to a congested network.
+    The Slow POST: The actual network request to execute the trade is sent but moves slowly due to a congested network.
 
-The Background Interference: While that POST request is still "pending," TanStack Query triggers an automatic background refetch (a GET request) to keep data fresh.
+    The Background Interference: While that POST request is still "pending," TanStack Query triggers an automatic background refetch (a GET request) to keep data fresh.
 
-The Stale Overwrite: Because the server hasn't finished processing the "Buy" yet, the background GET request returns the old list of trades.
+    The Stale Overwrite: Because the server hasn't finished processing the "Buy" yet, the background GET request returns the old list of trades.
 
-The Flicker: TanStack Query sees this "new" (but actually old) data and overwrites your optimistic "Success" state. The trade briefly disappears from the screen, only to reappear seconds later when the POST finally succeeds.
+    The Flicker: TanStack Query sees this "new" (but actually old) data and overwrites your optimistic "Success" state. The trade briefly disappears from the screen, only to reappear seconds later when the POST finally succeeds.
 
-The Solution: The "Cancel, Snapshot, Rollback" Pattern
-To fix this, you must take manual control of the cache lifecycle during the mutation.
+    The Solution: The "Cancel, Snapshot, Rollback" Pattern
+    To fix this, you must take manual control of the cache lifecycle during the mutation.
 
-1. Manual Cache Control (onMutate)
-The moment the user performs an action, you must call queryClient.cancelQueries(key). This effectively "mutes" the background refetching for that specific data. If a GET request was currently in flight, it is aborted so it cannot overwrite your optimistic UI with stale data.
+    1. Manual Cache Control (onMutate)
+    The moment the user performs an action, you must call queryClient.cancelQueries(key). This effectively "mutes" the background refetching for that specific data. If a GET request was currently in flight, it is aborted so it cannot overwrite your optimistic UI with stale data.
 
-2. State Snapshotting
-Before you modify the cache, you save a "snapshot" of the current data. Think of this as a Git commit or a restore point. You return this snapshot from the onMutate function so it's available to other lifecycle hooks if things go wrong.
+    2. State Snapshotting
+    Before you modify the cache, you save a "snapshot" of the current data. Think of this as a Git commit or a restore point. You return this snapshot from the onMutate function so it's available to other lifecycle hooks if things go wrong.
 
-3. The Safety Net (onError)
-If the trade fails (e.g., insufficient funds or timeout), you don't want the UI stuck in a "Success" lie. You use the snapshot from Step 2 to immediately revert the cache to its original state. This ensures the UI remains an accurate reflection of the server's reality.
+    3. The Safety Net (onError)
+    If the trade fails (e.g., insufficient funds or timeout), you don't want the UI stuck in a "Success" lie. You use the snapshot from Step 2 to immediately revert the cache to its original state. This ensures the UI remains an accurate reflection of the server's reality.
 
-4. Final Synchronization (onSettled)
-Whether the trade succeeded or failed, you trigger queryClient.invalidateQueries. This forces one final, "truthful" refetch from the server to ensure that any small inconsistencies are ironed out and the local cache is 100% in sync with the database.
+    4. Final Synchronization (onSettled)
+    Whether the trade succeeded or failed, you trigger queryClient.invalidateQueries. This forces one final, "truthful" refetch from the server to ensure that any small inconsistencies are ironed out and the local cache is 100% in sync with the database.
 
+    import { useMutation, useQueryClient } from '@tanstack/react-query';
+    import { useTradeStore } from './store'; // Zustand store
 
+    export const useExecuteTrade = () => {
+    const queryClient = useQueryClient();
+    const setLocalTradeStatus = useTradeStore((s) => s.setStatus);
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTradeStore } from './store'; // Zustand store
+    return useMutation({
+        mutationFn: executeTradeApi,
+        
+        // Step 1: Optimistic Update
+        onMutate: async (newTrade) => {
+        // Cancel outgoing refetches (so they don't overwrite our optimistic state)
+        await queryClient.cancelQueries({ queryKey: ['trades'] });
 
-export const useExecuteTrade = () => {
-  const queryClient = useQueryClient();
-  const setLocalTradeStatus = useTradeStore((s) => s.setStatus);
+        // Step 2: Snapshot the previous value
+        const previousTrades = queryClient.getQueryData(['trades']);
 
-  return useMutation({
-    mutationFn: executeTradeApi,
-    
-    // Step 1: Optimistic Update
-    onMutate: async (newTrade) => {
-      // Cancel outgoing refetches (so they don't overwrite our optimistic state)
-      await queryClient.cancelQueries({ queryKey: ['trades'] });
+        // Step 3: Optimistically update the cache
+        queryClient.setQueryData(['trades'], (old: any) => [...old, newTrade]);
+        setLocalTradeStatus('PENDING_CONFIRMATION');
 
-      // Step 2: Snapshot the previous value
-      const previousTrades = queryClient.getQueryData(['trades']);
+        // Return context object with snapshot
+        return { previousTrades };
+        },
 
-      // Step 3: Optimistically update the cache
-      queryClient.setQueryData(['trades'], (old: any) => [...old, newTrade]);
-      setLocalTradeStatus('PENDING_CONFIRMATION');
+        // Step 4: Handle Errors (The Rollback)
+        onError: (err, newTrade, context) => {
+        if (context?.previousTrades) {
+            queryClient.setQueryData(['trades'], context.previousTrades);
+        }
+        setLocalTradeStatus('ERROR');
+        },
 
-      // Return context object with snapshot
-      return { previousTrades };
-    },
+        // Step 5: Final Sync
+        onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['trades'] });
+        },
+    });
+    };
 
-    // Step 4: Handle Errors (The Rollback)
-    onError: (err, newTrade, context) => {
-      if (context?.previousTrades) {
-        queryClient.setQueryData(['trades'], context.previousTrades);
-      }
-      setLocalTradeStatus('ERROR');
-    },
+    The context is a plain JavaScript object that you manually create and return from the onMutate function. It is not automatically the cache data; rather, it is whatever you want to "pass forward" to the next steps of the mutation.
 
-    // Step 5: Final Sync
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['trades'] });
-    },
-  });
-};
+    Why do we use it in onSettled?
+    Even if our Optimistic UI update was successful, we call invalidateQueries as a "final sync." It forces the app to fetch the "official" version from the database, just in case there were minor differences (like a server-generated timestamp or a unique ID) that our local optimistic update couldn't predict.
 
-The context is a plain JavaScript object that you manually create and return from the onMutate function. It is not automatically the cache data; rather, it is whatever you want to "pass forward" to the next steps of the mutation.
+========================================================================
 
-Why do we use it in onSettled?
-Even if our Optimistic UI update was successful, we call invalidateQueries as a "final sync." It forces the app to fetch the "official" version from the database, just in case there were minor differences (like a server-generated timestamp or a unique ID) that our local optimistic update couldn't predict.
+Infinite spinner problem: when loading the first time, if user goes offline then spinner keeps showing (checking isPending flag)
+
+    First load (normal)  isPending = true, fetchStatus = 'fetching'
+    Offline (no cache)   isPending = true, fetchStatus = 'paused'
+    Refetch (background) isPending = false, fetchStatus = 'fetching'
+
+    SOLUTION 1:
+        if (isPending && fetchStatus === 'paused') return <OfflineStatus />
+        if (isPending) return <Loader />
+
+    SOLUTION 2: Supports service workers
+        defaultOptions: { queries: { networkMode: 'always' } }
+
+Background fetching 
+
+// If true, API is fired when user changes tab and comes back
+refetchOnWindowFocus: false 
+
+Background fetching loading state 
+
+    import { useIsFetchingLoadingState } from '@tanstack/react-query';
+
+    function GlobalLoadingIndicator() {
+        const isFetching = useIsFetching();
+        return isFetching ? <p>Fetching data...</p> : null;
+    }
+
+Retry delay:
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+            },
+        },
+    })
+
+SCENARIO: Handling the growing list 
+In your dashboard, there's a real-time list. If a background fetch adds 5 new rows to the top of the list while a user is reading item #10, their screen will jump down.
+Solution: 
+Implement a "New updates available" toast. 
+ - Keep the current view stable 
+ - Store the new background data in a separate 'pending' state 
+ - Show a button: '5 New rows - Click to view' (update on click)
+
+Using placeholderData:
+When refetching occurs due to query key change (e.g. id), isLoading is changed to true and again false, so spinner appears and disappears.
+To improve this experience, keep showing the old data until the new data is ready.
+When the query key changes, don't empty the data. Keep showing the previous result until new data arrives. 
+keepPreviousData does NOTHING on first load
+
+    import { keepPreviousData } from '@tanstack/react-query;
+    const { data, isFetching, isPlaceholderData } = useQuery({
+        queryKey: ['trades', page],
+        queryFn: () => fetchTrades(page),
+        placeholderData: keepPreviousData
+    });
+    return (
+        <>
+            {isFetching && !isPlaceholderData && <Spinner />}
+            {isPlaceholderData && <div>Loading next page...</div>}
+            <Table data={data} />
+        </>
+    )
+
+isLoading - first load only 
+isFetching - any background fetch 
+isPlaceholderData - data is stale/temporary
+
+===================================================
+
+TODO:
+
+Parallel Queries 
+Dependent Queries 
+Network mode 
+
+Better Paginated Queries with placeholderData
+Lagging Infinite Query results with placeholderData
+
+const groupOptions = (id: number) => {
+    return queryOptions({
+        queryKey: ['group', id],
+        queryFn: () => fetchGroup(id),
+        staleTime: 5 * 1000
+    })
+}
+
+useQuery(groupOptions(1));
+useSuspenseQuery(groupOptions(2))
+useQueries({
+    queries: [groupOptions(3), groupOptions(4)]
+})
