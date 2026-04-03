@@ -126,3 +126,11 @@ Advanced Type Manipulation
   Template Literal Types: Creating types by concatenating strings (e.g., type Direction = 'top' | 'bottom'; type Position = ${Direction}-left` | `${Direction}-right``).
 
 https://www.typescriptlang.org/docs/handbook/2/types-from-types.html
+
+Discriminative Unions:
+  type RemoteData<T> = 
+    | { status: 'loading' }
+    | { status: 'success'; data: T }
+    | { status: 'error'; error: string };
+
+// This enforces that if status is 'loading', 'data' is strictly unavailable.

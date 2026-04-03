@@ -454,44 +454,21 @@ Modern SSR flow:
    Client: 
       hydrate → reuse cache → no refetch → UI stable
 
-React Query SSR gives you:
-   Predictable cache
-   Server + client consistency
-   No hydration mismatch
-   Excellent performance
+React uses Object.is() to compare previous and current state values and re-renders if false. 
+While === is usually sufficient, it fails in two specific mathematical edge cases that Object.is() handles correctly:
+   NaN === NaN is false, Object.is(NaN, NaN) is true
+   +0 === -0 is true,    Object.is(+0, -0) is false
 
-Tanstack Query features:
-1) Background refetching 
-   - on window focus, On reconnect, At intervals, After mutations 
-   useQuery({
-      queryKey: ["orders"],
-      queryFn: fetchOrders,
-      refetchOnWindowFocus: true
-   })
-2) Show cached data instantly without any loading state 
-    staleTime: 60_000
-3) Automatic Deduplication: if 3 components call the same query key, only 1 API call is made. 
-  useQuery(["user"], fetchUser) // User, Profile, Dashboard components 
-4) Request cancellation: old request gets cancelled, prevents race condition. 
-     queryFn: ({ signal }) => fetch('/api/data', { signal })
-5) Query invaidation: refetches related queries after mutation 
-    useMutation(updateUser, {
-      onSuccess: () => {
-         queryClient.invalidateQueries(['users']);
-      }
-    })
-    invalidateQueries is "Safe" (it guarantees fresh data from the DB). However, for a better UX, you can use queryClient.setQueryData to manually update the cache. This is called Direct Cache Manipulation.
-6) Parallel queries:
-      useQueries({
-         queries: []
-      })
-7) Dependent queries:
-    const user = useQuery(...);
-    const permission = useQuery({ enabled: !!user.data });
-8) SSR and hydration - improved TTFB, no double fetch, streaming support  
+   const [user, setUser] = useState({ name: 'Alex' });
 
-How do you handle data if the user refreshes the page or goes offline?
- - persistQueryClient allows you to sync the cache to LocalStorage or IndexDB, so the app works instantly even after a hard refresh.
+   // This WON'T trigger a re-render:
+   user.name = 'Blake';
+   setUser(user); // Object.is(user, user) is true
 
-What happens to memory if the cache grows too large with 1000s of queries?
- - gcTime (formerly cacheTime). It determines how long inactive data stays in memory before being garbage collected.
+   // This WILL trigger a re-render:
+   setUser({ ...user, name: 'Blake' }); // A new object reference is created
+
+
+Debug React Memory leak: 
+https://oneuptime.com/blog/post/2026-01-15-debug-memory-leaks-react-applications/view
+
