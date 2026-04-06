@@ -262,3 +262,38 @@ Architecture Scenario:
     The Trade-off: Do you force a "singleton" version to save on bundle size (but break Team B), or do you allow multiple versions to load (hurting LCP and memory)? Is there a third architectural way to handle this at the "shell" level?
 
     => I'd weigh the LCP impact of loading two versions against the risk of a broken UI. If it's a critical path, we use 'Versioned' (Team A gets v2, Team B stays on v1). If it's a non-critical internal tool, we force a 'Singleton' and mandate a 1-week migration window for Team B.
+
+==========================
+
+How to handle different React versions in remote apps?
+Host, Remotes (B, C) → React 19
+RemoteA → React 17
+    1) Webpack configuration:
+    // webpack.config.js singleton set for v19 
+    new ModuleFederationPlugin({
+        name: "",
+        remotes: {}, // for host app only 
+        exposes: {}, // for child apps
+        shared: {
+            react: {singleton: true, version: "19.2.1"},
+            "react-dom": {singleton: true, version: "19.2.1"}
+        }
+    })
+    // RemoteA webpack.config.js
+    shared: {
+        react: {singleton: false, version: "17.2.1"}
+    }
+    2) Mount RemoteA safely - remoteA exposes mount function 
+        // RemoteA mount function 
+        export const mount = (el) => {
+            return ReactDOM.render(<App />, el);
+        }
+        // Host app 
+        const mountRemoteA = async () => {
+            const { mount } = await import('remoteA/App');
+            mount(document.getElementById('remote-a-root'))
+        }
+        // Host index.html 
+        <div id="root"></div>
+        <!-- Container for React 17 app -->
+        <div id="remote-a-root"></div>

@@ -186,7 +186,14 @@ As a Lead, how do you design your deployment process to prevent this "Chunk Load
 
   iv) Use atomic deployments to prevent mismatches between HTML and assets. Make sure index.html and chunks are deployed together, otherwise users will get 404. 
 
-  
+
+Q4) Remote A uses Styled-components v4 an Remote B uses Styled-components v6 and loaded in the single host. How to handle version conflict in webpack without forcing the legacy team to update immediately? 
+ => Forcing a specific version using strictVersion will cause the other remote app to crash. With singleton: true webpack tries to use the highest version available but if there's a version mismatch, it shows "Checksum mismatch" error. 
+        singleton: true + different versions → conflict
+        strictVersion: true → one remote crashes
+  - Use version aliasing styled-components-v4, styled-components-v6 allows both to co-exist in the registry without overwriting each other's global state 
+  - Use async import() so that these deps are loaded on demand when Remote is mounted.
+ 
 ==================
 
 Your monolithic codebase takes 15 minutes to build in CI/CD using Webpack. You want to switch to Vite or Turborepack to improve DX, but the project uses several legacy Webpack plugins that don't have direct equivalents in the Rollup/Vite ecosystem.
