@@ -104,3 +104,22 @@ How to prevent?
  - Use private/internal npm registry (JFrog/AWS Code artifact)
  - Use tools like SonarQube, npm audit 
  - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 
+
+
+Here is why running frontend builds in Docker minimizes risk:
+1) Isolation (The Sandbox):
+ - The app runs in its own container, isolated from your host system. 
+ - If a malicious package tries to scan your SSH keys, it sees a blank wall.
+2) Ephemeral environments:
+ - Containers are short-lived. 
+ - A compromise doesn't persist
+ - Kill the container, you kill the threat
+3) Minimal attack surface: 
+ - Use node:alpine or slim images
+ - Fewer packages means fewer holes to exploit
+4) Locked-down installs: 
+ - Stop malicious lifecycle scripts in their tracks:
+ RUN npm ci --ignore-scripts
+5) The principle of least privilege:
+ - Never run as root
+ USER app

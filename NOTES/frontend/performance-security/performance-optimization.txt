@@ -33,30 +33,35 @@ https://blog.logrocket.com/optimizing-performance-react-app/
    - bundle analyzer (debug and analyze bundle files)
 
 8. Dev Tools - Profiling, Performance to find bottlenecks
-____________________________________________________________________
 
-Security measures:
+===============================================================
 
-1. Authentication and authorization
-2. Don't store any sensitive data in localStorage/cookies
-3. Form validation 
-4. Captcha to prevent brute force attack
-5. Audit npm packages
-    npm audit / npm audit fix  (Check vunerabilities)
-    npm outdated
+Developer Experience - how easy, fast, and pleasant it is for developers to build, test, and ship code
+Less friction, Faster feedback, Fewer mistakes
 
-CSRF in cookies
- - HttpOnly, Secure, SameSite=Lax
- - SameSite=Lax (recommended): Allows normal navigation (GET) but blocks cookies on cross-site POST → CSRF protection + good UX
- - SameSite=Strict (very secure but bad UX): Blocks cookies on any cross-site navigation → User often appears logged out (Eg. clicking google URL/email URL)
+1. Code Quality & Consistency (Prevent bad code before it reaches the repo)
+   Husky (pre-commit hooks)
+   ESLint (linting)
+   Prettier (formatting)
+   lint-staged (run checks only on changed files)
 
-For local development - use npm install and commit package.json and package.lock.json files to git For dev/stg/prod - Jenbuils build uses npm ci (clean install) so that the exact versions mentioned in package.lock.json are installed and no new package can be installed
+2. Automated Quality Gates:
+   SonarQube is used for Code smells, Security issues, Vulnerabilities
 
-Supply chain attacks can't be flagged immediately (by npm audit/SonarCube) as attackers publish a new version and it's not a known vulnerability yet.
+3. Testing (fast feedback loop) - Catch issues early, not in production
+   Unit tests, E2E tests, Run on PR in CI
 
-Prevent:
- - Lock versions in package.lock.json 
- - Use npm ci (clean install) in Jenkins build 
- - Use private/internal npm registry (JFrog/AWS Code artifact)
- - Use tools like SonarQube, npm audit 
- - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 
+4. Accessibility check using axe-core 
+
+5. Fast Dev environment - Use Vite, HMR 
+
+6. Good error handling - Sentry
+
+7. Strong typing - TypeScript 
+
+8. Simple one command setup: npm run dev 
+
+9. Use AI tools and workspace prompt files: 
+   .copilot-instructions.md .component.md .service.md 
+   .skills/
+   mcp/
