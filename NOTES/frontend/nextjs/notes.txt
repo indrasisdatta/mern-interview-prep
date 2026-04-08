@@ -89,3 +89,7 @@ export async function generateStaticParams() {
     id: user.id.toString(), // The folder name/parameter is [id]
   }));
 }
+
+
+const Comp = dynamic(() => import('./Comp'), { ssr: false })
+

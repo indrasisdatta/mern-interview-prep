@@ -15,6 +15,7 @@ WEB OPTIMIZATION
 	 - Use HTTP/2 or HTTP/3 for multiplexing or lower latency 
 	 - Reduce HTTP overhead by minimizing headers and cookies 
 
+	FCP: time taken for the first text, image to render on a webpage
 	How to improve FCP? (Pre-loading or cache for above-the-fold content i.e before scollbar content and lazy load the rest) 
 	PRPL Pattern
 	 - Preload the late-discovered resources   <link rel="preload" as="image" href="image.jpg" > 
@@ -23,16 +24,18 @@ WEB OPTIMIZATION
 	 - Lazy load other routes and non-critical assets (split your bundle)
 	https://web.dev/articles/apply-instant-loading-with-prpl
 	 
+	LCP: time taken for the largest image, text or video block in the viewport to become visible
 	How to improve LCP? 
 	 - Optimize images using modern formats (avif, webp), compression and lazy loading 
 	 - Don't lazy load above the fold images to avoid delay in LCP 
 	 - JS optimizations - reduce bundle size (tree shaking, code splitting), delay or async load non-critical JS 
 	 
 	How to improve TTI? 
-	 - Break down long-running JS tasks (Use web workers for heavy computation, split tasks using setTImeout, requestIdleTimeout )
+	 - Break down long-running JS tasks (Use web workers for heavy computation, split tasks using setTImeout, requestIdleCallback)
 	 - Prioritize loading essential scripts first 
 	 - Minimize 3rd party scripts that may be blocking interactivity
-	 - Server side rendering (SSR, hydration, static rendering) 
+	 - Server side rendering (Streaming SSR, Selective Hydration, static rendering) 
+	 - Code splitting, dynamic import
 	 - Preload resources based on user behaviour 
 
 	How to improve CLS? (Cumulative Layout Shift)
