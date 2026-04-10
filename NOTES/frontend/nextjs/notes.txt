@@ -63,16 +63,23 @@ Client Component that imports getData() will receive a build-time error explaini
 By default every component is SSR 
 For CSR, we need to mention "use client" 
 
+For SSR: 
+ - For every API fetch function, specify use cache: 'no-store'
+ - Mention variable at the component level: 
+    export const dynamic = 'force-dynamic'
+
 export const dynamic = "force-dynamic"; // force-static for SSG 
 export defaut async function Page() {
-  const data = await axios.get(url;
+  const data = await axios.get(url);
 }
 
 // ISR - use fetch 
+// force-cache is default (SSG), and adding revalidate turns it into ISR. 
 export default async function Page() {
   const response = await fetch(url, {
     // It tells Next.js to re-generate the page at most once every 60 seconds.
     next: { revalidate: 60 },
+    //  cache: 'force-cache', // SSG (default)
   });
   const data = await response.json();
   // ... rest of your component logic
@@ -82,7 +89,8 @@ Note: after 60 secs, the next user request will trigger a background re-generati
 // app/users/[id]/page.js (Runs at Build Time)
 export async function generateStaticParams() {
   // 1. Fetch the list of all user IDs
-  const users = await fetch('https://api.example.com/users').then((res) => res.json());
+  const users = await fetch('https://api.example.com/users')
+                  .then((res) => res.json());
 
   // 2. Return an array of objects, where each object represents one static page
   return users.map((user) => ({
@@ -90,6 +98,83 @@ export async function generateStaticParams() {
   }));
 }
 
-
+// Load components in the browser, skipping SSR
 const Comp = dynamic(() => import('./Comp'), { ssr: false })
 
+Request Memoization: Next.js automatically memoizes fetch in server components only, same render cycle (layout.tsx - page.tsx - nested components)
+  // layout.tsx
+  const user = await fetch('/api/user').then(r => r.json());
+  // page.tsx - reused, only 1 Network call is made 
+  const user = await fetch('/api/user').then(r => r.json()); 
+
+NOTE: fetch('/api/user?id=1') !== fetch('/api/user?id=2')
+
+fetch('/api/user', { cache: 'no-store' }) // Skip memoization for dynamic behavior
+
+1) Use fetch() for simple pages privacy/page.tsx 
+2) Use generateStaticParams() when you need to pre-build dynamic routes 
+    blog/[slug]/page.tsx 
+      export const revalidate = 86400; // revalidate once a day
+      export async function generateStaticParams() {
+        // return [ {slug: 'post-1'}, {slug: 'post-2'}...]    
+      }
+
+revalidateTag, revalidatePath lets you manually refresh cached data/pages instantly instead of waiting for ISR timers.
+  await fetch('/posts', { next: { tags: ['posts'] } })
+  // Revalidate multiple components depending on same state (Home, Blog) 
+  import { revalidateTag } from 'next/cache';
+  revalidateTag('posts');
+  // Refresh cache for a specific URL route /posts
+  import { revalidatePath } from 'next/cache';
+  revalidatePath('/posts');
+
+ISG revalidate cache: 
+1) Time-based revalidation (Background):
+    1.1) Entire component 
+          export const revalidate = 86400;
+    1.2) Per API 
+          fetch('/posts', { next: { revalidate: 86400 } })
+
+2) On-demand revalidation (Manual):
+    2.1) Path-based: 
+          revalidatePath('/posts')
+    2.2) Tag-based: 
+          fetch('/posts', { next: {tags: ['posts']} });
+          revalidateTag('posts');
+
+Next.js caching v/s Tanstack Query caching 
+
+Use Next.js caching when:
+ - Data is static or semi-static (Blog posts, product description)
+ - SEO is critical 
+ - Reduction in client side bundle is needed 
+ - Data changes only on hard navigation or server action 
+
+Use Tanstack Query when:
+ - UI is highly interactive (Dashboard, real time feeds, chat)
+ - Need background sync (refetch data when user switches tabs back to your app)
+ - Need optimistic update 
+
+Login auth workflow:
+
+1. Login successful: API sends response access and refresh token in cookies.
+    Set-Cookie: accessToken=ACCESS_TOKEN; HttpOnly; Secure; SameSite=Lax
+    Set-Cookie: refreshToken=REFRESH_TOKEN; HttpOnly; Secure; SameSite=Lax
+2. Request → cookies sent (access + refresh)
+3. Access token expired
+4. Backend uses refresh token
+5. Generates new access token
+6. Sends response + Set-Cookie
+    Set-Cookie: accessToken=NEW_TOKEN; HttpOnly; Secure; SameSite=Lax
+7. Browser updates cookie automatically
+8. Next request uses new token
+
+Race Conditions: If the Refresh Token is one-time use (Rotation), concurrent requests might cause a "Used Token" error. Architects solve this by adding a small grace period (e.g., 10 seconds) where an old Refresh Token is still accepted after a new one is issued.
+
+The workflow you described hits a snag when using React Server Components (RSC).
+
+In a Server Component, the fetch happens Server-to-Server (Next.js Server → Backend API).
+The Issue: When your Backend sends a Set-Cookie response to the Next.js Server, the browser doesn't see it yet.
+The Solution: You must manually proxy that Set-Cookie header from the API response back to the client using the Next.js cookies() header or by forwarding headers in Middleware.
+
+next Server component -> Java server => Set-cookie doesn't update the browser cookies (Swallowed by Next.js server)
