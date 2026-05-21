@@ -280,6 +280,24 @@ app.use(cors({
 app.options('*', cors());
 ```
 
+**CORS Preflight validation steps:**
+- Check if preflight is needed - if it uses a non-simple method (`PUT`, `DELETE`) or non-simple content type (`application/json`) or custom headers, it halts the request
+- Browser fires `OPTIONS` request to the target server containing `Origin`, `Access-Control-Request-Method` and any `Access-Control-Request-Headers`
+- Server reads these headers and responds with its allowed security params (`Access-Control-Allow-Origin`, `-Methods`, and `-Headers`)
+- The browser verifies: 
+   - `Access-Control-Allow-Origin` header or `*`
+   - `Access-Control-Allow-Credentials: true` if the request includes credentials 
+   - `Access-Control-Allow-Methods` 
+   - `Access-Control-Allow-Headers` contains custom headers being sent
+- If all validations pass, the browser fires the actual real request. If any single check fails, it blocks the request and throws a CORS error.
+
+In case of Simple request, no preflight call is made. But the browser blocks JS from reading the response. 
+
+A GET from evil.com to agoda.com/api/hotels goes directly (no preflight). The server processes it and responds. But the browser blocks JavaScript from reading the response if the origin isn't allowed. The request still hit your server — you just can't do anything with the reply.
+
+Note: Access-Control-Allow-Origin: `Access-Control-Allow-Origin: *` and `Access-Control-Allow-Credentials: true` cannot be used together. Browsers reject this combination outright.
+
+
 ---
 
 ## 5. CSRF & Cookie Security
