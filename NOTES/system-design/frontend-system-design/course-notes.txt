@@ -314,5 +314,14 @@ Ans:  items.map((item) => <div key={item.id}>{item}</div>);
 
 ==================
 
+Virtualization v/s Infinite scroll: 
 
+- Infinite scroll as a pagination strategy when page is scrolled till the end. As the list grows, memory also increases. 
+- Virtualization is used as a DOM optimization strategy when the browser tries to render 1000+ complex rows. It reuses a fixed no. of DOM nodes and swaps their content. 
+
+- react-window keeps only a small fixed set of row components mounted. 
+- On scroll, it reuses those DOM nodes by updating their index + style (top/transform) instead of mounting/unmounting thousands of items. 
+- Because it uses translate/absolute positioning, updates are GPU-friendly and extremely fast.
+
+The "Context Trap" Tip: When virtualizing, remember that because elements are being unmounted, you cannot rely on local component state to persist. You must lift that state (to Zustand or TanStack Query) so when the row re-enters the viewport, it re-renders correctly.
 
