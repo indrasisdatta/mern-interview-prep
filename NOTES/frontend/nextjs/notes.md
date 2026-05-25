@@ -1,3 +1,5 @@
+# Next.js — Notes
+
 1. Next.js features:
    - SSR
    - SSG
@@ -89,3 +91,4 @@ export async function generateStaticParams() {
     id: user.id.toString(), // The folder name/parameter is [id]
   }));
 }
+ 

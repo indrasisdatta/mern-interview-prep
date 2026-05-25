@@ -1,3 +1,5 @@
+# Frontend Security — Notes
+
 OWASP Top 10 (2021) Security risks:
 https://www.cloudflare.com/learning/security/threats/owasp-top-10/
  - Access & auth 
@@ -103,4 +105,5 @@ How to prevent?
  - Use npm ci (clean install) in Jenkins build 
  - Use private/internal npm registry (JFrog/AWS Code artifact)
  - Use tools like SonarQube, npm audit 
- - Use tools like DataDog, Relic, Sentry to detect unexpected API calls 
+ - Use tools like SonarQube, npm audit 
+ - Use tools like DataDog, Relic, Sentry to detect unexpected API calls

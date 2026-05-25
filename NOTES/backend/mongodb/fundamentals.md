@@ -1,3 +1,4 @@
+```text
 Mongo DB fundamentals
 _____________________
 
@@ -53,7 +54,7 @@ genres: ["fantasy"] // check for exactly 1 genre matching fantasy
 genres: "fantasy" // check if fantasy exists, along with other genres
 genres: {$all: ["fantasy", "sci-fi"]} // check if these 2 are present, along with other entries
 
-{ "reviews.name": "user1" }  // find by object name --> reviews: [ {_id: "...", name: "..."}, {_id: "...", name: "..."} ]
+{"reviews.name": "user1" }  // find by object name --> reviews: [ {_id: "...", name: "..."}, {_id: "...", name: "..."} ]
 
 
 UPDATE
@@ -363,7 +364,7 @@ db.accounts.aggregate([
 -------
 
 
-{ "$addFields": {
+{"$addFields": {
     "permissions": {
       "$cond": {
         "if": {
@@ -376,7 +377,7 @@ db.accounts.aggregate([
   }},
   
   
-  db.accounts.aggregate([
+db.accounts.aggregate([
     { 
         "$lookup": {
             from: "transactions",
@@ -428,7 +429,7 @@ db.getCollection('sales').aggregate([
                 yy: { $year: "$saleDate" }
             },
             total_sales: { $sum: 1 },
-			itemsSold: { $addToSet: "$items" } // accumulator to compute the list of unique items old 
+		itemsSold: { $addToSet: "$items" } // accumulator to compute the list of unique items old 
       }
     }    
 ]);
@@ -484,3 +485,4 @@ db.getCollection('trips').aggregate([
         }
     }
 ])
+```

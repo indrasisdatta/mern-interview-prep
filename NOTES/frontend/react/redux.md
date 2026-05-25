@@ -1,3 +1,5 @@
+# Redux Toolkit (notes)
+
 Redux Toolkit is the official recommendation library for Redux usage in React app as it removes a lot of boilerplate code.
 
     -> configureStore 

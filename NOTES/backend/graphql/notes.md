@@ -1,3 +1,4 @@
+```text
 React: npm install @apollo/client and graphql 
 
     ApolloClient
@@ -78,3 +79,4 @@ For image processing (resizing), use S3 Object Lambda or an Event-Driven Archite
  - Lambda processes the file
 
 To further reduce costs, use S3 Lifecycle Policies (moving old images to Glacier) or CloudFront for caching frequently accessed images
+```

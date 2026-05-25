@@ -1,3 +1,5 @@
+# React — Practical Scenarios
+
 1. User Authentication with Token Management:
 **** How would you handle user authentication in a React application, including login, storing tokens, and protecting routes? Describe your approach.
 _______________________________________________________________________
@@ -208,5 +210,3 @@ MongoDB - when to choose?
  - rapid development, frequent schema changes 
  - high write throughput (RDBMS write takes more time as it checks FK, locks rows/tables, updates indexes)
  - read heavy use case with denormalized data (ideal for dashbord, profile, feeds)
-
-

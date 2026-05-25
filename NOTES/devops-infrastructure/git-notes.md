@@ -1,3 +1,4 @@
+```text
 1. Create new branch 
    1a. Create new branch from local, carrying forward unstaged and uncommitted changes
        git checkout -b new-branch 
@@ -56,4 +57,4 @@
 9. Git merge v/s git rebase
    Merge - preserves history (merge logs shows complete history of commit merging), suitable for shared branch
    Rebase - rewrites history (rebase logs are linear), suitable for private branch
-
+```

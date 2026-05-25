@@ -1,3 +1,4 @@
+```text
 Install Jenkins in Docker
 
 1. Pull official Jenkins LTS image from Docker Hub:
@@ -14,6 +15,7 @@ Install Jenkins in Docker
 
 Jenkins pwd: 2a7630072a314e7eb2cfa38a6077ed35
 Admin user: admin | admin
+
 
 
 Jenkinsfile - text file containing the definition of Jenkins pipeline (Pipeline as a code)
@@ -35,3 +37,4 @@ https://www.jenkins.io/doc/book/pipeline/
 
 
 
+```

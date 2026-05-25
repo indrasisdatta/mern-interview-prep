@@ -1,3 +1,4 @@
+```text
 Learning Resources:
     YouTube: https://www.youtube.com/watch?v=X48VuDVv0do
     Udemy course: https://cognizant.udemy.com/course/learn-kubernetes/learn/lecture/9703196#overview
@@ -237,3 +238,10 @@ Course answers: https://github.com/mmumshad/kubernetes-training-answers
 
 
 
+
+
+
+
+
+
+```

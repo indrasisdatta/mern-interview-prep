@@ -1,3 +1,4 @@
+```text
 Request - start 2 containers for Nginx
 1> Req is sent to API server
 2> Sent to controller (creates 2 pods but doesn't yet assign)
@@ -7,3 +8,4 @@ Kube proxy - redirects network traffic to pods
 
 Cloud control manager (CCM) - load balancer. Communicates with Cloud provider for Load balancing.
 
+```

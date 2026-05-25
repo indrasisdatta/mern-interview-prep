@@ -1,3 +1,4 @@
+```text
 Throughput - read/write operations per sec 
 DB Throughput is usually low, so scalability is necessary 
 
@@ -37,3 +38,4 @@ docker run -p 9092:9092 \
 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://<PRIVATE_IP>:9092 \
 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
 confluentinc/cp-kafka
+```

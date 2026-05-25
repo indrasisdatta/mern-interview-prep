@@ -1,3 +1,4 @@
+```text
 NodeJS 24 latest features
 https://blog.codeminer42.com/whats-new-in-node-js-24/
 
@@ -342,7 +343,7 @@ How to detect memory leak in Node app?
 Debugging Heap Snapshots
 
 Local:
-  1) node --inspect app.js OR Run VS Code Debugger (By configuting launch.json)
+  1) node --inspect app.js OR Run VS Code Debugger (By configuing launch.json)
      node --inspect .\dist\src\server.js
   2) chrome://inspect  
      Open dedicated Dev Tools for Node -> Memory tab -> heap snapshot
@@ -360,3 +361,4 @@ You need to integrate a third-party API with strict rate limits — how would yo
 5) Frontend - Tanstack Query to prevent duplicate UI requests 
 6) Implement a circuit breaker to protect the system if the 3rd party API degrades
 
+```

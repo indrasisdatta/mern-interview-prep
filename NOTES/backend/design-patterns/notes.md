@@ -1,3 +1,4 @@
+```text
 Common Frontend design patterns:
 
 1) Singleton: Ensure that a class/object has only one instance and provides a global point of access to it.
@@ -113,3 +114,4 @@ Use case: Form libaries like Formik (old version)
   content={<p>Card content displaying descriptionb</p>}
   footer={<p>Card footer</p>}
 />
+```
