@@ -15,16 +15,16 @@ The core reason it can't "maintain" scroll position is that it's **read-only and
 ### The Real Problem: Content Shift on Insertion
 
 ```
-Before insert:         After inserting 3 items above:
-┌─────────────┐        ┌─────────────┐
-│  [Sentinel] │◄── IO  │  [New Item] │
-│  Item A     │  fires │  [New Item] │
-│  Item B     │        │  [New Item] │
-│  [Item C]   │◄── was │  [Sentinel] │
-│   visible   │  here  │  [Item A]   │◄── pushed down
-└─────────────┘        │  [Item B]   │
-                       │  [Item C]   │ ← user loses position
-                       └─────────────┘
+Before insert:         After inserting 3 items above:
+┌─────────────┐        ┌─────────────┐
+│  [Sentinel] │◄── IO  │  [New Item] │
+│  Item A     │  fires │  [New Item] │
+│  Item B     │        │  [New Item] │
+│  [Item C]   │◄── was │  [Sentinel] │
+│   visible   │  here  │  [Item A]   │◄── pushed down
+└─────────────┘        │  [Item B]   │
+                       │  [Item C]   │ ← user loses position
+                       └─────────────┘
 ```
 
 ### Practical Real-World Example
@@ -37,9 +37,9 @@ In our Auto Triaging Platform, the log timeline view renders thousands of log en
 // IO has no API to say "stay where you were"
 
 const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    loadOlderLogs(); // this prepends DOM nodes → layout shift
-  }
+  if (entries[0].isIntersecting) {
+    loadOlderLogs(); // this prepends DOM nodes → layout shift
+  }
 });
 observer.observe(sentinelRef.current);
 ```
@@ -49,23 +49,23 @@ observer.observe(sentinelRef.current);
 **Option 1: CSS Scroll Anchoring (modern browsers)**
 ```css
 .log-timeline-container {
-  overflow-anchor: auto; /* default — browser tries to anchor */
+  overflow-anchor: auto; /* default — browser tries to anchor */
 }
 .sentinel {
-  overflow-anchor: none; /* prevent sentinel from being the anchor */
+  overflow-anchor: none; /* prevent sentinel from being the anchor */
 }
 ```
 
 **Option 2: Manual anchor with `scrollHeight` diff**
 ```js
 async function loadOlderLogs() {
-  const container = containerRef.current;
-  const prevScrollHeight = container.scrollHeight;
+  const container = containerRef.current;
+  const prevScrollHeight = container.scrollHeight;
 
-  await fetchAndPrepend(); // DOM updated
+  await fetchAndPrepend(); // DOM updated
 
-  // Restore scroll position
-  container.scrollTop += container.scrollHeight - prevScrollHeight;
+  // Restore scroll position
+  container.scrollTop += container.scrollHeight - prevScrollHeight;
 }
 ```
 
@@ -131,7 +131,7 @@ const GraphVisualizer = React.lazy(() => import('./GraphVisualizer'));
 const AISummary = React.lazy(() => import('./AISummary'));
 
 <Suspense fallback={<GraphSkeleton />}>
-  <GraphVisualizer orderId={orderId} />
+  <GraphVisualizer orderId={orderId} />
 </Suspense>
 ```
 
@@ -156,6 +156,98 @@ Replaced FID in 2024. Measures the worst-case delay between user interaction and
 | Re-rendering too many components | `React.memo`, `useMemo`, `useCallback` |
 | Synchronous state updates on fast input | Debounce, or use `useTransition` for non-urgent updates |
 
+## What `scheduler.yield()` Does Internally
+
+### `scheduler.yield()`
+
+1. Your async function hits:
+
+   ```js
+   await scheduler.yield();
+   ```
+
+2. The current task ends, freeing the main thread.
+
+3. The browser checks whether any high-priority work is pending:
+
+   - User input events
+   - Rendering/paint work
+   - Other urgent browser tasks
+
+   **If yes:** handle them first.
+
+   **If no:** immediately resume the continuation of your function.
+
+4. Execution resumes exactly at the line following the `await`.
+
+---
+
+### How This Differs from `setTimeout(..., 0)`
+
+#### `setTimeout`
+
+1. Your function executes:
+
+   ```js
+   setTimeout(fn, 0);
+   ```
+
+2. `fn` is added to the back of the task queue.
+
+3. The browser processes all previously queued tasks:
+
+   - Other timers
+   - Analytics callbacks
+   - Third-party scripts
+   - Any pending macrotasks
+
+4. Eventually `fn` runs, which could be:
+   - ~10ms later
+   - ~200ms later
+   - Or longer under heavy load
+
+---
+
+### Browser Support & Polyfill
+
+`scheduler.yield()` is supported in Chrome and Firefox (since August 2025). Safari has not implemented it yet.
+
+Always perform feature detection and provide a fallback:
+
+```js
+async function yieldToMain() {
+  if ('scheduler' in globalThis && 'yield' in scheduler) {
+    await scheduler.yield();
+  } else {
+    // Fallback to setTimeout.
+    // This still yields to the browser,
+    // but loses the priority scheduling benefits.
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+}
+```
+
+### Usage Example
+
+```js
+async function heavyWork() {
+  for (const item of largeList) {
+    process(item);
+
+    // Give the browser a chance to handle
+    // user input, rendering, and other work.
+    await yieldToMain();
+  }
+}
+```
+
+### Why Use It?
+
+- Keeps the UI responsive during CPU-intensive work.
+- Allows user interactions to be processed sooner.
+- Avoids long-running tasks blocking rendering.
+- More efficient than repeatedly using `setTimeout(..., 0)` because the browser can prioritize urgent work before resuming execution.
+
 **Real fix from our project — debounced search with `useTransition`:**
 
 The log search bar was triggering re-renders on every keystroke, filtering thousands of log entries synchronously. We debounced the input and wrapped the heavy filter in `useTransition`:
@@ -165,17 +257,17 @@ const [inputValue, setInputValue] = useState('');
 const [isPending, startTransition] = useTransition();
 
 const debouncedSearch = useMemo(
-  () => debounce((value) => {
-    startTransition(() => {
-      setFilteredLogs(filterLogs(allLogs, value)); // non-urgent — yields to browser
-    });
-  }, 300),
-  [allLogs]
+  () => debounce((value) => {
+    startTransition(() => {
+      setFilteredLogs(filterLogs(allLogs, value)); // non-urgent — yields to browser
+    });
+  }, 300),
+  [allLogs]
 );
 
 function handleSearch(value) {
-  setInputValue(value);   // urgent — input updates immediately
-  debouncedSearch(value); // non-urgent — filter runs after 300ms + transition
+  setInputValue(value);   // urgent — input updates immediately
+  debouncedSearch(value); // non-urgent — filter runs after 300ms + transition
 }
 ```
 
@@ -207,8 +299,8 @@ Measures visual stability — how much content jumps around during load.
 For screenshots in the log timeline — reserving fixed aspect ratio space before the image loads:
 ```css
 .screenshot-wrapper {
-  aspect-ratio: 16 / 9;
-  background: #1e1e2e; /* dark placeholder matching dashboard theme */
+  aspect-ratio: 16 / 9;
+  background: #1e1e2e; /* dark placeholder matching dashboard theme */
 }
 ```
 
@@ -217,19 +309,19 @@ For screenshots in the log timeline — reserving fixed aspect ratio space befor
 ### Follow-up Questions
 
 **Q: How do you measure these in a CI/CD pipeline?**
-> We run Lighthouse CI in our GitLab pipeline as a stage after deployment to staging. It fails the pipeline if LCP > 2.5s or CLS > 0.1. For real-user data, the `web-vitals` library sends INP and CLS metrics to our internal Datadog dashboard.
+> We run Lighthouse CI in our GitLab pipeline as a stage after deployment to staging. It fails the pipeline if LCP > 2.5s or CLS > 0.1. For real-user data, the `web-vitals` library sends INP and CLS metrics to our internal Sentry dashboard.
 ```yaml
 # .gitlab-ci.yml
 lighthouse:
-  stage: audit
-  script:
-    - npx lhci autorun --config=lighthouserc.js
-  rules:
-    - if: '$CI_MERGE_REQUEST_ID'
+  stage: audit
+  script:
+    - npx lhci autorun --config=lighthouserc.js
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'
 ```
 ```js
 import { onLCP, onINP, onCLS } from 'web-vitals';
-onINP(metric => sendToDatadog('inp', metric.value));
+onINP(metric => sendToSentry('inp', metric.value));
 ```
 
 **Q: What's the difference between lab data and field data?**
@@ -250,11 +342,11 @@ This is about choosing the **right tool for the right kind of state**. I classif
 
 ```
 ┌─────────────────────────────────────────────────┐
-│              State Types                        │
-│                                                 │
-│  Server State    UI/App State    Local State    │
-│  (React Query)   (Redux)         (useState)     │
-│                  (Zustand)       (Context API)  │
+│              State Types                        │
+│                                                 │
+│  Server State    UI/App State    Local State    │
+│  (React Query)   (Redux)         (useState)     │
+│                  (Zustand)       (Context API)  │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -272,12 +364,12 @@ In the Auto Triaging Platform, we use all three — each for the right job.
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const [user, setUser] = useState(null);
+  return (
+    <AuthContext.Provider value={{ user, setUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 ```
 
@@ -296,22 +388,22 @@ export function AuthProvider({ children }) {
 ```js
 // filtersSlice.ts
 const filtersSlice = createSlice({
-  name: 'filters',
-  initialState: { dateRange: null, logLevel: 'all', serviceId: null },
-  reducers: {
-    setDateRange: (state, action) => { state.dateRange = action.payload; },
-    setLogLevel: (state, action) => { state.logLevel = action.payload; },
-    resetFilters: () => initialState,
-  }
+  name: 'filters',
+  initialState: { dateRange: null, logLevel: 'all', serviceId: null },
+  reducers: {
+    setDateRange: (state, action) => { state.dateRange = action.payload; },
+    setLogLevel: (state, action) => { state.logLevel = action.payload; },
+    resetFilters: () => initialState,
+  }
 });
 
 // userSlice.ts — selected order context
 const userSlice = createSlice({
-  name: 'user',
-  initialState: { selectedOrderId: null, selectedSessionId: null },
-  reducers: {
-    setSelectedOrder: (state, action) => { state.selectedOrderId = action.payload; }
-  }
+  name: 'user',
+  initialState: { selectedOrderId: null, selectedSessionId: null },
+  reducers: {
+    setSelectedOrder: (state, action) => { state.selectedOrderId = action.payload; }
+  }
 });
 ```
 
@@ -329,19 +421,19 @@ const userSlice = createSlice({
 ```jsx
 // Parallel API calls using useQueries — fetch logs, screenshots, and metrics simultaneously
 const results = useQueries({
-  queries: [
-    { queryKey: ['logs', sessionId], queryFn: () => api.get(`/logs/${sessionId}`) },
-    { queryKey: ['screenshots', sessionId], queryFn: () => api.get(`/screenshots/${sessionId}`) },
-    { queryKey: ['metrics', orderId], queryFn: () => api.get(`/metrics/${orderId}`) },
-  ]
+  queries: [
+    { queryKey: ['logs', sessionId], queryFn: () => api.get(`/logs/${sessionId}`) },
+    { queryKey: ['screenshots', sessionId], queryFn: () => api.get(`/screenshots/${sessionId}`) },
+    { queryKey: ['metrics', orderId], queryFn: () => api.get(`/metrics/${orderId}`) },
+  ]
 });
 
 // With staleTime and refetchInterval for the 15-min data freshness requirement
 const { data: logs } = useQuery({
-  queryKey: ['logs', sessionId],
-  queryFn: ({ signal }) => api.get(`/logs/${sessionId}`, { signal }), // cancellable
-  staleTime: 60_000,
-  refetchInterval: 15 * 60 * 1000, // refetch every 15 mins for data freshness
+  queryKey: ['logs', sessionId],
+  queryFn: ({ signal }) => api.get(`/logs/${sessionId}`, { signal }), // cancellable
+  staleTime: 60_000,
+  refetchInterval: 15 * 60 * 1000, // refetch every 15 mins for data freshness
 });
 ```
 
@@ -394,16 +486,16 @@ Think of it as npm packages, but served live over the network instead of bundled
 ### The Core Concept
 
 ```
-┌──────────────────────┐     Runtime sharing     ┌────────────────────┐
-│   Shell App (Host)   │◄─────────────────────── │  Remote App MFE    │
-│                      │                         │                    │
-│  Loads & mounts:     │   exposes at runtime:   │  exposes:          │
-│  - Header (from MFE) │   /remoteEntry.js        │  - Header component│
-│  - Cart (from MFE)   │                         │  - Cart component  │
-│  - Checkout (local)  │                         │  - Shared utils    │
-└──────────────────────┘                         └────────────────────┘
-         ▲
-         │  Also shares: react, react-dom (singleton — one copy in memory)
+┌──────────────────────┐     Runtime sharing     ┌────────────────────┐
+│   Shell App (Host)   │◄─────────────────────── │  Remote App MFE    │
+│                      │                         │                    │
+│  Loads & mounts:     │   exposes at runtime:   │  exposes:          │
+│  - Header (from MFE) │   /remoteEntry.js        │  - Header component│
+│  - Cart (from MFE)   │                         │  - Cart component  │
+│  - Checkout (local)  │                         │  - Shared utils    │
+└──────────────────────┘                         └────────────────────┘
+         ▲
+         │  Also shares: react, react-dom (singleton — one copy in memory)
 ```
 
 ### Webpack Config Example
@@ -411,27 +503,27 @@ Think of it as npm packages, but served live over the network instead of bundled
 **Remote (exposes components):**
 ```js
 new ModuleFederationPlugin({
-  name: 'cartApp',
-  filename: 'remoteEntry.js',
-  exposes: {
-    './Cart': './src/components/Cart',
-    './useCartHook': './src/hooks/useCart',
-  },
-  shared: {
-    react: { singleton: true, requiredVersion: '^18.0.0' },
-    'react-dom': { singleton: true },
-  },
+  name: 'cartApp',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './Cart': './src/components/Cart',
+    './useCartHook': './src/hooks/useCart',
+  },
+  shared: {
+    react: { singleton: true, requiredVersion: '^18.0.0' },
+    'react-dom': { singleton: true },
+  },
 })
 ```
 
 **Host (consumes components):**
 ```js
 new ModuleFederationPlugin({
-  name: 'shell',
-  remotes: {
-    cartApp: 'cartApp@https://cart.myapp.com/remoteEntry.js',
-  },
-  shared: { react: { singleton: true }, 'react-dom': { singleton: true } },
+  name: 'shell',
+  remotes: {
+    cartApp: 'cartApp@https://cart.myapp.com/remoteEntry.js',
+  },
+  shared: { react: { singleton: true }, 'react-dom': { singleton: true } },
 })
 ```
 
@@ -440,11 +532,11 @@ new ModuleFederationPlugin({
 const Cart = React.lazy(() => import('cartApp/Cart'));
 
 function App() {
-  return (
-    <Suspense fallback={<Spinner />}>
-      <Cart />
-    </Suspense>
-  );
+  return (
+    <Suspense fallback={<Spinner />}>
+      <Cart />
+    </Suspense>
+  );
 }
 ```
 
@@ -492,34 +584,34 @@ With 300+ components, you need a **layered error handling strategy** — not try
 ```jsx
 // ErrorBoundary.jsx
 class ErrorBoundary extends React.Component {
-  state = { hasError: false, error: null };
+  state = { hasError: false, error: null };
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
 
-  componentDidCatch(error, info) {
-    // Send to Sentry/Datadog with component stack
-    reportError(error, {
-      componentStack: info.componentStack,
-      context: this.props.context,
-    });
-  }
+  componentDidCatch(error, info) {
+    // Send to Sentry with component stack
+    reportError(error, {
+      componentStack: info.componentStack,
+      context: this.props.context,
+    });
+  }
 
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <DefaultErrorUI error={this.state.error} />;
-    }
-    return this.props.children;
-  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <DefaultErrorUI error={this.state.error} />;
+    }
+    return this.props.children;
+  }
 }
 
 export function withErrorBoundary(Component, fallback, context) {
-  return (props) => (
-    <ErrorBoundary fallback={fallback} context={context}>
-      <Component {...props} />
-    </ErrorBoundary>
-  );
+  return (props) => (
+    <ErrorBoundary fallback={fallback} context={context}>
+      <Component {...props} />
+    </ErrorBoundary>
+  );
 }
 ```
 
@@ -528,21 +620,21 @@ export function withErrorBoundary(Component, fallback, context) {
 ```jsx
 // 1. Top-level catch-all
 <ErrorBoundary fallback={<AppCrashPage />}>
-  <App />
+  <App />
 </ErrorBoundary>
 
 // 2. Route-level — isolate page crashes
 <ErrorBoundary fallback={<PageErrorUI />} context="TriagingPage">
-  <TriagingPage />
+  <TriagingPage />
 </ErrorBoundary>
 
 // 3. Widget-level — AI summary and graph visualizer can fail independently
 <ErrorBoundary fallback={<AISummaryFallback />} context="AISummary">
-  <AISummary sessionId={sessionId} />
+  <AISummary sessionId={sessionId} />
 </ErrorBoundary>
 
 <ErrorBoundary fallback={<GraphFallback />} context="DependencyMatrix">
-  <DependencyMatrix orderId={orderId} />
+  <DependencyMatrix orderId={orderId} />
 </ErrorBoundary>
 ```
 
@@ -551,12 +643,12 @@ export function withErrorBoundary(Component, fallback, context) {
 ```js
 // main.tsx — catch unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
-  reportError(event.reason, { type: 'unhandledRejection' });
-  event.preventDefault();
+  reportError(event.reason, { type: 'unhandledRejection' });
+  event.preventDefault();
 });
 
 window.addEventListener('error', (event) => {
-  reportError(event.error, { type: 'windowError', filename: event.filename });
+  reportError(event.error, { type: 'windowError', filename: event.filename });
 });
 ```
 
@@ -569,30 +661,30 @@ In our project, a single axios instance is created and shared across all React Q
 export const api = axios.create({ baseURL: '/api' });
 
 api.interceptors.request.use((config) => {
-  const token = getAccessToken(); // from Redux store
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
+  const token = getAccessToken(); // from Redux store
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
 });
 
 api.interceptors.response.use(
-  res => res,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Silent token refresh
-      const newToken = await refreshAccessToken();
-      error.config.headers.Authorization = `Bearer ${newToken}`;
-      return api(error.config); // retry original request
-    }
-    if (error.response?.status >= 500) {
-      reportError(error, { type: 'apiError', url: error.config.url });
-    }
-    return Promise.reject(error);
-  }
+  res => res,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Silent token refresh
+      const newToken = await refreshAccessToken();
+      error.config.headers.Authorization = `Bearer ${newToken}`;
+      return api(error.config); // retry original request
+    }
+    if (error.response?.status >= 500) {
+      reportError(error, { type: 'apiError', url: error.config.url });
+    }
+    return Promise.reject(error);
+  }
 );
 
 // Usage in React Query — consistent pattern across all 300 components
 const { data } = useQuery(['logs', sessionId], () =>
-  api.get(`/logs/${sessionId}`).then(res => res.data)
+  api.get(`/logs/${sessionId}`).then(res => res.data)
 );
 ```
 
@@ -600,16 +692,16 @@ const { data } = useQuery(['logs', sessionId], () =>
 
 ```jsx
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        if (error.response?.status === 401) return false; // don't retry auth failures
-        return failureCount < 3;
-      },
-      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000) + Math.random() * 500,
-      onError: (error) => reportError(error, { type: 'queryError' }),
-    },
-  },
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        if (error.response?.status === 401) return false; // don't retry auth failures
+        return failureCount < 3;
+      },
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000) + Math.random() * 500,
+      onError: (error) => reportError(error, { type: 'queryError' }),
+    },
+  },
 });
 ```
 
@@ -617,15 +709,15 @@ const queryClient = new QueryClient({
 
 ```
 Support agent triggers action
-    │
-    ▼
-Component renders ──error──► ErrorBoundary ──► Datadog + Fallback UI
-    │
-    ▼
+    │
+    ▼
+Component renders ──error──► ErrorBoundary ──► Sentry + Fallback UI
+    │
+    ▼
 API Call ──────────error──► Axios Interceptor ──► silent retry or toast
-    │                       (401 → token refresh, 500 → error report)
-    ▼
-Async logic ───────error──► unhandledrejection ──► Datadog log
+    │                       (401 → token refresh, 500 → error report)
+    ▼
+Async logic ───────error──► unhandledrejection ──► Sentry log
 ```
 
 ---
@@ -639,7 +731,7 @@ Async logic ───────error──► unhandledrejection ──► Dat
 > This was a real bug we hit. React Query was retrying a 401 response at the same time the Axios interceptor was doing a silent refresh — causing duplicate refresh calls and occasionally a logout loop. The fix was to disable React Query retry for 401s specifically, and let the Axios interceptor own the refresh flow entirely. React Query retries only for network errors and 5xx responses.
 
 **Q: How do you use error monitoring in production?**
-> We use Datadog RUM. `componentDidCatch` calls `datadogRum.addError(error, { context })`. We attach the user's role, the current Order ID, and the active feature flags to every error context — so we can filter errors by "only occurred for ops team users on order flows with more than 50 log entries."
+> We use Sentry. `componentDidCatch` calls `Sentry.captureException(error, { extra: { context } })`. We attach the user's role, the current Order ID, and the active feature flags to every error context — so we can filter errors by "only occurred for ops team users on order flows with more than 50 log entries."
 
 ---
 
@@ -664,34 +756,34 @@ The RSC Payload is a **binary/JSON-like serialized tree** that describes what th
 ```
 Client receives:
 
-Traditional SSR:              RSC:
-<html>                        RSC Payload (binary protocol):
-  <div>                         J0:["$","div",null,{
-    <h1>Hello</h1>                "children": [
-    <p>World</p>                    ["$","h1",null,{"children":"Hello"}],
-  </div>                           "$L1"  ← hole for client component
-</html>                         }]
-(full HTML)                     M1:{"id":"./ClientCart.js", ...}
-                                (reference to client bundle chunk)
+Traditional SSR:              RSC:
+<html>                        RSC Payload (binary protocol):
+  <div>                         J0:["$","div",null,{
+    <h1>Hello</h1>                "children": [
+    <p>World</p>                    ["$","h1",null,{"children":"Hello"}],
+  </div>                           "$L1"  ← hole for client component
+</html>                         }]
+(full HTML)                     M1:{"id":"./ClientCart.js", ...}
+                                (reference to client bundle chunk)
 ```
 
 ### Why This Matters
 
 ```
 ┌─────────────────────────────────────────────────┐
-│                 Request/Response                │
-│                                                 │
-│  Server                    Client               │
-│  ──────                    ──────               │
-│  ServerComponent           Hydrates client      │
-│  runs here:                components only      │
-│  - DB queries              - No server code     │
-│  - File system             - No DB secrets      │
-│  - Secrets safe            - Smaller JS bundle  │
-│                                                 │
-│  Serializes as RSC Payload ──────────────────►  │
-│                            React reconciles     │
-│                            with existing DOM    │
+│                 Request/Response                │
+│                                                 │
+│  Server                    Client               │
+│  ──────                    ──────               │
+│  ServerComponent           Hydrates client      │
+│  runs here:                components only      │
+│  - DB queries              - No server code     │
+│  - File system             - No DB secrets      │
+│  - Secrets safe            - Smaller JS bundle  │
+│                                                 │
+│  Serializes as RSC Payload ──────────────────►  │
+│                            React reconciles     │
+│                            with existing DOM    │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -703,14 +795,14 @@ Traditional SSR:              RSC:
 // Cannot do: useState, useEffect, browser APIs, event handlers
 
 async function OrderSummary({ orderId }) {
-  const order = await db.orders.findById(orderId); // direct DB — no API round trip
-  return (
-    <div>
-      <h1>{order.id}</h1>
-      <p>{order.status}</p>
-      <LogTimeline orderId={orderId} /> {/* ← client component */}
-    </div>
-  );
+  const order = await db.orders.findById(orderId); // direct DB — no API round trip
+  return (
+    <div>
+      <h1>{order.id}</h1>
+      <p>{order.status}</p>
+      <LogTimeline orderId={orderId} /> {/* ← client component */}
+    </div>
+  );
 }
 ```
 
@@ -719,8 +811,8 @@ async function OrderSummary({ orderId }) {
 'use client';
 
 function LogTimeline({ orderId }) {
-  const { data: logs } = useQuery(['logs', orderId], fetchLogs);
-  return <VirtualizedLogList logs={logs} />;
+  const { data: logs } = useQuery(['logs', orderId], fetchLogs);
+  return <VirtualizedLogList logs={logs} />;
 }
 ```
 
@@ -729,8 +821,8 @@ function LogTimeline({ orderId }) {
 In Next.js App Router, when you navigate client-side, the browser fetches the RSC Payload (not full HTML) from `/_next/data/...` — React reconciles it with the existing DOM without a full page reload.
 
 ```
-Initial Load:  Server → HTML + RSC Payload → Hydrate
-Navigation:    Server → RSC Payload only → Reconcile (no full reload)
+Initial Load:  Server → HTML + RSC Payload → Hydrate
+Navigation:    Server → RSC Payload only → Reconcile (no full reload)
 ```
 
 This is why App Router feels like a SPA but runs components on the server.
@@ -772,41 +864,41 @@ These are the patterns I've used in production, including in our triaging platfo
 ```js
 // Before ES Modules — still relevant for SDKs/utilities
 const AnalyticsService = (() => {
-  let queue = [];
-  let isInitialized = false;
+  let queue = [];
+  let isInitialized = false;
 
-  return {
-    init(config) { isInitialized = true; },
-    track(event) {
-      if (!isInitialized) queue.push(event);
-      else sendEvent(event);
-    }
-  };
+  return {
+    init(config) { isInitialized = true; },
+    track(event) {
+      if (!isInitialized) queue.push(event);
+      else sendEvent(event);
+    }
+  };
 })();
 ```
 
-**Real use in project:** Our `reportError` utility that queues errors before Datadog initializes, then flushes the queue.
+**Real use in project:** Our `reportError` utility that queues errors before Sentry initializes, then flushes the queue.
 
 ### 2. Observer / Pub-Sub Pattern
 
 ```js
 class EventBus {
-  #listeners = new Map();
+  #listeners = new Map();
 
-  on(event, fn) {
-    if (!this.#listeners.has(event)) this.#listeners.set(event, []);
-    this.#listeners.get(event).push(fn);
-    return () => this.off(event, fn); // returns unsubscribe
-  }
+  on(event, fn) {
+    if (!this.#listeners.has(event)) this.#listeners.set(event, []);
+    this.#listeners.get(event).push(fn);
+    return () => this.off(event, fn); // returns unsubscribe
+  }
 
-  emit(event, data) {
-    this.#listeners.get(event)?.forEach(fn => fn(data));
-  }
+  emit(event, data) {
+    this.#listeners.get(event)?.forEach(fn => fn(data));
+  }
 
-  off(event, fn) {
-    const fns = this.#listeners.get(event) || [];
-    this.#listeners.set(event, fns.filter(f => f !== fn));
-  }
+  off(event, fn) {
+    const fns = this.#listeners.get(event) || [];
+    this.#listeners.set(event, fns.filter(f => f !== fn));
+  }
 }
 
 export const eventBus = new EventBus();
@@ -817,15 +909,15 @@ export const eventBus = new EventBus();
 ```js
 // WebSocket handler
 socket.on('ticket_update', (data) => {
-  eventBus.emit('ticket:updated', data);
+  eventBus.emit('ticket:updated', data);
 });
 
 // Component listens and refetches
 useEffect(() => {
-  const unsub = eventBus.on('ticket:updated', () => {
-    queryClient.invalidateQueries(['tickets']);
-  });
-  return unsub;
+  const unsub = eventBus.on('ticket:updated', () => {
+    queryClient.invalidateQueries(['tickets']);
+  });
+  return unsub;
 }, []);
 ```
 
@@ -833,33 +925,33 @@ useEffect(() => {
 
 ```js
 function createLogger(type) {
-  const loggers = {
-    datadog: new DatadogLogger(),
-    console: new ConsoleLogger(),
-    silent: new SilentLogger(),
-  };
-  return loggers[type] || loggers.console;
+  const loggers = {
+    sentry: new SentryLogger(),
+    console: new ConsoleLogger(),
+    silent: new SilentLogger(),
+  };
+  return loggers[type] || loggers.console;
 }
 
 const logger = createLogger(process.env.REACT_APP_LOG_TARGET);
 logger.info('App started');
 ```
 
-**Real use:** Different log targets for local dev (console), staging (verbose Datadog), and production (errors only).
+**Real use:** Different log targets for local dev (console), staging (verbose Sentry), and production (errors only).
 
 ### 4. Strategy Pattern
 
 ```js
 // Swap log filtering algorithm at runtime based on user selection
 const filterStrategies = {
-  error: (logs) => logs.filter(l => l.level === 'ERROR'),
-  warning: (logs) => logs.filter(l => ['ERROR', 'WARN'].includes(l.level)),
-  all: (logs) => logs,
-  service: (logs, serviceId) => logs.filter(l => l.serviceId === serviceId),
+  error: (logs) => logs.filter(l => l.level === 'ERROR'),
+  warning: (logs) => logs.filter(l => ['ERROR', 'WARN'].includes(l.level)),
+  all: (logs) => logs,
+  service: (logs, serviceId) => logs.filter(l => l.serviceId === serviceId),
 };
 
 function filterLogs(logs, strategy, params) {
-  return filterStrategies[strategy]?.(logs, params) ?? logs;
+  return filterStrategies[strategy]?.(logs, params) ?? logs;
 }
 ```
 
@@ -870,13 +962,13 @@ function filterLogs(logs, strategy, params) {
 ```js
 // Used for Vue 3-style reactivity, form validation, API response normalization
 function createNormalizedResponse(target) {
-  return new Proxy(target, {
-    get(obj, prop) {
-      if (prop === 'timestamp') return new Date(obj.ts).toISOString();
-      if (prop === 'level') return obj.severity?.toUpperCase() ?? 'INFO';
-      return obj[prop];
-    }
-  });
+  return new Proxy(target, {
+    get(obj, prop) {
+      if (prop === 'timestamp') return new Date(obj.ts).toISOString();
+      if (prop === 'level') return obj.severity?.toUpperCase() ?? 'INFO';
+      return obj[prop];
+    }
+  });
 }
 // Normalize inconsistent log field names from different microservices
 ```
@@ -886,15 +978,15 @@ function createNormalizedResponse(target) {
 ```js
 // withRetry — used for API calls that may transiently fail
 function withRetry(fn, retries = 3) {
-  return async (...args) => {
-    for (let i = 0; i < retries; i++) {
-      try { return await fn(...args); }
-      catch (e) {
-        if (i === retries - 1) throw e;
-        await delay(1000 * 2 ** i); // exponential backoff
-      }
-    }
-  };
+  return async (...args) => {
+    for (let i = 0; i < retries; i++) {
+      try { return await fn(...args); }
+      catch (e) {
+        if (i === retries - 1) throw e;
+        await delay(1000 * 2 ** i); // exponential backoff
+      }
+    }
+  };
 }
 ```
 
@@ -928,23 +1020,23 @@ Every component does one thing. In our triaging platform this means:
 ```jsx
 // ❌ Bad — TriageView does too much
 function TriageView({ sessionId }) {
-  const [logs, setLogs] = useState([]);
-  const [screenshots, setScreenshots] = useState([]);
-  const [aiSummary, setAiSummary] = useState(null);
-  const [filters, setFilters] = useState({});
-  // fetching + filtering + AI + rendering = too many responsibilities
+  const [logs, setLogs] = useState([]);
+  const [screenshots, setScreenshots] = useState([]);
+  const [aiSummary, setAiSummary] = useState(null);
+  const [filters, setFilters] = useState({});
+  // fetching + filtering + AI + rendering = too many responsibilities
 }
 
 // ✅ Good — each piece is a separate layer
 function TriageView({ sessionId }) {
-  return (
-    <>
-      <FilterBar />                    {/* Redux — reads/writes filter state */}
-      <LogTimeline sessionId={sessionId} />  {/* React Query — fetches logs */}
-      <ScreenshotViewer sessionId={sessionId} /> {/* IO + Blob cache */}
-      <AISummaryPanel sessionId={sessionId} />   {/* Lazy loaded */}
-    </>
-  );
+  return (
+    <>
+      <FilterBar />                    {/* Redux — reads/writes filter state */}
+      <LogTimeline sessionId={sessionId} />  {/* React Query — fetches logs */}
+      <ScreenshotViewer sessionId={sessionId} /> {/* IO + Blob cache */}
+      <AISummaryPanel sessionId={sessionId} />   {/* Lazy loaded */}
+    </>
+  );
 }
 ```
 
@@ -955,20 +1047,20 @@ Components open for extension, closed for modification.
 ```jsx
 // ❌ Bad — modify LogBadge every time you need a new log level
 function LogBadge({ level }) {
-  if (level === 'ERROR') return <span className="badge-error">{level}</span>;
-  if (level === 'WARN') return <span className="badge-warn">{level}</span>;
+  if (level === 'ERROR') return <span className="badge-error">{level}</span>;
+  if (level === 'WARN') return <span className="badge-warn">{level}</span>;
 }
 
 // ✅ Good — extend via config, no modification needed
 const LEVEL_CONFIG = {
-  ERROR: { className: 'badge-error', icon: '🔴' },
-  WARN:  { className: 'badge-warn',  icon: '🟡' },
-  INFO:  { className: 'badge-info',  icon: '🔵' },
+  ERROR: { className: 'badge-error', icon: '🔴' },
+  WARN:  { className: 'badge-warn',  icon: '🟡' },
+  INFO:  { className: 'badge-info',  icon: '🔵' },
 };
 
 function LogBadge({ level }) {
-  const config = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.INFO;
-  return <span className={config.className}>{config.icon} {level}</span>;
+  const config = LEVEL_CONFIG[level] ?? LEVEL_CONFIG.INFO;
+  return <span className={config.className}>{config.icon} {level}</span>;
 }
 // New log level from a new microservice? Add one line to LEVEL_CONFIG.
 ```
@@ -980,12 +1072,12 @@ Don't force consumers to take props they don't need.
 ```jsx
 // Used for our LogTimeline component
 <LogTimeline>
-  <LogTimeline.Toolbar />
-  <LogTimeline.Filters />
-  <LogTimeline.List>
-    <LogTimeline.Row />
-  </LogTimeline.List>
-  <LogTimeline.Pagination />
+  <LogTimeline.Toolbar />
+  <LogTimeline.Filters />
+  <LogTimeline.List>
+    <LogTimeline.Row />
+  </LogTimeline.List>
+  <LogTimeline.Pagination />
 </LogTimeline>
 // Teams consuming just LogTimeline.List don't need Toolbar internals
 ```
@@ -997,12 +1089,12 @@ Components depend on abstractions, not concretions.
 ```jsx
 // ❌ Bad — hardcoded to real API
 function LogViewer({ sessionId }) {
-  const { data } = useQuery(['logs', sessionId], () => api.get(`/logs/${sessionId}`));
+  const { data } = useQuery(['logs', sessionId], () => api.get(`/logs/${sessionId}`));
 }
 
 // ✅ Good — inject the fetcher, testable with mock
 function LogViewer({ sessionId, fetchLogs = defaultFetchLogs }) {
-  const { data } = useQuery(['logs', sessionId], () => fetchLogs(sessionId));
+  const { data } = useQuery(['logs', sessionId], () => fetchLogs(sessionId));
 }
 // In tests: <LogViewer sessionId="abc" fetchLogs={mockFetchLogs} />
 // In MSW integration tests: the network boundary is mocked, not the hook
@@ -1013,12 +1105,12 @@ function LogViewer({ sessionId, fetchLogs = defaultFetchLogs }) {
 ```jsx
 // Used in our layout — compose layouts instead of inheriting base classes
 function TriagingLayout({ children }) {
-  return (
-    <AppShell>
-      <Sidebar />
-      <main className="triage-content">{children}</main>
-    </AppShell>
-  );
+  return (
+    <AppShell>
+      <Sidebar />
+      <main className="triage-content">{children}</main>
+    </AppShell>
+  );
 }
 ```
 
@@ -1027,13 +1119,13 @@ function TriagingLayout({ children }) {
 ```jsx
 // Used across 15+ components in the triaging platform
 function useSessionData(sessionId) {
-  const logs = useQuery(['logs', sessionId], ({ signal }) =>
-    api.get(`/logs/${sessionId}`, { signal }).then(r => r.data)
-  );
-  const screenshots = useQuery(['screenshots', sessionId], ({ signal }) =>
-    api.get(`/screenshots/${sessionId}`, { signal }).then(r => r.data)
-  );
-  return { logs, screenshots, isLoading: logs.isLoading || screenshots.isLoading };
+  const logs = useQuery(['logs', sessionId], ({ signal }) =>
+    api.get(`/logs/${sessionId}`, { signal }).then(r => r.data)
+  );
+  const screenshots = useQuery(['screenshots', sessionId], ({ signal }) =>
+    api.get(`/screenshots/${sessionId}`, { signal }).then(r => r.data)
+  );
+  return { logs, screenshots, isLoading: logs.isLoading || screenshots.isLoading };
 }
 ```
 
@@ -1064,24 +1156,24 @@ React follows the **Unidirectional Data Flow** model (one-way data binding), com
 
 ```
 ┌──────────────────────────────────────────────────┐
-│           React's UI Model                       │
-│                                                  │
-│   State / Props                                  │
-│       │                                          │
-│       ▼                                          │
-│   render() → Virtual DOM (JS object tree)        │
-│       │                                          │
-│       ▼                                          │
-│   Reconciliation (Diffing algorithm / Fiber)     │
-│       │                                          │
-│       ▼                                          │
-│   Commit Phase → Real DOM updates (minimal)      │
-│                                                  │
-│   User Interaction                               │
-│       │                                          │
-│       ▼                                          │
-│   setState / dispatch → New State → Re-render    │
-│   (cycle repeats — always top-down)              │
+│           React's UI Model                       │
+│                                                  │
+│   State / Props                                  │
+│       │                                          │
+│       ▼                                          │
+│   render() → Virtual DOM (JS object tree)        │
+│       │                                          │
+│       ▼                                          │
+│   Reconciliation (Diffing algorithm / Fiber)     │
+│       │                                          │
+│       ▼                                          │
+│   Commit Phase → Real DOM updates (minimal)      │
+│                                                  │
+│   User Interaction                               │
+│       │                                          │
+│       ▼                                          │
+│   setState / dispatch → New State → Re-render    │
+│   (cycle repeats — always top-down)              │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -1091,15 +1183,15 @@ React follows the **Unidirectional Data Flow** model (one-way data binding), com
 // Imperative (jQuery/DOM):
 const btn = document.getElementById('btn');
 btn.addEventListener('click', () => {
-  const count = parseInt(btn.textContent) + 1;
-  btn.textContent = count; // YOU manage DOM
+  const count = parseInt(btn.textContent) + 1;
+  btn.textContent = count; // YOU manage DOM
 });
 
 // Declarative (React):
 function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
-  // YOU describe what to show — React manages DOM
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+  // YOU describe what to show — React manages DOM
 }
 ```
 
@@ -1117,9 +1209,9 @@ From React 18 onwards, the model evolved with **Fiber** to support **concurrent 
 - High-priority updates (user input) interrupt low-priority work (background renders)
 
 ```
-React 17 (Sync):           React 18 (Concurrent Fiber):
-─────────────────          ──────────────────────────────
-Render → Block → Commit    Render(low) → interrupt → Render(high) → Commit → Resume(low)
+React 17 (Sync):           React 18 (Concurrent Fiber):
+─────────────────          ──────────────────────────────
+Render → Block → Commit    Render(low) → interrupt → Render(high) → Commit → Resume(low)
 ```
 
 This is how `useTransition` works in our log search — the input update is high-priority (Fiber handles it immediately), while the heavy log filtering is low-priority (deferred, can be interrupted).
@@ -1161,14 +1253,14 @@ This is a classic problem: **production builds are minified/mangled**, so variab
 ```js
 // Your source code:
 function handleClick(event) {
-  event.preventDefault();
-  submitForm();
+  event.preventDefault();
+  submitForm();
 }
 
 // After Terser minification:
-function handleClick(e) {  // 'event' → 'e'
-  e.preventDefault();      // fine if e exists
-  submitForm();
+function handleClick(e) {  // 'event' → 'e'
+  e.preventDefault();      // fine if e exists
+  submitForm();
 }
 
 // But if there's a scope issue in the original:
@@ -1180,7 +1272,7 @@ const handler = () => submitForm(event); // 'event' captured wrong scope
 
 **Step 1 — Get the source map and decode the real location**
 
-Source maps are uploaded to Datadog/Sentry by our Jenkins pipeline. The mapped stack trace shows the original file and line.
+Source maps are uploaded to Sentry by our Jenkins pipeline. The mapped stack trace shows the original file and line.
 
 If you have the source map manually:
 ```bash
@@ -1195,19 +1287,19 @@ In our CRACO setup:
 ```js
 // craco.config.js
 module.exports = {
-  webpack: {
-    configure: (webpackConfig) => {
-      if (process.env.BUILD_ANALYZE === 'true') {
-        // Keep variable names readable, keep dead code removal
-        webpackConfig.optimization.minimizer[0].options.terserOptions = {
-          mangle: false,
-          compress: true,
-        };
-        webpackConfig.devtool = 'source-map';
-      }
-      return webpackConfig;
-    }
-  }
+  webpack: {
+    configure: (webpackConfig) => {
+      if (process.env.BUILD_ANALYZE === 'true') {
+        // Keep variable names readable, keep dead code removal
+        webpackConfig.optimization.minimizer[0].options.terserOptions = {
+          mangle: false,
+          compress: true,
+        };
+        webpackConfig.devtool = 'source-map';
+      }
+      return webpackConfig;
+    }
+  }
 };
 ```
 ```bash
@@ -1219,8 +1311,8 @@ BUILD_ANALYZE=true npm run build
 
 ```jsx
 componentDidCatch(error, info) {
-  console.log('Error:', error);
-  console.log('Component stack:', info.componentStack);
+  console.log('Error:', error);
+  console.log('Component stack:', info.componentStack);
 }
 ```
 
@@ -1229,37 +1321,37 @@ componentDidCatch(error, info) {
 ```js
 // Culprit 1: Global 'event' in strict mode
 document.addEventListener('click', function() {
-  console.log(event); // works in loose mode, undefined in strict mode after minification
+  console.log(event); // works in loose mode, undefined in strict mode after minification
 });
 // Fix: explicit parameter
 document.addEventListener('click', function(event) { console.log(event); });
 
 // Culprit 2: Typo in catch clause
 try {
-  doSomething();
+  doSomething();
 } catch (error) {
-  reportError(e); // typo — should be 'error'; minifier renames 'error' to 'e' elsewhere
+  reportError(e); // typo — should be 'error'; minifier renames 'error' to 'e' elsewhere
 }
 
 // Culprit 3: Wrong scope capture
 const handleSubmit = () => {
-  api.post('/submit', event.target.value); // 'event' not in scope here
+  api.post('/submit', event.target.value); // 'event' not in scope here
 };
 ```
 
-**Step 5 — Use Datadog RUM session replay**
+**Step 5 — Use Sentry session replay**
 
-In our project we use Datadog RUM with session replay. When a production error fires, the replay shows the exact user actions, network calls, and component state at the time of the error — without needing to reproduce it locally.
+In our project we use Sentry with session replay. When a production error fires, the replay shows the exact user actions, network calls, and component state at the time of the error — without needing to reproduce it locally.
 
 ### Prevention
 
 ```js
 // .eslintrc
 {
-  "rules": {
-    "no-undef": "error",
-    "no-unused-vars": "error"
-  }
+  "rules": {
+    "no-undef": "error",
+    "no-unused-vars": "error"
+  }
 }
 ```
 
@@ -1270,17 +1362,17 @@ TypeScript would catch this at compile time — we use TypeScript in the triagin
 ### Follow-up Questions
 
 **Q: How do you set up source maps in production without exposing them publicly?**
-> In our Jenkins pipeline, after the build step, source maps are uploaded to Datadog using `datadog-ci` and then deleted from the build output before deployment to the CDN. Source maps never reach the public server.
+> In our Jenkins pipeline, after the build step, source maps are uploaded to Sentry using `@sentry/cli` and then deleted from the build output before deployment to the CDN. Source maps never reach the public server.
 ```sh
 # Jenkinsfile
 sh 'npm run build'
-sh 'datadog-ci sourcemaps upload ./build --service=triage-ui --release-version=$BUILD_NUMBER'
-sh 'find ./build -name "*.map" -delete'  # remove before deploy
+sh 'sentry-cli releases files $RELEASE upload-sourcemaps ./build --url-prefix "~/"'
+sh 'find ./build -name "*.map" -delete'  # remove before deploy
 sh 'aws s3 sync ./build s3://triage-frontend/'
 ```
 
 **Q: The error only happens on specific user machines — how do you debug?**
-> Datadog RUM tags errors by browser, OS, and user role. We filter the error event by browser — often it's a Safari version issue or an older Chromium on corporate laptops. For race conditions, the breadcrumb timeline in Datadog shows the sequence of API calls and user actions leading to the error.
+> Sentry tags errors by browser, OS, and user role. We filter the error event by browser — often it's a Safari version issue or an older Chromium on corporate laptops. For race conditions, the breadcrumb timeline in Sentry shows the sequence of API calls and user actions leading to the error.
 
 **Q: Why don't we always keep source maps public?**
 > Source maps expose your entire original source code — business logic, internal API endpoints, algorithm implementations, sometimes env variable names. For an internal enterprise tool like our triaging platform, source maps in the public bundle would expose Verizon's internal microservice structure to anyone with DevTools. Always upload privately to your error monitoring tool.
@@ -1301,13 +1393,13 @@ Untestable components collapse concerns — they fetch, transform, and render al
 
 ```
 Layer 1: Pure Logic (Custom Hooks / Plain Functions)
-  → No JSX, no side effects. Test with renderHook or plain JS tests.
+  → No JSX, no side effects. Test with renderHook or plain JS tests.
 
 Layer 2: Container (Smart Component)
-  → Orchestrates data + state. Test by mocking the hook/API layer.
+  → Orchestrates data + state. Test by mocking the hook/API layer.
 
 Layer 3: Presentational (Dumb Component)
-  → Receives props, returns JSX. Easiest to test — just pass props.
+  → Receives props, returns JSX. Easiest to test — just pass props.
 ```
 
 **In our triaging platform:**
@@ -1315,30 +1407,30 @@ Layer 3: Presentational (Dumb Component)
 ```jsx
 // Layer 3 — Presentational (pure)
 function LogRow({ level, timestamp, message, serviceName }) {
-  return (
-    <tr>
-      <td><LogBadge level={level} /></td>
-      <td>{formatTimestamp(timestamp)}</td>
-      <td>{serviceName}</td>
-      <td>{message}</td>
-    </tr>
-  );
+  return (
+    <tr>
+      <td><LogBadge level={level} /></td>
+      <td>{formatTimestamp(timestamp)}</td>
+      <td>{serviceName}</td>
+      <td>{message}</td>
+    </tr>
+  );
 }
 
 // Layer 2 — Container (smart)
 function LogTimeline({ sessionId }) {
-  const { data: logs, isLoading } = useQuery(
-    ['logs', sessionId],
-    ({ signal }) => api.get(`/logs/${sessionId}`, { signal }).then(r => r.data)
-  );
-  if (isLoading) return <LogSkeleton />;
-  return <LogTable logs={logs} />;
+  const { data: logs, isLoading } = useQuery(
+    ['logs', sessionId],
+    ({ signal }) => api.get(`/logs/${sessionId}`, { signal }).then(r => r.data)
+  );
+  if (isLoading) return <LogSkeleton />;
+  return <LogTable logs={logs} />;
 }
 
 // Layer 1 — Custom hook (pure logic)
 function useLogFilters(logs) {
-  const filters = useSelector(selectFilters);
-  return useMemo(() => filterLogs(logs, filters), [logs, filters]);
+  const filters = useSelector(selectFilters);
+  return useMemo(() => filterLogs(logs, filters), [logs, filters]);
 }
 ```
 
@@ -1349,14 +1441,14 @@ function useLogFilters(logs) {
 import { renderHook, act } from '@testing-library/react';
 
 it('filters logs by ERROR level', () => {
-  const logs = [
-    { level: 'ERROR', message: 'Payment failed' },
-    { level: 'INFO', message: 'Session started' },
-  ];
-  const { result } = renderHook(() => useLogFilters(logs));
-  // assert filtered output
-  expect(result.current).toHaveLength(1);
-  expect(result.current[0].level).toBe('ERROR');
+  const logs = [
+    { level: 'ERROR', message: 'Payment failed' },
+    { level: 'INFO', message: 'Session started' },
+  ];
+  const { result } = renderHook(() => useLogFilters(logs));
+  // assert filtered output
+  expect(result.current).toHaveLength(1);
+  expect(result.current[0].level).toBe('ERROR');
 });
 ```
 
@@ -1367,16 +1459,16 @@ We mock at the network boundary using MSW — not inside the component. This tes
 ```js
 // mocks/handlers.js (MSW)
 rest.get('/api/logs/:sessionId', (req, res, ctx) => {
-  return res(ctx.json([
-    { level: 'ERROR', message: 'Payment failed', serviceName: 'checkout-svc' }
-  ]));
+  return res(ctx.json([
+    { level: 'ERROR', message: 'Payment failed', serviceName: 'checkout-svc' }
+  ]));
 });
 
 // LogTimeline.test.jsx
 it('shows log entry after fetch', async () => {
-  render(<LogTimeline sessionId="session-123" />);
-  expect(await screen.findByText('Payment failed')).toBeVisible();
-  expect(screen.getByText('checkout-svc')).toBeInTheDocument();
+  render(<LogTimeline sessionId="session-123" />);
+  expect(await screen.findByText('Payment failed')).toBeVisible();
+  expect(screen.getByText('checkout-svc')).toBeInTheDocument();
 });
 ```
 
@@ -1399,8 +1491,8 @@ Our triaging platform consumes APIs from 4 backend teams. We use **Pact** for AP
 > Wrap the test render with a real Redux store configured with `configureStore` from Redux Toolkit, but with test-specific initial state. Avoid mocking the store — testing with the real store catches bugs in reducers and selectors that mock stores would hide.
 ```js
 function renderWithStore(ui, { preloadedState } = {}) {
-  const store = configureStore({ reducer: rootReducer, preloadedState });
-  return render(<Provider store={store}>{ui}</Provider>);
+  const store = configureStore({ reducer: rootReducer, preloadedState });
+  return render(<Provider store={store}>{ui}</Provider>);
 }
 ```
 
@@ -1408,12 +1500,12 @@ function renderWithStore(ui, { preloadedState } = {}) {
 > Wrap with a fresh `QueryClientProvider` per test (no shared cache between tests), and mock the API layer with MSW. React Query's retry behavior can slow tests — set `retry: false` in the test QueryClient.
 ```js
 const testQueryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } }
+  defaultOptions: { queries: { retry: false } }
 });
 render(
-  <QueryClientProvider client={testQueryClient}>
-    <LogTimeline sessionId="test-123" />
-  </QueryClientProvider>
+  <QueryClientProvider client={testQueryClient}>
+    <LogTimeline sessionId="test-123" />
+  </QueryClientProvider>
 );
 ```
 
@@ -1425,7 +1517,7 @@ render(
 
 ### Answer
 
-I separate **lab measurements** (DevTools Profiler, `performance.mark`, Lighthouse) from **field measurements** (web-vitals RUM, Datadog). Lab tells me what's slow in a controlled environment; field tells me what users actually experience.
+I separate **lab measurements** (DevTools Profiler, `performance.mark`, Lighthouse) from **field measurements** (web-vitals RUM, Sentry). Lab tells me what's slow in a controlled environment; field tells me what users actually experience.
 
 ### React DevTools Profiler — First Stop
 
@@ -1442,10 +1534,10 @@ In our triaging platform, the Profiler revealed that `LogRow` was re-rendering o
 performance.mark('ai-summary:render:start');
 
 useEffect(() => {
-  performance.mark('ai-summary:render:end');
-  performance.measure('ai-summary:render', 'ai-summary:render:start', 'ai-summary:render:end');
-  const [entry] = performance.getEntriesByName('ai-summary:render');
-  console.log(`AI Summary rendered in ${entry.duration}ms`);
+  performance.mark('ai-summary:render:end');
+  performance.measure('ai-summary:render', 'ai-summary:render:start', 'ai-summary:render:end');
+  const [entry] = performance.getEntriesByName('ai-summary:render');
+  console.log(`AI Summary rendered in ${entry.duration}ms`);
 }, []);
 ```
 
@@ -1455,14 +1547,14 @@ useEffect(() => {
 import { Profiler } from 'react';
 
 function onRenderCallback(id, phase, actualDuration, baseDuration) {
-  // actualDuration: time to render this commit
-  // baseDuration:   estimated time WITHOUT memoization
-  // Gap between them = memoization savings
-  datadogRum.addTiming(`${id}.${phase}`, actualDuration);
+  // actualDuration: time to render this commit
+  // baseDuration:   estimated time WITHOUT memoization
+  // Gap between them = memoization savings
+  Sentry.addBreadcrumb({ message: `${id}.${phase}`, data: { duration: actualDuration } });
 }
 
 <Profiler id="LogTimeline" onRender={onRenderCallback}>
-  <LogTimeline sessionId={sessionId} />
+  <LogTimeline sessionId={sessionId} />
 </Profiler>
 ```
 
@@ -1472,16 +1564,16 @@ function onRenderCallback(id, phase, actualDuration, baseDuration) {
 
 ```js
 import { onINP, onCLS, onLCP } from 'web-vitals';
-onINP(({ value }) => datadogRum.addTiming('inp', value));
-onLCP(({ value }) => datadogRum.addTiming('lcp', value));
+onINP(({ value }) => Sentry.addMeasurement('inp', value, 'millisecond'));
+onLCP(({ value }) => Sentry.addMeasurement('lcp', value, 'millisecond'));
 ```
 
 **Long Tasks API** — observe tasks blocking main thread > 50ms:
 ```js
 const obs = new PerformanceObserver(list => {
-  list.getEntries().forEach(entry => {
-    datadogRum.addError(new Error(`Long task: ${entry.duration}ms`));
-  });
+  list.getEntries().forEach(entry => {
+    Sentry.captureMessage(`Long task: ${entry.duration}ms`, 'warning');
+  });
 });
 obs.observe({ type: 'longtask', buffered: true });
 ```
@@ -1494,7 +1586,7 @@ obs.observe({ type: 'longtask', buffered: true });
 > In the triaging platform, the Profiler showed that `DependencyMatrix` (our D3 graph visualizer) was re-rendering on every Redux state change — including filter changes it didn't consume. The fix was `React.memo` with a custom equality check on the graph-specific props, plus moving it to read only from a dedicated Redux slice. The render time dropped from 340ms to 12ms.
 
 **Q: How do you track performance in production, not just in dev?**
-> `<Profiler>` wraps the three heaviest components in production with sampling (1 in 20 renders sends timing to Datadog). The web-vitals library reports LCP, INP, and CLS from real users. Long Tasks API catches main-thread blockages. Datadog dashboards show p50/p75/p95 render times segmented by component, user role, and order size.
+> `<Profiler>` wraps the three heaviest components in production with sampling (1 in 20 renders sends timing to Sentry). The web-vitals library reports LCP, INP, and CLS from real users. Long Tasks API catches main-thread blockages. Sentry dashboards show p50/p75/p95 render times segmented by component, user role, and order size.
 
 **Q: How do you decide when a component is "slow enough" to optimize?**
 > I use 100ms as the perception threshold for interactions (human perception of instant). For renders that happen in response to user actions, anything over 50ms gets investigated. For background renders, 200ms is acceptable. I always profile before optimizing — premature memoization adds complexity and can introduce bugs.
@@ -1521,8 +1613,8 @@ obs.observe({ type: 'longtask', buffered: true });
 // setupTests.js (development only)
 import React from 'react';
 if (process.env.NODE_ENV === 'development') {
-  const whyDidYouRender = require('@welldone-software/why-did-you-render');
-  whyDidYouRender(React, { trackAllPureComponents: true });
+  const whyDidYouRender = require('@welldone-software/why-did-you-render');
+  whyDidYouRender(React, { trackAllPureComponents: true });
 }
 
 // Opt a component in:
@@ -1535,16 +1627,16 @@ This caught a critical bug in our triaging platform: `LogRow` was re-rendering b
 
 ```js
 function useRenderCount(label = '') {
-  const count = useRef(0);
-  count.current++;
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[${label}] render #${count.current}`);
-  }
+  const count = useRef(0);
+  count.current++;
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[${label}] render #${count.current}`);
+  }
 }
 
 function LogRow({ log }) {
-  useRenderCount('LogRow');
-  // ...
+  useRenderCount('LogRow');
+  // ...
 }
 ```
 
@@ -1564,13 +1656,13 @@ const LOG_ROW_CONFIG = { showTimestamp: true, showService: true };
 ```jsx
 // ❌ New function every render — LogRow re-renders even with React.memo
 {logs.map(log => (
-  <LogRow key={log.id} log={log} onSelect={() => handleSelect(log.id)} />
+  <LogRow key={log.id} log={log} onSelect={() => handleSelect(log.id)} />
 ))}
 
 // ✅ Stable callback
 const handleSelectLog = useCallback((id) => dispatch(setSelectedLog(id)), [dispatch]);
 {logs.map(log => (
-  <LogRow key={log.id} log={log} onSelect={handleSelectLog} />
+  <LogRow key={log.id} log={log} onSelect={handleSelectLog} />
 ))}
 ```
 
@@ -1583,18 +1675,18 @@ In our project we initially put filters AND auth user in the same context. Every
 const AppContext = createContext({ user, filters, selectedOrderId });
 
 // ✅ Split by update frequency
-const AuthContext = createContext(user);         // rarely changes
+const AuthContext = createContext(user);         // rarely changes
 // Filters moved to Redux — subscription-based, not context propagation
 ```
 
 **Cause 4 — Parent Re-renders Pulling Children Along**
 ```jsx
 const LogRow = React.memo(function LogRow({ log, onSelect }) {
-  return <tr onClick={() => onSelect(log.id)}>...</tr>;
+  return <tr onClick={() => onSelect(log.id)}>...</tr>;
 }, (prevProps, nextProps) => {
-  // Custom comparison — skip re-render if log ID and level haven't changed
-  return prevProps.log.id === nextProps.log.id &&
-         prevProps.log.level === nextProps.log.level;
+  // Custom comparison — skip re-render if log ID and level haven't changed
+  return prevProps.log.id === nextProps.log.id &&
+         prevProps.log.level === nextProps.log.level;
 });
 ```
 
@@ -1609,7 +1701,7 @@ const LogRow = React.memo(function LogRow({ log, onSelect }) {
 > When more than 3-4 components are consuming a context that updates frequently, I move that state to Zustand or Jotai. They use subscription-based updates — only components subscribed to the specific piece of state re-render, not the whole context subtree. We use Redux for the same reason — `useSelector` ensures a component only re-renders when the specific slice it selects changes.
 
 **Q: How do you track re-renders in production?**
-> The React Profiler API in production with sampling — log `actualDuration` for the top 10 heaviest components to Datadog. When a new deploy spikes re-render times, the Datadog dashboard shows it immediately. We also use the Long Tasks API to catch main-thread blockages caused by excessive re-rendering.
+> The React Profiler API in production with sampling — log `actualDuration` for the top 10 heaviest components to Sentry. When a new deploy spikes re-render times, the Sentry dashboard shows it immediately. We also use the Long Tasks API to catch main-thread blockages caused by excessive re-rendering.
 
 ---
 
@@ -1628,12 +1720,12 @@ The ops and support teams frequently need to look up Verizon internal policy doc
 ```
 Architecture:
 Policy PDFs → S3 → LangChain chunking (≈500 tokens/chunk)
-            → HuggingFace/Instructor XL embeddings
-            → FAISS vector store (persisted back to S3, versioned)
+            → HuggingFace/Instructor XL embeddings
+            → FAISS vector store (persisted back to S3, versioned)
 
 Query flow:
 User question → embed → FAISS similarity search → top-k chunks
-             → LLM context window → grounded answer (no hallucination)
+             → LLM context window → grounded answer (no hallucination)
 ```
 
 **Frontend rendering of LLM output:**
@@ -1644,22 +1736,22 @@ import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 
 function AISummaryPanel({ sessionId }) {
-  const { data } = useQuery(['ai-summary', sessionId], fetchAISummary);
+  const { data } = useQuery(['ai-summary', sessionId], fetchAISummary);
 
-  const safeHtml = useMemo(() => {
-    if (!data?.summary) return '';
-    const rawHtml = marked(data.summary); // markdown → HTML
-    return DOMPurify.sanitize(rawHtml, {
-      ALLOWED_TAGS: ['p', 'ul', 'li', 'strong', 'em', 'code', 'pre', 'h3', 'h4']
-    });
-  }, [data?.summary]);
+  const safeHtml = useMemo(() => {
+    if (!data?.summary) return '';
+    const rawHtml = marked(data.summary); // markdown → HTML
+    return DOMPurify.sanitize(rawHtml, {
+      ALLOWED_TAGS: ['p', 'ul', 'li', 'strong', 'em', 'code', 'pre', 'h3', 'h4']
+    });
+  }, [data?.summary]);
 
-  return (
-    <div className="ai-summary">
-      <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
-      <ConfidenceScore value={data?.confidence} />
-    </div>
-  );
+  return (
+    <div className="ai-summary">
+      <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
+      <ConfidenceScore value={data?.confidence} />
+    </div>
+  );
 }
 ```
 
@@ -1669,13 +1761,13 @@ User enters a Session ID → LangChain parses it → generates Kibana DSL query 
 
 ```
 Input: Session ID
-  ↓
+  ↓
 LangChain: Natural language → Kibana DSL
-  ↓
+  ↓
 Backend: Execute DSL on ELK → retrieve relevant logs
-  ↓
+  ↓
 LLM: Summarize → root cause → confidence score → next action
-  ↓
+  ↓
 Frontend: summary + timeline + root cause card
 ```
 
@@ -1683,15 +1775,15 @@ Frontend: summary + timeline + root cause card
 
 ```jsx
 function RootCauseCard({ analysis }) {
-  return (
-    <div className={`rca-card rca-card--${analysis.confidence}`}>
-      <h3>Root Cause</h3>
-      <p>{analysis.rootCause}</p>
-      <p><strong>Failed Service:</strong> {analysis.failedService}</p>
-      <p><strong>Recommended Action:</strong> {analysis.recommendation}</p>
-      <ConfidenceBadge score={analysis.confidence} />
-    </div>
-  );
+  return (
+    <div className={`rca-card rca-card--${analysis.confidence}`}>
+      <h3>Root Cause</h3>
+      <p>{analysis.rootCause}</p>
+      <p><strong>Failed Service:</strong> {analysis.failedService}</p>
+      <p><strong>Recommended Action:</strong> {analysis.recommendation}</p>
+      <ConfidenceBadge score={analysis.confidence} />
+    </div>
+  );
 }
 ```
 
@@ -1743,12 +1835,12 @@ The Fix Agent integrates Jira and GitLab via MCP (Model Context Protocol). When 
 
 ```
 Jira Ticket → Fix Agent
-  ↓ Jira MCP: fetch ticket details + stack trace
-  ↓ Kibana MCP: fetch logs by correlation_id
-  ↓ IDE: open relevant files, map error to line
-  ↓ LLM: generate fix
-  ↓ Husky: ESLint + unit tests
-  ↓ GitLab MCP: create MR with description
+  ↓ Jira MCP: fetch ticket details + stack trace
+  ↓ Kibana MCP: fetch logs by correlation_id
+  ↓ IDE: open relevant files, map error to line
+  ↓ LLM: generate fix
+  ↓ Husky: ESLint + unit tests
+  ↓ GitLab MCP: create MR with description
 ```
 
 ### Reviewer Agent — Structured MR Review
@@ -1757,10 +1849,10 @@ Runs independently after the MR is created. Uses a `Reviewer.md` skill file that
 
 ```
 Reviewer Agent:
-  → GitLab MCP: fetch MR diff
-  → Analyze: code correctness, edge cases, security, perf implications
-  → Add inline comments on the MR
-  → Approve/request-changes (requires human confirmation — no auto-merge)
+  → GitLab MCP: fetch MR diff
+  → Analyze: code correctness, edge cases, security, perf implications
+  → Add inline comments on the MR
+  → Approve/request-changes (requires human confirmation — no auto-merge)
 ```
 
 GitLab rule enforced: **author cannot approve their own MR** — even if the Fix Agent creates the MR, a human or the Reviewer Agent (different identity/PAT) must approve.
@@ -1769,26 +1861,26 @@ GitLab rule enforced: **author cannot approve their own MR** — even if the Fix
 
 ```
 Fix Agent (LLM)
-  ↓
+  ↓
 PreToolUse Hook (validate intent, block dangerous tools)
-  ↓
+  ↓
 Security Proxy MCP (sanitize PII, strip secrets)
-  ↓
+  ↓
 MCP Tool (Jira / GitLab / Kibana)
-  ↓
+  ↓
 Security Proxy MCP (sanitize response)
-  ↓
+  ↓
 Fix Agent (LLM reasoning on clean data)
-  ↓
+  ↓
 Post-validation (Husky tests + human approval)
 ```
 
 ### Cost Optimization — Model Routing
 
 ```
-Log parsing (cheap):    GPT-4o-mini
-Code fix generation:    Claude 3.5 Sonnet (reasoning model)
-Review comments:        GPT-4o-mini
+Log parsing (cheap):    GPT-4o-mini
+Code fix generation:    Claude 3.5 Sonnet (reasoning model)
+Review comments:        GPT-4o-mini
 ```
 
 ---
@@ -1819,11 +1911,11 @@ Review comments:        GPT-4o-mini
 | Topic | Mid-level Answer | Architect-level Answer |
 |---|---|---|
 | Intersection Observer | "IO fires when element enters viewport" | Passive/read-only model, scrollHeight delta fix, scroll-anchoring, practical chat/log timeline example |
-| Core Web Vitals | "Use Lighthouse to check scores" | Lab vs field data, Jenkins/GitLab CI integration with Lighthouse CI, Datadog RUM for real users |
+| Core Web Vitals | "Use Lighthouse to check scores" | Lab vs field data, Jenkins/GitLab CI integration with Lighthouse CI, Sentry for real users |
 | State Management | "Use Redux for global state" | Three buckets (server/client/local), React Query for server state, Redux for UI state, race condition handling |
 | Module Federation | "It's for micro-frontends" | Runtime vs build-time sharing, singleton flag, GitLab per-team pipelines, health checks for remotes |
 | Error Handling | "Use Error Boundaries" | 4-layer strategy, Axios interceptor owning auth refresh, React Query retry conflicts |
-| Performance | "Use React DevTools Profiler" | Lab vs field distinction, Profiler API in production with sampling, Long Tasks API, Datadog correlation |
+| Performance | "Use React DevTools Profiler" | Lab vs field distinction, Profiler API in production with sampling, Long Tasks API, Sentry correlation |
 | Re-renders | "Use React.memo and useCallback" | Context architecture by update frequency, WDYR for detection, profile before memoizing |
 | Testability | "Use React Testing Library" | Testing Trophy model, MSW at network boundary, Pact for contract testing across teams |
 | AI Integration | "We use an LLM for summaries" | RAG grounding, DOMPurify for LLM output, streaming SSE, PII masking at ETL layer, confidence scores |

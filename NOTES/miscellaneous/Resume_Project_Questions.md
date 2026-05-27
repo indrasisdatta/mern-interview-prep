@@ -1,53 +1,48 @@
 # Lead/Architect Level Interview Preparation Guide
-### Indrasis Datta — 11+ YOE, MERN & GenAI
-
----
 
 ## QUESTION INDEX
 
 ### Section 1: Frontend Architecture & System Design
-1. Walk me through the high-level architecture of the Auto Triaging platform. How did you decide on the tech stack?
-2. How would you design a micro-frontend architecture for a large enterprise portal? What are the trade-offs vs. a monolith?
-3. You used React Query and Redux together. How do you decide what goes into each? Where does one end and the other begin?
-4. How does your virtualized log table work under the hood? What are the limits of `react-window`?
+1. Walk me through the high-level architecture of the Auto Triaging platform. How did you decide on the tech stack?\
+2. How would you design a micro-frontend architecture for a large enterprise portal? What are the trade-offs vs. a monolith?\
+3. You used React Query and Redux together. How do you decide what goes into each? Where does one end and the other begin?\
+4. How does your virtualized log table work under the hood? What are the limits of `react-window`?\
 5. You mentioned CRACO for Webpack customization. What specific optimizations did you configure, and why not migrate to Vite?
 
 ### Section 2: Performance Engineering
-6. You reduced bundle size by 20% at Cognizant. Walk me through the exact steps you took — profiling, decisions, results.
-7. How do you handle a UI that receives 1,000 WebSocket events per second without freezing?
-8. You solved a race condition using AbortController. Explain the full scenario — why it happened, what failed first, and why AbortController was the right fix.
-9. What is the difference between `staleTime`, `cacheTime`, and `gcTime` in React Query? Give a real example from your project where tuning these mattered.
+6. You reduced bundle size by 20% at Cognizant. Walk me through the exact steps you took — profiling, decisions, results.\
+7. How do you handle a UI that receives 1,000 WebSocket events per second without freezing?\
+8. You solved a race condition using AbortController. Explain the full scenario — why it happened, what failed first, and why AbortController was the right fix.\
+9. What is the difference between `staleTime`, `cacheTime`, and `gcTime` in React Query? Give a real example from your project where tuning these mattered.\
 10. How do you measure and improve Core Web Vitals (LCP, CLS, FID/INP) in a React app?
 
 ### Section 3: Authentication, Authorization & Security
-11. You store the access token in Redux and refresh token in an HttpOnly cookie. Why not store both in cookies? What attack does each decision defend against?
-12. Walk me through the silent token refresh flow — every step, every edge case.
-13. You had a conflict between React Query retry logic and Axios refresh-token retry. Explain exactly what went wrong and how you resolved it.
-14. How do you implement RBAC in a frontend application? What are the limits of frontend RBAC?
+11. You store the access token in Redux and refresh token in an HttpOnly cookie. Why not store both in cookies? What attack does each decision defend against?\
+12. Walk me through the silent token refresh flow — every step, every edge case.\
+13. You had a conflict between React Query retry logic and Axios refresh-token retry. Explain exactly what went wrong and how you resolved it.\
+14. How do you implement RBAC in a frontend application? What are the limits of frontend RBAC?\
 15. How do you protect an agentic AI system (LLM + MCP tools) from prompt injection and data exfiltration?
 
 ### Section 4: GenAI & Agentic Systems
-16. Explain your RAG implementation end-to-end — from document ingestion to user query to grounded answer.
-17. How does your LangChain pipeline convert natural language to an Elasticsearch DSL query? What are the failure modes?
-18. You built a Fix Agent and a Reviewer Agent. How do they coordinate? What prevents them from conflicting?
-19. How do you evaluate the quality of an AI agent in production? What metrics do you track?
+16. Explain your RAG implementation end-to-end — from document ingestion to user query to grounded answer.\
+17. How does your LangChain pipeline convert natural language to an Elasticsearch DSL query? What are the failure modes?\
+18. You built a Fix Agent and a Reviewer Agent. How do they coordinate? What prevents them from conflicting?\
+19. How do you evaluate the quality of an AI agent in production? What metrics do you track?\
 20. You use model routing (GPT-4o-mini vs. Claude 3.5 Sonnet). What is the decision logic? How do you handle latency vs. quality trade-offs?
 
 ### Section 5: Leadership, Architecture Decisions & Trade-offs
-21. As a UI Lead, how do you govern code quality across a 6-member team without becoming a bottleneck?
-22. You improved CI/CD build time from 5 mins to 2 mins. Describe exactly what you changed.
-23. How do you handle technical debt in a fast-moving product? Give a specific example.
-24. A junior developer wants to add a new global state key in Redux. What questions do you ask before approving?
+21. As a UI Lead, how do you govern code quality across a 6-member team without becoming a bottleneck?\
+22. You improved CI/CD build time from 5 mins to 2 mins. Describe exactly what you changed.\
+23. How do you handle technical debt in a fast-moving product? Give a specific example.\
+24. A junior developer wants to add a new global state key in Redux. What questions do you ask before approving?\
 25. How would you onboard a team of 50 developers to use your agentic MCP-based dev workflow safely?
 
 ### Section 6: Node.js, Backend & Full-Stack
-26. Walk me through your ETL pipeline — data from ELK to MongoDB. How do you handle failures and data freshness?
-27. How does your WebSocket architecture handle reconnections, missed messages, and room-based subscriptions?
-28. In your authenticate/authorize middleware, what happens if the JWT secret is rotated? How do you avoid downtime?
-29. How do you handle idempotency in APIs that trigger downstream microservices?
+26. Walk me through your ETL pipeline — data from ELK to MongoDB. How do you handle failures and data freshness?\
+27. How does your WebSocket architecture handle reconnections, missed messages, and room-based subscriptions?\
+28. In your authenticate/authorize middleware, what happens if the JWT secret is rotated? How do you avoid downtime?\
+29. How do you handle idempotency in APIs that trigger downstream microservices?\
 30. You've worked with GraphQL (CitiBank) and REST. When would you choose GraphQL for a new project, and when wouldn't you?
-
----
 
 ---
 
