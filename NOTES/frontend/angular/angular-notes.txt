@@ -1,0 +1,165 @@
+https://www.youtube.com/watch?v=VxeZLazamM8
+
+Angular fundamentals tutorial: https://www.youtube.com/watch?v=pwuGBvOPFYI&list=PLC3y8-rFHvwhBRAgFinJR8KHIrCdTkZcZ&index=17&ab_channel=Codevolution
+
+Angular Reactive forms: https://www.youtube.com/watch?v=dlVVYmntDnE&list=PLC3y8-rFHvwhwL-XH04cHOpJnkgRKykFi&index=24
+
+Angular folder structure: https://stackoverflow.com/questions/52933476/angular-project-structure-best-practice
+
+Angular lazy loading: https://www.youtube.com/watch?v=ibn2yAomxp8&ab_channel=TechnicalBabaji
+
+ng g m modules/topic --route topic --module app-routing.module
+
+Code example:
+1. Form array https://www.tektutorialshub.com/angular/angular-formarray-example-in-reactive-forms/
+2. Dynamic component
+
+Interview questions with examples: https://www.youtube.com/watch?v=TDo--zM9Yrk
+
+Why use providedIn in injectable services?
+@Injectable({
+  providedIn: 'root' // root v/s any?  Refer to https://indepth.dev/posts/1090/angulars-root-and-any-provider-scopes
+})
+
+Component providers v/s Ngmodule providers?
+Angular latest features?
+Types of pipes?
+How to use pipe to format date in UTC?
+Routes navigate vs nagivate by url?
+How can errors be handled globally? -- Using interceptor
+How to migrate from Angular 4 to 13? 
+Can there be multiple <router-outlet> in single  file? -- Yes using aux routing 
+
+
+Angular upskilling:
+
+1. ng test, ng e2e
+2. ngZone
+
+====
+
+Covered:
+
+1. What is change detection?
+2. How's change detection related to ngZone? Can they work independently?
+3. What is ngZone? How/why do we need it for global error handling?
+4. Parent Component sends a data to child. How to call API from child component every time parent value changes?
+5. Angular life cycle hooks - with practical examples in vdi-demo project.
+6. ng-content vs ng-container vs ng-template
+7. Pure pipe v/s impure pipe
+https://blog.mgechev.com/2017/11/12/faster-angular-applications-pure-pipes-memoization-pure-functions-part-2/
+
+8. How does AOT compilation work?
+9. Uses of HostListener and HostBinding?
+10. Use of directives with examples
+11. What is rendering engine? What is Ivy?
+
+Rxjs concepts - subjects vs behaviorsubject vs replaysubject
+https://stackoverflow.com/questions/43348463/what-is-the-difference-between-subject-and-behaviorsubject
+
+What is View Encapsulation?
+Angular animation
+What is SSR?
+What are service workers and PWA?
+What are web workers?
+What is incremental DOM?
+Observable vs subject?
+What are some of RxJS functions?
+
+What are DYNAMIC COMPONENTS in Angular? How to generate one? (Component factory resolver)
+
+How to build Dynamic forms with 100+ fields?
+
+=================================
+
+https://www.youtube.com/watch?v=10b6K9fORI4&list=PL7pEw9n3GkoW5bYOhVAtmJlak3ZK7SaDf&index=46&ab_channel=techsith
+
+Symbols, Reflection, Proxy --> usage??
+
+Javascript questions:
+
+1. Call vs apply vs bind
+2. What are arrow functions? What are its advantages compared to normal functions?
+3. How do we use inheritance in ES6 class?
+4. What are new features in ES6?
+5. What are closures? Why do we use it?
+6. What are rest and spread operator?
+7. What are the different ways of creating an object?
+
+Angular => Encode/decode json data in localstorage
+
+https://github.com/softvar/secure-ls
+
+CSS Questions: https://www.youtube.com/watch?v=6cviFVrlleY
+CSS display: https://www.w3schools.com/CSSref/pr_class_display.asp
+CSS position: https://www.w3schools.com/css/css_positioning.asp
+
+How can we specify font size? px vs pt vs em vs rem? https://gist.github.com/marko-jankovic/22ad55fae467e72d0312
+
+
+JS questions:
+
+ArrayBuffer
+Typed array
+Mixins
+Prototype chaining
+unary function
+currying function
+pure function
+closures?
+
+Angular - 
+what is $any function?
+What is ng-template?
+What are pure pipes? https://stackoverflow.com/questions/39285550/what-is-impure-pipe-in-angular
+
+What are entry components? Why don't we need it in Angular 9 with Ivy?
+
+How security measures like XSS are handled by Angular?
+https://ripcordsystems.com/2019/03/09/angular-how-to-prevent-xss-attacks-code-examples/
+
+What are dynamic components? (not defined at build time, instantiated and placed in the app at runtime)
+What is deep linking?
+
+
+Latest questions 6 Sep 2023:
+1. How to communication b/w sibling components? When name is updated in sidebar, it should reflect in header.
+   App
+    - Header
+	- Sidebar
+	- Dashboard
+	- Footer
+2. How to detect when URL changes?
+   this.router.events.subscribe((event: Event) => {
+		if (event instanceof NavigationStart) {
+			// Show loading indicator and perform an action
+		}
+	}
+	The @loading block is an optional block that allows you to declare content that is shown while deferred dependencies are loading. It replaces the @placeholder block once loading is triggered.
+3. Can we use script tag in component? How to allow?
+4. How to implement routing? Can there be multiple <router-outlet> in a single file? 
+5. In dashboard page /dashboard, we have an input. On form submit, how can we navigate to another screen /details and display the input value entered? 
+
+6. How to create dynamic components? Using ComponentFactoryResolver 
+7. How can we call child component's button from parent component? Parent component has a form with input elements and child component has 2 buttons (Save and cancel) and onClick event handler functions for those. 
+    // parent.component.ts
+		<form>
+			<!-- input elements -->
+			<Child />
+		</form>
+   (ViewChild) 
+8. How to write a centralized code so that Authorization header param is sent in all API requests?
+9. How to add authorization in Angular for 3 roles - super admin, admin, end user?
+10. State management library eg. ngrx 
+11. ViewChild v/s ContentChild 
+12. What is change detection? What are possible options? (onpush default) 
+
+
+What is View Encapsulation?
+
+===============================================================================================
+
+Dynamic component example: https://www.youtube.com/watch?v=uoqNuecHIR4&ab_channel=LeelaWebDev
+
+
+4.25 , 3.83 -> 4.04

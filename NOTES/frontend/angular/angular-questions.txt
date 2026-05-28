@@ -1,0 +1,318 @@
+
+1) Explain Angular architecture and how it works 
+    - Components (fundamental building block)
+        - Typescript class which handles the logic and data (from service)
+        - HTML template defines the UI 
+        - CSS styles
+       Angular uses data binding to coordinate between the class and template. 
+       - Property binding [value] data flows from TS to HTML 
+       - Event binding (click) data flows from HTML to TS
+    - Modules 
+       - at least 1 root module - AppModule and different feature modules
+       - during lazy loading, the feature modules are loaded based on the route 
+    - Services & Dependency injection  
+       - HTTP calls 
+       - Shared data 
+    - Directives (instructions to DOM for structual and attributes *ngIf *ngFor)
+    - Pipes (transform data for display eg. date format)
+    - Engine (How it works)
+       - Ivy compiler Angular transforms your HTML and ts into highly optimized JavaScript before the browser even sees it. This is called Ahead-of-Time (AOT) Compilation. This makes the initial load much faster and catches errors during the build process rather than at runtime
+       - Change detection (uses Zone.js for async events like setTimeout) 
+    
+   Component v/s directive:
+    - Component defines UI with its own template 
+    - Directive modifies behavior of existing DOM elements without adding a new view 
+   Eg. for grid data, we'll use a component. A copy button used in all rows can use a custom directive which provides the copy functionality.
+
+2) Give an example of a custom directive with real use case 
+   Eg. 1: Click to copy 
+   Eg. 2: Image fallback
+    - image fallback directive (no image exists, show a placeholder image)
+    - Instead of adding an (error) handler to every single <img> tag in your app, you create a reusable directive.
+    // Refer to custom-directive.js
+    @HostListener('error')
+    loadFallback() {
+        const element: HTMLImageElement = this.eRef.nativeElement;
+        element.src = this.appImageFallback;
+    }
+    HostListener - handling browser events click, hover, error etc. 
+    HostBinding - styling, adding classes, disabling elements 
+
+3) Authentication and authorization     
+      - AuthService with a BehaviorSubject to hold the access token in memory
+      - Implement a functional HttpInterceptorFn to clone outgoing requests, attach the Authorization header and enable withCredentials for httpOnly cookies.
+      - Token Refresh: Use RxJS operators (switchMap, filter, take) within the interceptor to handle 401 errors and "lock" concurrent requests while a single refresh call is in progress.
+      - Route Protection: Apply functional CanActivate guards to the routing configuration to prevent unauthorized navigation before components are even instantiated.
+      Refer to -> authentication-authorization.js 
+
+4) Add dynamic validation in Reactive form 
+    Refer to reactive-dynamic-form.js
+
+5) Create form using JSON data - dynamic form 
+
+6) Steps to upgrade Angular project 
+
+7) Observables v/s Subjects 
+ - Observables are unicast i.e each subscriber gets its own execution and data instance. Subjects are multicast i.e all subscribers share a single execution and receive the exact same value. 
+  E.g. Observable 3 .subscribe to an HTTP observable getProducts() results in 3 API calls 
+  components.
+  E.g. Subject 3 function calls isLoggedIn return the same value 
+ - Observable execution starts only when we do .subscribe. Subject values can be broadcasted even if no listener are listening currently.  
+ Note: Subjects are my go-to for state management, while Observables are best for isolated data streams like API requests.
+
+8) What are the types of Subjects?
+ - Subject (no initial value, emits to only current subscribers and late subscribers miss previous values. Use case: Event broadcasting, Event emitters Clicks, Toasts)
+ - BehaviorSubject (requires initial state e.g. for login state, theme state. Emits the latest value to new subscribers)
+ - ReplaySubject (no initial value, replays previous value to new subscribers, can configure how many values to store Use case: History Chat, Activity Feeds)
+ - AsyncSubject (emits only the last value when the observable completes 
+   Use case: One-time Fetches Config, Permissions)
+
+A BehaviorSubject stores the latest emitted value, so a late subscriber immediately receives the most recent value upon subscription. In contrast, a normal Subject does not store values, so any emissions before subscription are lost.
+
+9) RxJS operators, switchMap, mergeMap, concatMap, exhaustMap
+   of, from, tap 
+   => Transformation (mapping) operators:
+      - switchMap: cancels previous inner Observable and starts a new one
+      - mergeMap: run all inner observable concurrently, none are cancelled and they finish as they come 
+      - concatMap: wait for current obs to finish before starting the next one 
+      - exhaustMap: ignore next request until the first one is completed (button clicked 5 times - first API runs, 4 are ignored)
+      Creation and utility operators:
+       - of(1,2,3) emits as sequence, good for mock data in service 
+       - from([1,2,3]) converts array/promise/iterable to observable 
+       - tap: executes side effects without changing the data in the stream 
+
+10) I have 2 api calls, response from api1 should be passed as request to
+api call 2 and then once we have response of api 2 combine response
+of both api and send it to component
+
+  => Since API2 depends on the response of API1, we can use switchMap to chain the calls and then use map to combine both responses before returning them to the component.
+
+   getData(): Observable<CombinedData> {
+   return this.api1().pipe(
+      switchMap(res1 => 
+         this.api2(res1.id).pipe(
+         // Use map here to combine the results
+         map(res2 => ({
+            originalData: res1,
+            additionalData: res2
+         }))
+         )
+      )
+   );
+   }
+
+11) Life cycle hooks in Angular 
+
+12) What is ng-content?
+
+
+SET 2:
+1. What is change detection and role in Performance Optimization
+=> Default change detection checks the whole tree. 
+   OnPush only checks if the @Input reference changes.
+   // ChangeDetectionStrategy.OnPush
+   Problem: With the default strategy, every time a single stock price updates, Angular re-checks every single row, chart and button in your entire application. This causes major UI lag.
+   Solution: Set your "StockRowComponent" to ChangeDetectionStrategy.OnPush. Now, Angular only re-renders that specific row when the stock object reference actually changes.
+
+2. Difference between Template and Reactive form (when to use which)
+3. How to Secure Angular App (Guards, XSS Protection, Token based API, Encryption)
+4. What is micro front end in angular
+5. Why Test Case plays imp role while development, what framework are there => jasmin karma, jest, Cypress
+6. How to Create Custom Pipe and which you have created
+7. RXJS => Debouncing with btn click, combineWith Operator, Diff between Subject & behavior Sub
+8. What is cold and Hot observable
+9. how to stop an observable based on some condition
+10. Use case of ForkJoin
+11. How to optimize Performance angular app ?
+12. Various ways of component Communication
+13. How to avoid Memory Leaks
+
+Scenario: A project uses Material but now client wants to change to some other library. How to migrate it in Angular?
+ 
+
+RxJS v/s Signals
+
+
+Fine-Grained Reactivity: In Angular 20+, Signals provide local updates. In a Zone.js app, if you click a button, the entire tree is checked. In a Signals-based app, only the component that actually uses that Signal is refreshed.
+
+Signal Components & Inputs: Angular 20+ introduced Signal-based Components and Signal Inputs/Queries. These features make the code more predictable and easier to debug than the old @Input() and @Output() decorators, as the data flow is explicitly tracked by Angular's reactive graph
+
+================================================================
+
+Angular Lead Interview Questions & Practical Answers
+
+1.  How do you structure a large Angular project? 
+      Answer: For large applications we follow feature-based modular architecture.
+
+      Example structure: 
+      src/app 
+         core/ (singleton services, interceptors, guards) 
+         shared/ (reusable components, pipes, directives) 
+         features/
+            dashboard/ orders/ users/ layout/ 
+            app-routing.module.ts
+
+      Rules: 
+      - CoreModule → global services (auth, interceptors) 
+      - SharedModule → reusable UI components 
+      - Feature modules → business features 
+      - Each feature module is lazy loaded
+
+      Example: 
+         { path: ‘orders’, loadChildren: () =>
+         import(‘./features/orders/orders.module’) .then(m => m.OrdersModule) }
+
+      This keeps the initial bundle small and code maintainable across teams.
+
+2.  How do you optimize Angular performance? 
+      Answer: Key optimizations used in production apps:
+       - OnPush change detection 
+         @Component({ 
+            changeDetection: ChangeDetectionStrategy.OnPush 
+         })
+       - trackBy in ngFor 
+         <div *ngFor=“let user of users; trackBy:trackById”>
+       - Lazy loading modules
+       - Avoid heavy libraries moment.js → dayjs lodash → lodash-es
+       - Bundle analysis to find large dependencies
+         ng build –source-map 
+         npx source-map-explorer dist/main.js
+
+8.  How does Angular Change Detection work? 
+    Answer: Angular runs change detection whenever async events occur:
+      -   HTTP responses
+      -   user events
+      -   timers
+      -   promises
+    This is managed by Zone.js which patches async APIs. In large apps this can cause many checks. 
+    Solution: ChangeDetectionStrategy.OnPush
+    Angular then updates only when: 
+    - @Input changes 
+    - event occurs in component 
+    - observable emits
+
+4.  How do you handle API authentication in Angular? 
+    Answer: Use HTTP Interceptors (Refer authentication-authorization.js)
+
+5.  How do you cancel API requests when user types? 
+    Answer: Use switchMap.
+      this.searchControl.valueChanges.pipe( 
+         debounceTime(300), 
+         switchMap(value => this.api.search(value)) 
+      ).subscribe();
+      switchMap cancels previous HTTP requests automatically.
+
+6.  How do you combine multiple API calls?
+      If APIs are independent: forkJoin({ users: this.api.getUsers(), orders:
+      this.api.getOrders() })
+
+      If API2 depends on API1: this.api.getUser().pipe( switchMap(user =>
+      this.api.getOrders(user.id)) )
+
+7.  How do you share data between components?
+      Parent → Child @Input()
+      Child → Parent @Output() EventEmitter
+      Unrelated components Use service with BehaviorSubject.
+
+8.  How do you manage state in Angular?
+      Small apps: Services + RxJS
+      Large enterprise apps: NgRx
+
+      Used when: - many components share state - complex side effects -
+      predictable state flow required
+
+9.  How do you migrate a UI library like Angular Material?
+      Use wrapper components (Adapter pattern).
+      Example: Inside wrapper, if library changes: Material → PrimeNG
+      Only wrapper implementation changes.
+
+      // Material 
+      <button mat-raised-button [color]="color" (click)="btnClick.emit()">
+         <ng-content></ng-content>
+      </button>
+      // Later switched to PrimeNG
+      <p-button [label]="label" [styleClass]="color" (onClick)="btnClick.emit()">
+         <ng-content></ng-content>
+      </p-button>
+
+      <app-my-button color="primary" (btnClick)="save()">Save Patient</app-my-button>     
+
+10. How do you reduce Angular bundle size?
+      - Lazy load modules
+      - Remove unused dependencies
+      - Replace heavy libraries
+      - Production build ng build –configuration production
+      - Bundle budgets in angular.json
+      - Analyze bundle with source-map-explorer
+
+17. How do you handle global error handling?
+   - HTTP errors: Handled with interceptors.
+      Example: 401 → redirect login 500 → show toast
+   - Runtime errors: Use Angular ErrorHandler.
+      @Injectable() 
+      export class GlobalErrorHandler implements ErrorHandler {
+         handleError(error) { 
+            console.error(error); 
+         } 
+      }
+
+12. How do you scale Angular apps across multiple teams?
+      Enterprise approach: - Feature modules owned by teams - Shared design
+      system - Shared core services - Lazy loading per module
+
+      Example: Team A → Orders module Team B → Users module Team C → Dashboard
+      module
+
+13. Angular vs React — when would you choose Angular?
+      Angular is better when: - large enterprise project - multiple teams -
+      strong architecture required
+      React is better when: - fast MVP - smaller teams - flexible architecture
+
+14. How do you debug performance issues?
+      Steps: 1. Chrome Performance profiler 2. Angular DevTools 3. Identify
+      heavy components 4. Apply: - OnPush - trackBy - lazy loading
+
+      Also check bundle size.
+
+15. How do you ensure frontend code quality as a Lead?
+      Things we enforce: - ESLint rules - strict TypeScript - architecture
+      guidelines - reusable component libraries - code reviews - CI checks
+      (bundle size, lint, tests)
+
+      These practices keep large teams consistent.
+
+       - Code conventions: avoid using large libraries, avoid memory leaks (unsubscribe), lazy load routes, lazy load images, use pagination while loading large dataset
+       - to keep the code formatting and indentation consistent, we use tools like Prettier, ESLint configured with Husky as pre-commit hook. So code review saves time.
+       - Git pre-push has unit test and axe-core configured to make sure the recent feature doesn't break any existing code and passes accessibility check.
+       - PR templates: 
+            This forces developers to check boxes: 
+            [] "Did I unsubscribe from Observables?"
+            [] "Did I add unit tests?" 
+            [] "Did I check for accessibility (ARIA)?"
+       - SonarQube Gates: Use Sonar to enforce Quality Gates. 
+         For example: "If code coverage drops below 80% or if there is 1 new Security Vulnerability, the PR cannot be merged." 
+       - CI runs the unit testing and integration testing, checks bundle budgets. 
+
+      CI steps:
+       - Clean install: npm ci 
+       - Linting and formatting: npm lint 
+       - Unit testing 
+       - Run build to catch compilation errors, circular dependencies or type mismatch 
+       - Static code analysis using SonarQube scan (code smell, security vulnerability)
+
+      CD steps: 
+       - Prod build ng build --configuration=production
+       - /dist folder is zipped and moved to a storage bucket 
+       - Env configuration 
+       - Deploy to server 
+       - Smoke/E2E testing 
+       - Cache busting  
+
+16. Security practices in Angular app 
+     - XSS protection use DOMPurify with allowed tags 
+     - CSRF proection use httpOnly secure cookies and avoid storing confidential data in localStorage and sessionStorage 
+     - Brute force attack prevention use captcha 
+     - Clickjacking protection - use CSP (allow specific domains) and X-Frame-options: DENY to prevent iframe  
+     - HSTS for first time http URL with 301 redirect to https url 
+     - npm audit in CI/CD pipeline 
+     - Authentication and authorization using HttpClient interceptors 

@@ -206,3 +206,65 @@ map.set(obj, 'obj val');
 obj = {};
 // After sometime 
 console.log(map); // Returns for Map but {} for WeakMap
+
+
+==========================================================================
+
+Q. How do you implement a design once a wireframe is provided?
+
+   - Analyze the UX flow and map wireframe elements to existing Design System components.
+   - Prioritize "Component Reuse" over creating new custom code to maintain consistency.
+   - If a UI element is missing, either "Compose" existing components or propose an extension to the Design System.
+   - Structure the page using the Atomic Design pattern (Atoms > Molecules > Organisms).
+   - Implement layouts using Design Tokens (standardized variables for spacing, color, typography).
+
+   Example of using Tokens:
+      .my-card {
+         padding: var(--ds-spacing-md);
+         color: var(--ds-color-text-primary);
+         border-radius: var(--ds-radius-sm);
+      }
+
+Q. How do you make a major design change in a shared system without breaking projects?
+   Never modify the existing component's base logic if it changes the visual or functional API.
+   Use Semantic Versioning (SemVer):
+      Patch (1.0.1): Bug fixes.
+      Minor (1.1.0): New features, backward compatible.
+      Major (2.0.0): Breaking changes or total redesigns.
+
+   Implementation Strategy:
+      Introduce the new design as a new "Variant" or a new Component name.
+      Maintain the old API as "Deprecated" and trigger console warnings for developers.
+      Provide a Migration Guide and, if possible, a Codemod script to auto-update consumer code.
+
+Q. How do you prevent breaking projects on old major versions?
+   - Use a Package Registry (NPM/Artifactory) to host versioned packages.
+   - Consumer projects lock their version in package.json (e.g., "ds-library": "1.2.0").
+   - The Design System team provides Long Term Support (LTS) for the previous major version while the company migrates to the latest.
+ 
+Q. How do you maintain consistency when creating new components?
+   - Strict adherence to Design Tokens (Source of Truth for CSS values).
+   - Consistent Prop Naming: If a Button uses 'size="md"', an Input should also use 'size="md"'.
+   - Governance: Every new component must pass a "Design Review" (with UX) and a "Code Review" (with DS Leads).
+   - Documentation: Add every state (hover, disabled, loading) to Storybook.
+   - Accessibility (A11y): Ensure WCAG 2.1 compliance (ARIA labels, keyboard tab-order).
+
+Q. How many versions to keep in Design system? Is there a limit? It could be complex with hundreds of versions (major, minor, patch)
+   All versions remain in the Registry history, but only 2-3 are "Active":
+    - Current (Stable): The latest release.
+    - Previous (LTS): Supported for security/critical bug fixes only.
+    - Experimental/Beta: For testing upcoming features.
+
+   Manage "Version Bloat" by monitoring download statistics in Artifactory.
+   Set a "Sunset Policy": e.g., versions older than 2 years with zero downloads are archived or removed from active maintenance.
+
+   Encourage migration by providing: migration guides, codemods, internal announcements. This prevents the ecosystem from being stuck on old versions.
+
+   Before deletion we check: dependency usage, download statistics, build pipelines referencing the version.
+   Artifactory usually provides dependency tracking for this.
+
+   Use scheduled cleanup jobs in Artifactory instead of manual deletion.
+   - older than 730 days
+   - not downloaded in last 365 days
+   - not tagged as release
+

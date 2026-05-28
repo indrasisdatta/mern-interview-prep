@@ -1,0 +1,42 @@
+Regulatory & Compliance Frameworks
+    21 CFR Part 11: The FDA's "Electronic Records and Electronic Signatures" rule.
+
+    EU Annex 11: The European equivalent focusing on computerized systems.
+
+    GxP: An umbrella term for "Good Practice" (e.g., GMP for Manufacturing, GCP for Clinical Trials, GLP for Labs).
+
+    ALCOA+: The core principles of Data Integrity (Attributable, Legible, Contemporaneous, Original, Accurate).
+
+    HIPAA / GDPR: Regulations for protecting Patient Health Information (PHI) and Personal Identifiable Information (PII).
+    
+Regulatory Bodies
+    FDA (Food and Drug Administration): The US regulator.
+    EMA (European Medicines Agency): The EU regulator.
+    MHRA: The UK regulator.
+    Health Canada: The Canadian regulator.
+
+GxP: Good Practice guidelines and regulations. The main goal is patient safety and data integrity.
+    Good Manufacturing Practice (GMP) - ensuring drugs are consistently produced and controlled according to quality standards  
+    Good Clinical Practice (GCP) - patient portals or data capture tools 
+    Good Laboratory Practice (GLP) - sample management software 
+
+ALCOA: To satisfy GxP in UI/UX, we follow ALCOA principles. 
+ - Attributable: who did it? Every save and submit to have user id. Apply RBAC 
+ - Legible: can it be read? 
+    Use standard fonts and ensure data exported or displayed in UI work for all screen sizes.
+ - Contemporaneous: record timestamp server timezone 
+ - Original: is it the source? (avoid first writing on paper and typing later)
+ - Accurate: is it correct? 
+   Use form validations, use dropdown & radio buttons wherever possible instead of textbox  
+
+Data Integrity & Safety
+These concepts dictate how the UI must behave to ensure the data is "legal."
+
+    ALCOA+: The gold standard for data. Data must be Attributable, Legible, Contemporaneous, Original, Accurate, Complete, Consistent, Enduring, and Available.
+
+    Audit Trail: A chronological record of "who did what and when." If a user changes a dosage from 5mg to 10mg, the Audit Trail must capture that change.
+
+    Electronic Signature (eSig): A legally binding signature. It usually requires two components (e.g., Username and Password) and a "Meaning of Signature" (e.g., "I am the author").
+
+    SOP (Standard Operating Procedure): A written set of instructions that users follow. Your UI design should ideally mirror the steps in the SOP.
+

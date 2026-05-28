@@ -44,3 +44,34 @@ Scenarios:
 3) App uses Redux and handles heavy frequent API call - RTK Query 
 
 For SSR, createAsyncThunk needs a lot of boilerplate code. Tanstack query and RTK Query are better options.
+
+
+How useSelector works internally:
+    useSelector hook allows functional components to extract data from Redux store and re-render only when that specific data changes. 
+    - It uses React Context to access Redux store instance 
+        <Provider store={store}>
+            <App />
+        </Provider>
+    - Internally it uses useSyncExternalStore to subscribe the component to Redux store 
+    - When an action is dispatched and the store updates, useSelector runs the provider function with the new state 
+    - It performs strict reference equality === 
+    (for object or array comparison, it will always return false and re-render)
+    - false then re-render component 
+    - true then don't re-render
+    connect() HOC used shallow equality check by default 
+
+    useSelector creates an individual subscription per hook call, which is why multiple useSelector calls in one component are safe and independently optimized.
+
+How useDispatch works internally
+- uses React Context API to get reference to the store dispatch function 
+    return store.dispatch 
+- useDispatch doesn't subscribe to the store or trigger re-render itself, it simply returns the dispatch function 
+- Use returned dispatch function to dispatch objects or action creators (like Thunks) to the Redux store 
+
+
+useSelector v/s connect HOC:
+ - useSelector does strict equality check === 
+   connect() uses shallow equality check 
+ - connect is more optimized by default 
+
+

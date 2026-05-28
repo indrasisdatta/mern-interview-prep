@@ -1,0 +1,43 @@
+HTTP/1.0: This was truly non-persistent. Every single request (a JS file, an image, a CSS file) required a brand-new TCP handshake. This was incredibly slow.
++1
+
+HTTP/1.1 (The Standard): Introduced Keep-Alive. By default, the TCP connection stays open for a short period after the response is sent. This allows the client to "reuse" the same connection for multiple pulls.
+
+HTTP/2 & HTTP/3: These are fully persistent and multiplexed, meaning many requests and responses can fly back and forth over a single connection simultaneously.
+
+Web sockets provide full-duplex persistent connection between client and server. 
+Features: Bi-directional, low latency
+Used for: chat apps, live dashboards, ride tracking (Uber)
+
+Browsers only support these protocols: HTTP, WebSocket, SSE 
+Kafka uses: TCP binary protocol, persistent broker connection, custom wire format 
+
+Why Direct Browser Use Isn't Good for Kafka? 
+ - Kafka uses TCP binary protocol which is not natively supported by browser 
+ - Direct connections from browser will likely be blocked by firewall and require complex security configurations (managing TLS certs and auth in browser)
+ - High volume of Kafka message processing can make browser unresponsive
+ - Exposing Kafka in browser would expose broker to the internet, credential leakage risk 
+
+There are ways to talk to Kafka from a browser:
+    - Confluent REST Proxy: This allows you to send/receive Kafka messages using standard HTTP GET and POST requests.
+    - Web-Kafka Bridges: Some companies use a specialized proxy that converts Kafka's TCP protocol into WebSockets.
+
+Pub-sub architecture: 
+ - User A (Publisher) sends a message via an Express API.
+ - Express publishes that message to a Redis Topic called room_101.
+ - User B and User C (Subscribers) are "listening" to room_101 via WebSockets.
+ - The message pops up on their screens instantly.
+
+Redis v/s Kafka:
+ - Redis pub/sub is in-memory with low-latency - if user B is offline and A sends a message via Redis, message is gone forever (unless stored in MongoDB)
+   Kafka is log based (disk  based) - keeps messages for a set amount of time (7 days). If User B comes back online an hour later, they can replay the messages they missed from the Kafka log 
+
+   Note: Redis can also be durable when using Redis Streams, Redis Persistence 
+
+ - Redis use case: handle who is online, status and instant of push message to users.
+   Kafka use case: used in large apps to sync data between different Microservices 
+
+   Storage:
+    - Redis Pub/Sub → instant fan-out (no storage, fire and forget)
+    - Redis Streams → in Redis memory - lightweight durable queue (with optional disk persistence using RDB snapshots, AOF append only file)
+    - Kafka → on disk (distributed log)

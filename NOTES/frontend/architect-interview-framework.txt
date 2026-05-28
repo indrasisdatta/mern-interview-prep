@@ -1,0 +1,33 @@
+GAPS: Implementation-focused rather than Strategy-focused. Explanations 
+  often assume a "happy path" (e.g., assuming backward compatibility). 
+  Needs to bridge the gap between "How it works" and "Why it serves the 
+  business/team.
+  
+[S] SCOPE: Define boundaries/ask questions.
+    "Before deciding, I need to know: Is this for a 50-person team or 
+    a startup? Is SEO or Bundle Size the primary KPI?"
+
+[T] TRADE-OFFS: Present the conflict clearly.
+    "We have two paths: Option A gives us speed but hits the bundle size. 
+    Option B is cleaner but adds 3 weeks to the timeline."
+
+[A] ANALYSIS: Compare using specific metrics.
+    "From a DX (Developer Experience) and LCP (Performance) standpoint, 
+    Option B wins because..."
+
+[R] RECOMMENDATION: Make a firm choice with a mitigation plan.
+    "Given our 2-week constraint, I recommend Option A today, with a 
+    technical debt ticket to migrate in Q3."
+
+
+ARCHITECT-LEVEL "POWER TIPS"
+---------------------------------------------------------------------------
+- THE "THIRD WAY": Always look for a middle ground (e.g., using 
+  esbuild-loader inside Webpack instead of a full Vite migration).
+- DISCOVERY QUESTIONS: Ask "Is our goal saving server costs or 
+  maximizing UI responsiveness?" before suggesting a tech stack.
+- ACKNOWLEDGE DOWNSIDES: Every choice has a cost. "We lose Redux 
+  DevTools but gain 50% development speed with Zustand."
+- CONNECT TO BUSINESS: Mention "Independent Deployments" or 
+  "Reduced Blast Radius" instead of just "Cleaner Code."
+
