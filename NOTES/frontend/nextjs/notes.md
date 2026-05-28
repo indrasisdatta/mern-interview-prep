@@ -1,3 +1,5 @@
+# Next.js — Notes
+
 1. Next.js features:
    - SSR
    - SSG

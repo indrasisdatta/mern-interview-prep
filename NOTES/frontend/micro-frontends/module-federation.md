@@ -1,3 +1,5 @@
+# Micro-Frontends — Module Federation
+
 Micro-Frontend: 
 - App is split into independent modules and deployed separately 
   (e.g. Search, Booking, Payment made in different technologies)

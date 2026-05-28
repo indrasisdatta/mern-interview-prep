@@ -1,3 +1,5 @@
+# React — Authentication & Authorization
+
 // In Route, "replace" is used when user explicitly didn't click to navigate 
 // Used in post login, post logout redirects  
 // replace ultimately calls the browser replaceState() which overrides the current history instead of creating new one 
@@ -43,7 +45,7 @@ export const ProtectedRoute = ({ children }) => {
     if (!isAllowed) return <p>Unauthorized access!</p>
 
     return <Outlet />
-}   
+}    
 
 // Login component - redirect to previously accessed page form the state
 export const Login = () => {
@@ -57,3 +59,4 @@ export const Login = () => {
         return navigate(from, { replace: true }) // Redirect code
     }
 }
+ 

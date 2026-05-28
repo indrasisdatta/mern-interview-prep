@@ -1,3 +1,4 @@
+```text
 1) Find all Electronics that have less than 20 items in stock for the "Black" variant.
     WRONG: variants: [{}...] may not meet both conditions color and stock 
     db.products.find({
@@ -237,4 +238,5 @@ $sort
 $limit
 $unwind
 
-$facet 
+$facet
+```

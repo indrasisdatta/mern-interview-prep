@@ -1,3 +1,4 @@
+```text
 PHASE 1 (Core - MUST master) These cover 70% of interviews.
     Do only these first:
     Hashing
@@ -50,4 +51,4 @@ For each problem:
 3) Dry-run 1 example on paper
 4) Code
 5) Write 1 mistake / edge case learned
-
+```

@@ -36,13 +36,13 @@ Update queryKey to [] notation & queryFn
 npm uninstall react-query --legacy-peer-deps
 npm install @tanstack/react-query --legacy-peer-deps
 
---------------
+# React — Upgrade Guide
 
+Upgrade guide notes for React apps
 Note: Always upgrade in a separate branch, run codemods first, fix breaking tests, then gradually roll out.
 
 npm install fails if it finds conflicting peer dependencies. For e.g. some-lib expects React 18 but you're on React 19.
 
---legacy-peer-deps is a shortcut, not a fix. You can get your app running, but for stable production, all 3rd-party deps and types should eventually support React 19.
 
 Normally, npm enforces peer dependency compatibility.
 
@@ -92,10 +92,10 @@ npm install does these checks:
 render(<Component />);
 expect(screen.getByText("Loaded")).toBeInTheDocument();
 
-// After concurrent rendering 
-render(<Component />);
-expect(await screen.findByText("Loaded")).toBeInTheDocument();
-// OR 
-await waitFor(() => {
-  expect(screen.getByText("Loaded")).toBeInTheDocument();
-});
+  // After concurrent rendering 
+  render(<Component />);
+  expect(await screen.findByText("Loaded")).toBeInTheDocument();
+  // OR 
+  await waitFor(() => {
+    expect(screen.getByText("Loaded")).toBeInTheDocument();
+  });

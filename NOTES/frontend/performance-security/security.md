@@ -1,3 +1,5 @@
+# Frontend Security — Notes
+
 OWASP Top 10 (2021) Security risks:
 https://www.cloudflare.com/learning/security/threats/owasp-top-10/
  - Access & auth 
