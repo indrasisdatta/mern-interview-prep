@@ -1,21 +1,5 @@
-# 🧠 MERN Stack Lead/Architect — Interview Prep Notes
-### 11+ YOE | Focus: Node.js Internals · Async Governance · AI Bridge · MCP
+### Node.js Internals · Async Governance · AI Bridge · MCP
 
-> **Memory Strategy:** Keywords are in **`code-bold`** format. Use the keyword to anchor the concept, then expand verbally.
-
----
-
-## 📅 STUDY ROADMAP
-
-| Day | Focus Area | Key Deliverable |
-|-----|-----------|----------------|
-| Mon–Tue | Event Loop · Clustering · Worker Threads | Whiteboard the call stack + libuv |
-| Wed | Streams · Security Middleware · CPU Utilization | Draw pipeline diagrams |
-| Thu | Husky · ESLint · SonarQube · Code Quality CI | Explain gate-based deployment |
-| Fri | MCP Mechanics · LLM Context Bridge | Whiteboard MCP host architecture |
-| Sat–Sun | STAR Script · Verizon/GitLab Project · Mock QA | Verbal fluency + abstraction |
-
----
 
 # PART 1 — NODE.JS EVENT LOOP & ASYNC GOVERNANCE
 
@@ -479,6 +463,11 @@ export const authenticate = async (req, res, next) => {
 
 - *"JWT vs Session — which do you choose and when?"*
   > JWT for stateless microservices (no shared session store needed, scales horizontally). Sessions for monoliths or when you need instant revocation. JWT revocation requires a blacklist (Redis), which adds overhead.
+
+- *"How to logout user immediately by revoking the token?"*
+  > - If you have a single server and low traffic: Use a Database Versioning check. It’s the easiest to maintain.
+    -If you have multiple servers (Horizontal Scaling): Use Redis. Local in-memory caches in Node won't work because Server A won't know that Server B revoked a token.
+    - If you want maximum performance: Use Short Expiry (15m) and don't blacklist at all. Accept that a "revoked" token might still work for up to 15 minutes.
 
 - *"How do you prevent SQL Injection in a Node.js MongoDB app?"*
   > `express-mongo-sanitize` strips `$` and `.` operators. For SQL: always use parameterized queries/prepared statements — never string concatenation.
