@@ -148,6 +148,17 @@ console.log('5. sync');
 setTimeout(() => console.log('timeout'), 0);
 setImmediate(() => console.log('immediate'));
 
+// setTimeout secretly needs 1ms to pass - libuv enforces 1ms instead of 0
+// Run 1: startup took 0.6ms → 1ms NOT yet elapsed
+//   → Timers phase: nothing to run
+//   → Check phase: setImmediate fires
+//   Output: immediate → timeout
+
+// Run 2: startup took 1.3ms → 1ms HAS elapsed  
+//   → Timers phase: setTimeout fires
+//   → Check phase: setImmediate fires
+//   Output: timeout → immediate
+
 // INSIDE I/O CALLBACK: setImmediate ALWAYS runs first
 const fs = require('fs');
 fs.readFile(__filename, () => {
