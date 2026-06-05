@@ -706,6 +706,19 @@ app.post('/upload/video', memoryUpload.none(), async (req, res) => {
 });
 ```
 
+Approach          Browser RAM     Server RAM      Good for
+───────────────────────────────────────────────────────────────
+FormData          ~0 (streaming)  Whole file*     Excel, images, docs
+                                  (memoryStorage) up to 10MB
+
+ArrayBuffer       Whole file      Whole file      Client-side manipulation
+                  ❌ avoid large  ❌ avoid large  (encryption, preview)
+
+Raw stream        ~64KB chunks    ~chunk size     Videos, large files
+                  ✅              ✅              anything > 10MB
+
+*DiskStorage avoids server RAM — saves to disk instead
+
 ---
 
 ## 8. Memory Management & Leak Detection
@@ -1525,6 +1538,45 @@ process.on('uncaughtException', (err) => {
   logger.fatal({ err }, 'Uncaught exception');
   gracefulShutdown('uncaughtException');
 });
+```
+
+## What Breaks Without Graceful Shutdown — Payment Example
+
+```
+Step 1 → wallet debited ₹50,000       ✓
+Step 2 → Razorpay captured payment     ✓
+         process.exit(1) fires here
+Step 3 → Transaction record            ❌ never created
+Step 4 → Dispatch job                  ❌ never queued
+
+Result: money gone, order stuck, no record to debug against
+```
+
+| What was running | `process.exit(1)` | Graceful shutdown |
+|---|---|---|
+| In-flight HTTP requests | Dropped — client gets `ERR_CONNECTION_RESET` | Allowed to complete before exit |
+| DB transactions | Abandoned mid-write — data inconsistency | Committed or rolled back cleanly |
+| BullMQ jobs | Stuck as "active" — retried — duplicate emails/invoices | Finished or requeued properly |
+| DB connections | Forcefully dropped — pool slot occupied for 60s | Properly closed — slot released immediately |
+| K8s rolling deploy | User-facing errors during every deploy | Zero dropped requests |
+
+## The 10 Second Timeout
+
+Graceful shutdown can itself hang (e.g. MongoDB is already down).
+The timeout is a safety net — force kill if cleanup takes too long.
+
+```js
+setTimeout(() => process.exit(1), 10000).unref();
+// .unref() — don't keep process alive just for this timer
+// If everything closes before 10s, this is ignored
+```
+
+## Rule
+
+```
+process.exit(1) without cleanup = power cut mid file-write
+                                = data corruption waiting to happen
+                                = guaranteed to hit during peak traffic deploy
 ```
 
 ---

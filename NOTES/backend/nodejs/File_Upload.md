@@ -74,21 +74,23 @@ try {
 ---
 
 ## Memory Comparison
-
-| Approach | Browser RAM | Server RAM | Good For |
-|---|---|---|---|
-| FormData | ~0 (streaming) | Whole file (memoryStorage) | Excel, images, docs up to 10MB |
-| ArrayBuffer | Whole file ❌ | Whole file ❌ | Client-side manipulation only |
-| Raw stream | ~64KB chunks ✅ | ~chunk size ✅ | Videos, any file > 10MB |
-
+ 
+| Approach | Browser RAM | Server RAM | Size on Wire | Good For |
+|---|---|---|---|---|
+| FormData | ~0 (streaming) | Whole file (memoryStorage) | Original size | Excel, images, docs up to 10MB |
+| ArrayBuffer | Whole file ❌ | Whole file ❌ | Original size | Client-side manipulation only |
+| Base64 | Whole file + 33% ❌ | Whole file + 33% ❌ | +33% larger | Tiny files (< 1MB) inside JSON |
+| Raw stream | ~64KB chunks ✅ | ~chunk size ✅ | Original size | Videos, any file > 10MB |
+ 
 ---
-
+ 
 ## Decision Guide
-
+ 
 | File type / size | Frontend | Server |
 |---|---|---|
 | Excel / CSV (< 10MB) | FormData | multer memoryStorage → XLSX parse |
 | Images (< 5MB) | FormData | multer memoryStorage → Sharp |
+| Avatar / icon (< 1MB) alongside JSON data | Base64 inside JSON | `Buffer.from(data, 'base64')` → S3 |
 | Images needing client resize | `file.arrayBuffer()` → canvas → FormData | multer memoryStorage |
-| Videos / large files (> 10MB) | Raw stream via XHR | `req` piped to S3, no multer |
-| Any file needing progress bar | XHR + upload events | Either approach |
+| Videos / large files (> 10MB) | Raw stream via Axios / XHR | `req` piped to S3, no multer |
+| Any file needing progress bar | Axios `onUploadProgress` or XHR | Either approach |
