@@ -1,0 +1,15 @@
+{
+  "name": "rate-limiter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Token bucket + sliding window rate limiter implementations. Standalone (no external deps). See NOTES/system-design/backend-system-design/02-RateLimiter/notes.md",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test src/*.test.js",
+    "demo": "node src/demo.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,84 @@
+// EXAMPLE: Redis-backed token bucket.
+// Rename to redis-adapter.js and `npm install ioredis` to use.
+// Keeps the same public API (tryAcquire) — drop-in replacement for in-memory.
+
+const fs = require("fs");
+const path = require("path");
+// const Redis = require("ioredis");   // uncomment when wiring up
+
+const LUA_SCRIPT = fs.readFileSync(path.join(__dirname, "redis-token-bucket.lua"), "utf8");
+
+class RedisTokenBucket {
+  /**
+   * @param {object} opts
+   * @param {object} opts.redis           ioredis client instance
+   * @param {number} opts.capacity
+   * @param {number} opts.refillPerSec
+   * @param {string} [opts.namespace='rl']
+   * @param {number} [opts.failOpenMs=10] Timeout after which we fail open
+   */
+  constructor({ redis, capacity, refillPerSec, namespace = "rl", failOpenMs = 10 }) {
+    this.redis = redis;
+    this.capacity = capacity;
+    this.refillPerSec = refillPerSec;
+    this.namespace = namespace;
+    this.failOpenMs = failOpenMs;
+
+    // Pre-load script on connect for SCRIPT_LOAD-then-EVALSHA speed
+    this._sha = null;
+    this._loadScript();
+  }
+
+  async _loadScript() {
+    try {
+      this._sha = await this.redis.script("LOAD", LUA_SCRIPT);
+    } catch (e) {
+      console.warn("Could not preload Lua script (will eval inline):", e.message);
+    }
+  }
+
+  async tryAcquire(key, cost = 1) {
+    const fullKey = `${this.namespace}:${key}`;
+    const now = Date.now() / 1000;
+
+    const exec = async () => {
+      const args = [this.capacity, this.refillPerSec, now, cost];
+      if (this._sha) {
+        try {
+          return await this.redis.evalsha(this._sha, 1, fullKey, ...args);
+        } catch (e) {
+          if (String(e.message).includes("NOSCRIPT")) {
+            this._sha = null;   // script flushed; re-load lazily
+          } else { throw e; }
+        }
+      }
+      return await this.redis.eval(LUA_SCRIPT, 1, fullKey, ...args);
+    };
+
+    try {
+      const result = await Promise.race([
+        exec(),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("redis_timeout")), this.failOpenMs)),
+      ]);
+      const [allowed, remaining, retryAfter] = result;
+      return {
+        allowed: !!allowed,
+        remaining: Number(remaining),
+        retryAfter: parseFloat(retryAfter),
+      };
+    } catch (e) {
+      // Fail open for general APIs (override per-endpoint if you need fail-closed for login)
+      console.warn(`rate-limiter: ${e.message}, failing open for key=${fullKey}`);
+      return { allowed: true, remaining: 0, retryAfter: 0 };
+    }
+  }
+}
+
+module.exports = { RedisTokenBucket };
+
+/* Usage:
+const Redis = require("ioredis");
+const redis = new Redis();
+const tb = new RedisTokenBucket({ redis, capacity: 100, refillPerSec: 100/60 });
+const result = await tb.tryAcquire(userId);
+*/
