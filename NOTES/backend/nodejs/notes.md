@@ -1540,45 +1540,6 @@ process.on('uncaughtException', (err) => {
 });
 ```
 
-## What Breaks Without Graceful Shutdown — Payment Example
-
-```
-Step 1 → wallet debited ₹50,000       ✓
-Step 2 → Razorpay captured payment     ✓
-         process.exit(1) fires here
-Step 3 → Transaction record            ❌ never created
-Step 4 → Dispatch job                  ❌ never queued
-
-Result: money gone, order stuck, no record to debug against
-```
-
-| What was running | `process.exit(1)` | Graceful shutdown |
-|---|---|---|
-| In-flight HTTP requests | Dropped — client gets `ERR_CONNECTION_RESET` | Allowed to complete before exit |
-| DB transactions | Abandoned mid-write — data inconsistency | Committed or rolled back cleanly |
-| BullMQ jobs | Stuck as "active" — retried — duplicate emails/invoices | Finished or requeued properly |
-| DB connections | Forcefully dropped — pool slot occupied for 60s | Properly closed — slot released immediately |
-| K8s rolling deploy | User-facing errors during every deploy | Zero dropped requests |
-
-## The 10 Second Timeout
-
-Graceful shutdown can itself hang (e.g. MongoDB is already down).
-The timeout is a safety net — force kill if cleanup takes too long.
-
-```js
-setTimeout(() => process.exit(1), 10000).unref();
-// .unref() — don't keep process alive just for this timer
-// If everything closes before 10s, this is ignored
-```
-
-## Rule
-
-```
-process.exit(1) without cleanup = power cut mid file-write
-                                = data corruption waiting to happen
-                                = guaranteed to hit during peak traffic deploy
-```
-
 ---
 
 ## 17. Observability — Logging, Metrics & Tracing
@@ -2150,4 +2111,706 @@ const threads = os.availableParallelism(); // use this for UV_THREADPOOL_SIZE
 
 ---
 
-*Last updated for Node.js 24.x · Express 5.x · MongoDB 7.x · Redis 7.x*
+## 24.1 WebSockets Are Stateful — Sticky Sessions for a MERN Chat App
+
+#### Why a WebSocket is stateful
+
+A WebSocket is a single long-lived **TCP connection** pinned to **one** Node instance. Everything about that connection — the socket object, which rooms it joined, the authenticated user — lives in **that one instance's RAM**. There is no shared "connection table" across instances.
+
+This creates **two separate problems** that people constantly conflate. You need a different tool for each.
+
+```
+Problem A — CONNECTION AFFINITY (which instance does the client land on?)
+   Client ──upgrade──▶ Load Balancer ──▶ ??? (Instance 1, 2 or 3?)
+   Fix: sticky sessions  OR  force websocket-only transport
+
+Problem B — CROSS-INSTANCE BROADCAST (User A on inst-1 → User B on inst-2)
+   inst-1 has A's socket in RAM, inst-2 has B's socket in RAM.
+   inst-1 has NO WAY to reach B's socket directly.
+   Fix: Redis adapter (pub/sub) — NOT sticky sessions
+```
+
+> ⚠️ **Common misconception:** "I added sticky sessions so multi-instance chat works." No. Sticky sessions only solve Problem A. Two users on two different instances still can't talk without a **Redis adapter** (Problem B). You almost always need **both**.
+
+#### When do you even need sticky sessions?
+
+| Transport | Needs sticky sessions? | Why |
+|---|---|---|
+| Socket.IO default (HTTP long-polling → upgrade) | **Yes** | The handshake is *multiple* HTTP requests carrying a session id (`sid`). If request #2 lands on a different instance that never saw the `sid`, you get `Session ID unknown` / constant disconnects. |
+| `transports: ['websocket']` (skip polling) | Mostly no | A single upgrade request; once the TCP connection is established it stays pinned to that instance anyway. Stickiness still recommended as a safety net. |
+| Raw `ws` / native WebSocket | No (for the connection itself) | Single upgrade, single pinned TCP socket. But you still need Problem-B fan-out. |
+
+Tradeoff of forcing `transports: ['websocket']`: you lose the long-polling fallback, which breaks clients behind restrictive corporate proxies/old load balancers that block the upgrade. For a public chat app, keep polling enabled and use sticky sessions.
+
+#### Architecture for a MERN chat app at scale
+
+```
+            ┌──────────── Redis (pub/sub adapter) ────────────┐
+            │     broadcasts events across ALL instances      │
+            └───────┬───────────────┬───────────────┬─────────┘
+                    │               │               │
+   ┌──────────┐  ┌──┴───┐        ┌──┴───┐        ┌──┴───┐
+   │   LB /   │─▶│ Node │        │ Node │        │ Node │
+   │ Ingress  │  │ inst1│        │ inst2│        │ inst3│
+   │ (sticky) │  └──────┘        └──────┘        └──────┘
+   └────┬─────┘    ▲                                ▲
+        │          │ User A pinned here   User B pinned here
+    React clients ─┘ (sticky keeps A on inst1 for its whole session)
+
+Presence / "who's online" → stored in Redis (centralized), NOT in instance RAM.
+Message persistence → MongoDB.
+```
+
+#### React client (socket.io-client)
+
+```jsx
+// src/lib/socket.js
+import { io } from 'socket.io-client';
+
+let socket;
+
+export function connectSocket(token) {
+  socket = io(`${import.meta.env.VITE_API_URL}/chat`, {  // note the /chat namespace
+    auth: { token },                 // JWT sent on handshake (read in io.use on server)
+    transports: ['websocket', 'polling'], // keep polling fallback → sticky sessions matter
+    withCredentials: true,           // send the affinity cookie set by the LB/ingress
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+  });
+  return socket;
+}
+
+export const getSocket = () => socket;
+```
+
+```jsx
+// src/components/ChatRoom.jsx
+import { useEffect, useState, useRef } from 'react';
+import { connectSocket, getSocket } from '../lib/socket';
+
+export default function ChatRoom({ roomId, token }) {
+  const [messages, setMessages] = useState([]);
+  const [connected, setConnected] = useState(false);
+  const [online, setOnline] = useState([]);
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    const socket = connectSocket(token);
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      setConnected(true);
+      socket.emit('join:room', roomId);        // re-join on every (re)connect
+    });
+
+    // CRITICAL on reconnect: the new connection may land on a DIFFERENT instance.
+    // It has no memory of your rooms, so you MUST re-join. socket.io fires
+    // 'connect' again after a reconnect, so the handler above covers it.
+    socket.io.on('reconnect', () => socket.emit('join:room', roomId));
+
+    socket.on('disconnect', (reason) => {
+      setConnected(false);
+      // 'io server disconnect' → server forced it (e.g. auth expired); must reconnect manually
+      if (reason === 'io server disconnect') socket.connect();
+    });
+
+    socket.on('message:new', (msg) => setMessages((m) => [...m, msg]));
+    socket.on('presence:update', (users) => setOnline(users));
+    socket.on('connect_error', (err) => console.error('socket auth/connect error', err.message));
+
+    return () => {
+      socket.emit('leave:room', roomId);
+      socket.off();                 // remove all listeners
+      socket.disconnect();
+    };
+  }, [roomId, token]);
+
+  const send = (text) => {
+    // optimistic UI; server echoes the persisted message back via 'message:new'
+    socketRef.current?.emit('message:send', { roomId, text }, (ack) => {
+      if (ack?.error) console.error('send failed', ack.error);
+    });
+  };
+
+  return (
+    <div>
+      <div>{connected ? '🟢 connected' : '🔴 reconnecting…'} — {online.length} online</div>
+      <ul>{messages.map((m) => <li key={m._id}>{m.user}: {m.text}</li>)}</ul>
+      <MessageInput onSend={send} />
+    </div>
+  );
+}
+```
+
+> **Why the re-join on reconnect matters:** with sticky sessions a reconnect *usually* returns to the same instance, but not guaranteed (instance died, was redeployed, or sticky cookie expired). Rooms are in-instance state, so always treat reconnect as "I'm on a fresh instance that knows nothing about me."
+
+#### Node.js server (multi-instance with Redis adapter)
+
+This is the §14 code, completed with presence and an ack callback.
+
+```js
+// chat.socket.js
+import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { createClient } from 'redis';
+
+export async function initChat(httpServer) {
+  const io = new Server(httpServer, {
+    cors: { origin: process.env.CLIENT_URL, credentials: true },
+    pingTimeout: 60000,
+    pingInterval: 25000,
+  });
+
+  // ── Problem B fix: cross-instance broadcast via Redis pub/sub ──
+  const pubClient = createClient({ url: process.env.REDIS_URL });
+  const subClient = pubClient.duplicate();
+  await Promise.all([pubClient.connect(), subClient.connect()]);
+  io.adapter(createAdapter(pubClient, subClient));
+
+  const chat = io.of('/chat');
+
+  chat.use(async (socket, next) => {
+    try {
+      socket.user = await verifyJWT(socket.handshake.auth.token);
+      next();
+    } catch {
+      next(new Error('Authentication failed'));
+    }
+  });
+
+  chat.on('connection', (socket) => {
+    const userId = socket.user.id;
+
+    socket.on('join:room', async (roomId) => {
+      await socket.join(`room:${roomId}`);
+
+      // Presence is GLOBAL state → keep it in Redis, not in this instance's RAM.
+      await pubClient.sAdd(`presence:room:${roomId}`, userId);
+      const online = await pubClient.sMembers(`presence:room:${roomId}`);
+      // .to() goes through the Redis adapter → reaches sockets on every instance
+      chat.to(`room:${roomId}`).emit('presence:update', online);
+    });
+
+    socket.on('message:send', async ({ roomId, text }, ack) => {
+      try {
+        const message = await MessageService.create({ roomId, text, userId });
+        chat.to(`room:${roomId}`).emit('message:new', message); // fan-out across instances
+        ack?.({ ok: true });
+      } catch (err) {
+        ack?.({ error: err.message });
+      }
+    });
+
+    socket.on('disconnect', async () => {
+      // Clean presence for every room this socket was in
+      for (const room of socket.rooms) {
+        if (room.startsWith('room:')) {
+          const roomId = room.slice('room:'.length);
+          await pubClient.sRem(`presence:room:${roomId}`, userId);
+          chat.to(room).emit('presence:update', await pubClient.sMembers(`presence:room:${roomId}`));
+        }
+      }
+    });
+  });
+
+  return io;
+}
+```
+
+#### Making sticky sessions actually happen
+
+**A) Kubernetes — nginx Ingress (cookie-based, recommended)**
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chat-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"   # stick even after scaling up
+    nginx.ingress.kubernetes.io/session-cookie-name: "chat_aff"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+    # WebSocket upgrade timeouts (default 60s closes idle WS connections)
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  rules:
+    - host: chat.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: chat-svc, port: { number: 80 } } }
+```
+
+**B) Kubernetes — Service-level (L4, IP-based, coarser)**
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata: { name: chat-svc }
+spec:
+  selector: { app: chat }
+  sessionAffinity: ClientIP            # all requests from one client IP → same pod
+  sessionAffinityConfig:
+    clientIP: { timeoutSeconds: 10800 }
+  ports: [{ port: 80, targetPort: 3000 }]
+```
+
+> ClientIP affinity is weaker: many users behind one corporate NAT share an IP and pile onto one pod. Cookie affinity at the ingress is finer-grained. Prefer the ingress approach.
+
+**C) Plain Nginx**
+
+```nginx
+upstream chat_backend {
+    ip_hash;                       # or: hash $cookie_chat_aff consistent;
+    server node1:3000;
+    server node2:3000;
+}
+server {
+    location / {
+        proxy_pass http://chat_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;     # required for WS upgrade
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_read_timeout 3600s;
+    }
+}
+```
+
+**D) Node `cluster` module (single machine, multiple workers)**
+
+The built-in cluster module round-robins TCP connections, which **breaks** Socket.IO's polling handshake (handshake requests scatter across workers). Use Socket.IO's official helpers:
+
+```js
+// primary.js — routes connections to workers by sid hash + lets workers talk
+import cluster from 'cluster';
+import { createServer } from 'http';
+import { setupMaster, setupWorker } from '@socket.io/sticky';
+import { createAdapter, setupPrimary } from '@socket.io/cluster-adapter';
+import { availableParallelism } from 'os';
+
+if (cluster.isPrimary) {
+  const httpServer = createServer();
+  setupMaster(httpServer, { loadBalancingMethod: 'least-connection' }); // sticky routing
+  setupPrimary();                                  // inter-worker message bus
+  httpServer.listen(3000);
+  for (let i = 0; i < availableParallelism(); i++) cluster.fork();
+} else {
+  // worker.js
+  const { Server } = await import('socket.io');
+  const httpServer = createServer(app);
+  const io = new Server(httpServer);
+  io.adapter(createAdapter());   // cluster adapter — fan-out between workers
+  setupWorker(io);               // receive sticky-routed connections
+  // ... your chat namespace handlers ...
+}
+```
+
+> For a *single machine* the cluster-adapter handles cross-worker fan-out. The moment you run on **multiple machines / pods**, switch the adapter back to the **Redis adapter** — only Redis (or another external bus) spans hosts.
+
+**Mental model:** *Sticky sessions* keep one client glued to one instance for connection stability. The *Redis adapter* lets instances broadcast to each other. *Redis* (or Mongo) holds presence/messages because instance RAM is not shared. All three jobs are distinct.
+
+---
+
+## 24.2 Tradeoffs of Event-Driven Systems (Kafka, SNS) — End to End
+
+Event-driven means services communicate by **publishing facts** ("OrderCreated") rather than **calling each other** ("POST /reserve-stock"). The producer doesn't know or care who consumes.
+
+#### The honest tradeoff table
+
+| You gain | You pay with |
+|---|---|
+| **Decoupling** — add a consumer without touching the producer | **Eventual consistency** — no read-after-write across services; "order placed" but inventory shows it 200ms later |
+| **Load leveling** — broker buffers a traffic spike | **Harder debugging** — a request spans N services & a broker; you *need* distributed tracing (correlation IDs) |
+| **Resilience** — consumer down ≠ producer down; messages wait | **At-least-once delivery** — duplicates happen; every consumer must be **idempotent** |
+| **Fan-out** — one event, many independent reactions | **Ordering is limited** — global ordering is expensive; you get per-partition / per-group ordering at best |
+| **Replay** (Kafka) — re-process history for a new service or after a bug | **The dual-write problem** — writing to DB *and* publishing an event is not atomic; you need the **outbox pattern** |
+| **Throughput** — Kafka does millions/sec | **Operational + cognitive cost** — schema evolution, consumer lag, poison messages, DLQs, more infra |
+
+#### Kafka vs SNS vs SNS→SQS (when to reach for which)
+
+| | Kafka | SNS (standard) | SNS → SQS fan-out | EventBridge |
+|---|---|---|---|---|
+| Model | Distributed **log** (pull, offsets) | Pub/sub **push** | Pub/sub + durable per-subscriber queue | Event bus + routing rules |
+| Replay / history | ✅ retained, re-readable | ❌ fire-and-forget | ⚠️ until consumed | ❌ |
+| Ordering | ✅ per partition | ❌ (FIFO variant: per group) | per SQS-FIFO group | ❌ |
+| Durability if consumer down | ✅ (retention) | ❌ message lost | ✅ sits in SQS | limited |
+| Throughput | Very high | High | High | Moderate |
+| Ops burden | High (self/MSK/Confluent) | None (managed) | None | None |
+| Best for | streaming, analytics, replay, high volume | simple notifications | reliable fan-out to N services | AWS-native routing/integration |
+
+> **Key insight:** raw SNS is push-and-forget — if a subscriber is down, the message is *gone*. The production-grade AWS pattern is **SNS → SQS fan-out**: SNS fans the event out into one SQS queue *per* consumer, so each consumer gets a durable, independently-retryable copy with its own DLQ.
+
+#### End-to-end example: e-commerce "order placed"
+
+```
+                         ┌─────────────────────────────┐
+ POST /orders ──▶ Order  │  publish  "order.created"    │
+                 Service │  {orderId, userId, items[]}  │
+                         └──────────────┬──────────────-┘
+                                        │  (broker: Kafka topic / SNS topic)
+                 ┌──────────────────────┼──────────────────────┐
+                 ▼                      ▼                       ▼
+          Inventory svc          Payment svc             Notification svc
+          reserve stock          charge card             send confirmation email
+                 │                      │                       │
+                 ▼                      ▼                       ▼
+       emit inventory.reserved   emit payment.captured    (no further event)
+                 └──────────► Order svc updates status ◄──────┘
+                              (saga / choreography)
+```
+
+**Producer with the transactional outbox (solves the dual-write problem)**
+
+```js
+// Don't do: await db.save(order); await broker.publish(event);
+// If the process dies between the two lines → order saved, event lost (or vice versa).
+// Instead: write the event INTO the DB in the SAME transaction, then relay it.
+
+await db.transaction(async (tx) => {
+  await tx.orders.insert(order);
+  await tx.outbox.insert({                    // same transaction → atomic
+    id: crypto.randomUUID(),
+    topic: 'order.created',
+    payload: JSON.stringify(order),
+    status: 'PENDING',
+  });
+});
+
+// A separate relay polls the outbox (or uses Debezium/CDC) and publishes,
+// marking rows SENT only after the broker acks. At-least-once, never lost.
+async function relayOutbox(producer) {
+  const rows = await db.outbox.findPending(100);
+  for (const row of rows) {
+    await producer.send({ topic: row.topic, messages: [{ key: row.id, value: row.payload }] });
+    await db.outbox.markSent(row.id);
+  }
+}
+```
+
+**Kafka consumer — idempotent (duplicates are guaranteed)**
+
+```js
+const consumer = kafka.consumer({ groupId: 'inventory-service' });
+await consumer.subscribe({ topic: 'order.created' });
+
+await consumer.run({
+  eachMessage: async ({ message }) => {
+    const order = JSON.parse(message.value.toString());
+
+    // Idempotency: this event may be delivered twice. Dedupe on a stable key.
+    const seen = await redis.set(`processed:inv:${order.orderId}`, '1', { NX: true, EX: 86400 });
+    if (!seen) return;                          // already handled — skip
+
+    try {
+      await InventoryService.reserve(order);
+    } catch (err) {
+      // Don't swallow: throwing makes Kafka NOT commit the offset → redelivery.
+      // For poison messages, route to a DLQ topic after N attempts.
+      throw err;
+    }
+  },
+});
+```
+
+**SNS → SQS fan-out — each consumer gets its own durable queue**
+
+```js
+// One SNS topic, multiple SQS subscribers. Each SQS has its own DLQ + retry.
+await sns.send(new PublishCommand({
+  TopicArn: process.env.ORDER_TOPIC_ARN,
+  Message: JSON.stringify(order),
+  MessageAttributes: { eventType: { DataType: 'String', StringValue: 'order.created' } },
+}));
+
+// inventory-queue consumer (long-poll), payment-queue consumer, email-queue consumer
+// each poll their OWN queue independently — one slow consumer can't block the others.
+```
+
+> **Architect insight:** the three things that bite teams new to event-driven systems, in order: (1) forgetting **idempotency** → double-charged customers; (2) the **dual-write** gap → lost events, fixed with the outbox; (3) no **DLQ + tracing** → a poison message silently stalls a partition/queue and nobody notices for hours. Build all three in from day one, not after the incident.
+>
+> **When NOT to go event-driven:** if you need an immediate synchronous answer ("is this coupon valid?"), call the service directly. Events are for *facts that already happened*, not *questions that need an answer now*.
+
+---
+
+## 24.3 SQS vs BullMQ vs Other Queues — Practical Examples
+
+First, a category distinction that prevents most bad choices:
+
+```
+TASK / JOB QUEUE  → "do this unit of work, retry it, tell me when done"
+   BullMQ, SQS, RabbitMQ, pg-boss, Redis Streams
+EVENT LOG / STREAM → "append facts, many consumers read at their own pace, replay"
+   Kafka, Kinesis           (covered in §24.2 — NOT a job queue)
+```
+
+Using Kafka as a job queue (per-job ack, priorities, delayed retry) is painful — it has no native per-message ack/visibility model. Pick a real queue.
+
+#### Comparison
+
+| | BullMQ | SQS | RabbitMQ | pg-boss | Redis Streams |
+|---|---|---|---|---|---|
+| Backing store | Redis | AWS managed | Erlang broker | PostgreSQL | Redis |
+| Delivery | at-least-once | at-least-once | at-least-once (acks) | at-least-once | at-least-once |
+| Ordering | per-queue-ish | FIFO queues | per-queue | FIFO | per-stream |
+| Priorities | ✅ | ❌ | ✅ | ✅ (singleton/throttle) | ❌ |
+| Delayed / scheduled | ✅ delay + cron repeat | ⚠️ max 15 min delay | via plugin | ✅ cron | manual |
+| Retries + DLQ | ✅ backoff + failed set | ✅ DLQ + maxReceiveCount | ✅ DLX | ✅ retry + dead state | manual |
+| Rate limiting | ✅ built-in | ❌ | ❌ | ✅ throttle | ❌ |
+| Dashboard | ✅ Bull Board | CloudWatch | management UI | query SQL | RedisInsight |
+| Ops burden | run Redis | none (managed) | run RabbitMQ | none (use existing PG) | run Redis |
+| Cross-language | Redis clients | ✅ any AWS SDK | ✅ AMQP everywhere | SQL clients | Redis clients |
+| Sweet spot | Node services needing rich job features | AWS, simple/reliable, huge scale | complex routing, many languages | "already have Postgres, no new infra" | lightweight, low-level control |
+
+#### BullMQ — rich features (priority, delay, repeat, rate limit)
+
+```js
+import { Queue, Worker } from 'bullmq';
+const connection = { host: process.env.REDIS_HOST, port: 6379 };
+
+const reportQueue = new Queue('reports', { connection });
+
+// delayed job (run in 1 hour) with priority
+await reportQueue.add('monthly', { userId }, { delay: 3_600_000, priority: 1,
+  attempts: 5, backoff: { type: 'exponential', delay: 2000 } });
+
+// repeatable / cron job — every weekday at 9am
+await reportQueue.add('daily-digest', {}, { repeat: { pattern: '0 9 * * 1-5' } });
+
+// worker with rate limit: max 10 jobs / second (e.g. third-party API cap)
+new Worker('reports', async (job) => {
+  await ReportService.generate(job.data);
+}, { connection, concurrency: 5, limiter: { max: 10, duration: 1000 } });
+```
+
+> **Use BullMQ when:** your workers are Node, and you want delayed jobs, cron repeats, priorities, per-queue rate limiting, progress tracking, and a UI (Bull Board) — without standing up a separate broker. The cost: you operate Redis, and durability is only as good as your Redis persistence config (AOF/RDB).
+
+#### SQS — managed, simple, massive scale
+
+```js
+import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand } from '@aws-sdk/client-sqs';
+const sqs = new SQSClient({ region: 'us-east-1' });
+
+// Consumer with long-polling. DLQ + maxReceiveCount are configured on the queue, not in code.
+while (true) {
+  const { Messages = [] } = await sqs.send(new ReceiveMessageCommand({
+    QueueUrl: process.env.QUEUE_URL, MaxNumberOfMessages: 10, WaitTimeSeconds: 20,
+  }));
+  for (const m of Messages) {
+    try {
+      await processJob(JSON.parse(m.Body));
+      await sqs.send(new DeleteMessageCommand({ QueueUrl: process.env.QUEUE_URL, ReceiptHandle: m.ReceiptHandle }));
+    } catch (e) {
+      // Don't delete → after VisibilityTimeout it reappears → after maxReceiveCount → DLQ
+      logger.error({ e, id: m.MessageId }, 'job failed, will redeliver');
+    }
+  }
+}
+```
+
+> **Use SQS when:** you're on AWS, want zero infra to manage, and need rock-solid durability at any scale. The cost: no priorities, no cron (max 15-min delay), and "done" is implicit (delete the message). Pair with a library like `sqs-consumer` in production instead of a hand-rolled loop.
+
+#### RabbitMQ — flexible routing across services/languages
+
+```js
+import amqp from 'amqplib';
+const conn = await amqp.connect(process.env.RABBIT_URL);
+const ch = await conn.createChannel();
+
+// topic exchange: route by key, e.g. "order.created", "order.cancelled"
+await ch.assertExchange('orders', 'topic', { durable: true });
+ch.publish('orders', 'order.created', Buffer.from(JSON.stringify(order)), { persistent: true });
+
+// consumer binds with a pattern — one consumer for all order events, another for cancellations only
+const { queue } = await ch.assertQueue('billing', { durable: true });
+await ch.bindQueue(queue, 'orders', 'order.*');
+ch.prefetch(10);                                  // backpressure: max 10 unacked
+await ch.consume(queue, async (msg) => {
+  try { await handle(JSON.parse(msg.content)); ch.ack(msg); }
+  catch { ch.nack(msg, false, false); }           // reject → dead-letter exchange
+});
+```
+
+> **Use RabbitMQ when:** you need rich routing (topic/direct/fanout/headers exchanges), explicit acks/nacks, and polyglot services. The cost: you operate the broker.
+
+#### pg-boss — queue on top of Postgres (no new infra)
+
+```js
+import PgBoss from 'pg-boss';
+const boss = new PgBoss(process.env.DATABASE_URL);
+await boss.start();
+
+await boss.send('resize-image', { key: 's3://bucket/photo.jpg' }, { retryLimit: 3, retryBackoff: true });
+await boss.schedule('cleanup', '0 3 * * *');       // cron, stored in PG
+await boss.work('resize-image', async ([job]) => { await resize(job.data); });
+```
+
+> **Use pg-boss when:** you already run Postgres and want jobs, retries, and cron *without* adding Redis/RabbitMQ. Transactional bonus: enqueue a job in the **same DB transaction** as your business write (a poor-man's outbox). The cost: lower throughput ceiling than Redis/SQS.
+
+#### Redis Streams — lightweight consumer groups
+
+```js
+await redis.xAdd('events', '*', { type: 'signup', userId });           // produce
+await redis.xGroupCreate('events', 'workers', '0', { MKSTREAM: true }); // once
+
+const res = await redis.xReadGroup('workers', 'worker-1',
+  [{ key: 'events', id: '>' }], { COUNT: 10, BLOCK: 5000 });            // consume
+// ... process ...
+await redis.xAck('events', 'workers', id);                              // ack
+```
+
+> **Use Redis Streams when:** you want at-least-once consumer groups with minimal dependencies and you're comfortable handling acks/claims yourself. BullMQ is built on top of this — reach for raw streams only when you need the low-level control.
+
+#### Decision shortcut
+
+```
+On AWS, want zero ops, huge scale, simple jobs ............ SQS
+Node services, need delay/cron/priority/rate-limit/UI ..... BullMQ
+Complex routing, many languages, explicit acks ............ RabbitMQ
+Already have Postgres, don't want new infra ............... pg-boss
+Need replay / stream to many independent consumers ........ Kafka (§24.2)
+```
+
+---
+
+## 24.4 Graceful Shutdown vs `process.exit(1)` — How It Actually Works
+
+#### What `process.exit(code)` really does
+
+`process.exit()` terminates the Node process **as soon as the current synchronous code returns to the event loop's exit check** — it does **not** wait for pending async work, may **truncate buffered stdout/stderr** writes, and skips most cleanup. The **code** is *only* the exit status reported to the OS/orchestrator:
+
+```
+process.exit(0)  → "I finished successfully"
+process.exit(1)  → "I failed" (generic non-zero error)
+```
+
+> ⚠️ **Misconception:** people think `exit(1)` is "the violent one." It isn't. `exit(0)` and `exit(1)` are **equally abrupt** — both abandon in-flight work instantly. The only difference is the status number. *Graceful* vs *abrupt* is about **what you run before calling exit**, not about the code you pass.
+
+#### The signals you trap (and the one you can't)
+
+| Signal | Source | Trappable? | Meaning |
+|---|---|---|---|
+| `SIGTERM` | K8s, `docker stop`, PM2, systemd | ✅ | "Please shut down." → run graceful shutdown |
+| `SIGINT` | Ctrl+C | ✅ | Same, interactive |
+| `SIGKILL` (`kill -9`) | OS / K8s after grace period | ❌ never | Instant death — you get no chance to clean up |
+
+K8s lifecycle: it sends **SIGTERM**, waits `terminationGracePeriodSeconds` (default **30s**), then sends **SIGKILL**. Your entire graceful shutdown must finish *inside* that window.
+
+#### How graceful shutdown works — the sequence
+
+```
+SIGTERM received
+   │
+   ├─ 1. Fail readiness probe  → K8s stops routing NEW traffic to this pod
+   │      (gives Endpoints time to propagate before you close the server)
+   ├─ 2. server.close()        → stop accepting NEW connections; existing ones finish
+   ├─ 3. stop queue consumers  → worker.close() so no new jobs are picked up
+   ├─ 4. wait for in-flight    → let current HTTP requests + active jobs finish
+   ├─ 5. close resources       → DB pool, Redis, flush logs/metrics
+   ├─ 6. process.exit(0)       → clean success
+   │
+   └─ SAFETY NET: if steps 2–5 hang past N seconds → process.exit(1) (forced)
+```
+
+#### Real example — API + BullMQ worker + Mongo (corrects the §16 snippet)
+
+```js
+import http from 'http';
+const server = http.createServer(app);
+server.listen(PORT);
+
+let shuttingDown = false;                 // re-entrancy guard (SIGTERM can fire twice)
+let isReady = true;
+app.get('/readyz', (_req, res) => res.status(isReady ? 200 : 503).end());
+
+const connections = new Set();
+server.on('connection', (socket) => {
+  connections.add(socket);
+  socket.on('close', () => connections.delete(socket));  // ← §16 had .destroy(); Set uses .delete()
+});
+
+async function gracefulShutdown(signal) {
+  if (shuttingDown) return;               // ignore repeated signals
+  shuttingDown = true;
+  logger.info({ signal }, 'graceful shutdown started');
+
+  // 1. Fail readiness FIRST so K8s drains traffic before we close the listener.
+  isReady = false;
+  await new Promise((r) => setTimeout(r, 5000));   // let Endpoints propagate
+
+  // SAFETY NET — must beat terminationGracePeriodSeconds (e.g. 30s → set this to 25s)
+  const forceTimer = setTimeout(() => {
+    logger.error('cleanup hung — forcing exit');
+    process.exit(1);                       // non-zero: we did NOT shut down cleanly
+  }, 25_000).unref();                      // .unref() so it can't keep the process alive itself
+
+  try {
+    // 2. Stop accepting new HTTP connections; in-flight requests still complete.
+    await new Promise((resolve, reject) =>
+      server.close((err) => (err ? reject(err) : resolve())));
+
+    // 3. Stop the worker from grabbing NEW jobs; let the ACTIVE one finish.
+    await emailWorker.close();             // BullMQ waits for the current job
+
+    // 4. Close resources (in-flight queries already drained above).
+    await mongoose.connection.close(false);
+    await redisClient.quit();
+    await logger.flush?.();                // flush async log/metric buffers
+
+    clearTimeout(forceTimer);
+    logger.info('clean shutdown complete');
+    process.exit(0);                       // success
+  } catch (err) {
+    logger.error({ err }, 'error during shutdown');
+    process.exit(1);
+  }
+
+  // help close stubborn keep-alive sockets so server.close() can resolve
+  for (const s of connections) s.end();
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'uncaught exception');
+  gracefulShutdown('uncaughtException');   // try to clean up, then exit(1) via the path above
+});
+```
+
+K8s side — the readiness drain plus a `preStop` hook closes the traffic race:
+
+```yaml
+spec:
+  terminationGracePeriodSeconds: 30
+  containers:
+    - name: api
+      readinessProbe: { httpGet: { path: /readyz, port: 3000 }, periodSeconds: 5 }
+      lifecycle:
+        preStop:
+          exec: { command: ["sh", "-c", "sleep 10"] }   # buffer before SIGTERM-driven close
+```
+
+#### Side-by-side: same incident, two endings
+
+```
+Scenario: K8s rolling deploy, pod handling a payment + a running BullMQ job.
+
+process.exit(1) on SIGTERM            │  graceful shutdown
+─────────────────────────────────────┼──────────────────────────────────────
+TCP connections cut instantly        │  in-flight request finishes (200 to client)
+client sees ERR_CONNECTION_RESET     │  no error surfaced to the user
+DB write abandoned mid-transaction   │  transaction commits or rolls back cleanly
+BullMQ job stuck "active" → retried  │  job completes (or is re-queued intentionally)
+   → duplicate invoice email         │     → no duplicate
+DB pool slot held ~60s by dead conn  │  pool slot released immediately
+errors on EVERY deploy               │  zero dropped requests
+```
+
+> **Architect takeaway:** `process.exit(1)` mid-flight is a power cut during a file write — corruption waiting to happen, and it always strikes during the peak-traffic deploy. Graceful shutdown is just the disciplined sequence — *drain readiness → stop intake → finish in-flight → close resources → exit(0)* — with a forced `exit(1)` safety net so a hung cleanup can't outlast the orchestrator's grace period. Use `exit(1)` deliberately for "I tried to clean up and failed," never as the normal path.
+>
+> **Three things people get wrong:** (1) closing the HTTP server *before* failing readiness → requests dropped during the Endpoints-propagation window (fix: fail `/readyz` + `preStop sleep` first); (2) forgetting to close queue workers → jobs stuck "active"; (3) no re-entrancy guard → a second SIGTERM restarts the sequence and tears down resources twice.
