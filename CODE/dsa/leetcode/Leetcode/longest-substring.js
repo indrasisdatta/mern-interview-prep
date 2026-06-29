@@ -52,3 +52,26 @@ var lengthOfLongestSubstring = function(s) {
     }
     return longestChar;
 }
+
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var lengthOfLongestSubstring_set = function(s) {
+
+    if (!s) return 0;
+    
+    let start = 0, end = 1;
+    let windowSet = new Set();
+    let maxLen = 0;
+
+    for (let i = 0; i < s.length; i++) {
+        while (windowSet.has(s[i])) {
+            windowSet.delete(s[start]);
+            start++;
+        }      
+        windowSet.add(s[i]);  
+        maxLen = Math.max(maxLen, (i - start + 1));
+    }
+    return maxLen;
+};
