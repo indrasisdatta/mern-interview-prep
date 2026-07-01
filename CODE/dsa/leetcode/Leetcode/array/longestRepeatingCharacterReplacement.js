@@ -40,3 +40,32 @@ const characterReplacement = function(s, k) {
 console.log(characterReplacement("AABABBA", 1));
 console.log(characterReplacement("ABAB", 2));
 
+
+
+/**
+ * @param {string} s
+ * @param {number} k
+ * @return {number}
+ */
+var characterReplacement = function(s, k) {
+    let start = 0, maxFreq = 0, maxLen = 0;
+    let charMap = new Map();
+    for (let end = 0; end < s.length; end++) {
+        // Freq of each char
+        charMap.set(
+            s[end], 
+            charMap.has(s[end]) ? (charMap.get(s[end]) + 1) : 1
+        );
+        maxFreq = Math.max(charMap.get(s[end]), maxFreq);
+        // window - maxFreq > k - slide window start pointer
+        while ((end - start + 1) - maxFreq > k) {
+            charMap.set(
+                s[start], 
+                charMap.get(s[start]) - 1
+            );
+            start++;
+        }
+        maxLen = Math.max(maxLen, end - start + 1);
+    }
+    return maxLen;
+};
