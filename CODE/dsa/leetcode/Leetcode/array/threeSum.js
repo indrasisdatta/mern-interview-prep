@@ -1,35 +1,39 @@
 /**
- * @param {number[]} nums
- * @return {number[][]}
- * https://leetcode.com/problems/3sum/ * 
- */
-const threeSum = function(nums) {
-  if (!Array.isArray(nums) || nums.length < 3) {
-    console.error('Invalid input');
-    return [];
-  }
-  const targetSum = 0;
-  nums = (nums.sort((a, b) => a-b));
+* @param {number[]} nums
+* @return {number[][]}
+*/
+var threeSum = function(nums) {
 
-  let combinations = new Set();
+    if (!nums || nums.length < 3) return [];
 
-  for (let i = 0; i < nums.length - 2; i++) {
-    let start = i+1;
-    let end = nums.length - 1;
-    while (start < end) {
-      let sum = nums[i] + nums[start] + nums[end];
-      if (sum < targetSum) {
-        start++;
-      } else if (sum > targetSum) {
-        end--;
-      } else {
-        combinations.add(`${nums[i]}, ${nums[start]}, ${nums[end]}`);
-        start++;
-        end--;        
-      }
+    let result = new Set();   
+    let target = 0;
+
+    // [-1,0,1,2,-1,-4] => [-4,-1,-1,0,1,2]
+    nums = nums.sort((a, b) => a - b);
+
+    for (let i = 0; i < nums.length; i++) {
+
+        // Duplicate condition
+        if (i > 0 && nums[i] === nums[i-1]) continue;
+
+        let left = i + 1;
+        let right = nums.length - 1;
+
+        while (left < right) {
+            if (nums[i] + nums[left] + nums[right] > target) {                
+                right--;
+            } else if (nums[i] + nums[left] + nums[right] < target) {
+                left++;
+            } else {
+                result.add(
+                    `${nums[i]},${nums[left]},${nums[right]}`
+                );               
+                left++;
+                right--;
+            }
+        }
     }
-  }
-  return [...combinations].map(c => c.split(', ').map(c => Number(c)));
+    
+    return [...result].map(item => item.split(',').map(n => Number(n)));
 };
-
-console.log(threeSum([-1,0,1,2,-1,-4]));
